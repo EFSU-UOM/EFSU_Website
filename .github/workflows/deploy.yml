@@ -111,30 +111,6 @@ jobs:
         VITE_APP_NAME="Engineering Faculty Students' Union - University of Moratuwa"
         EOF
       
-    - name: Run Laravel optimization commands
-      run: |
-        # Generate application key if not set
-        php artisan key:generate --force
-        
-        # Clear any existing cached files
-        php artisan config:clear
-        php artisan route:clear
-        php artisan view:clear
-        php artisan cache:clear
-        
-        # Run Laravel optimization commands for production
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
-        php artisan optimize
-        
-        # Set proper file permissions for deployment
-        find . -type f -exec chmod 644 {} \; 2>/dev/null || true
-        find . -type d -exec chmod 755 {} \; 2>/dev/null || true
-        chmod -R 755 storage
-        chmod -R 755 bootstrap/cache
-        chmod -R 755 public
-      
     - name: Deploy entire Laravel app to FTP root
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
