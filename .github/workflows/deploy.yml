@@ -1,0 +1,163 @@
+name: Deploy Laravel to cPanel
+
+on:
+  push:
+    branches: [ main, production ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, dom, filter, gd, iconv, json, mbstring, pdo
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+          
+    - name: Install Composer dependencies
+      run: composer install --optimize-autoloader --no-dev --no-interaction
+      
+    - name: Install npm dependencies
+      run: npm ci
+      
+    - name: Build frontend assets
+      run: npm run build
+      
+    - name: Create production .env file
+      run: |
+        # Create production .env file
+        cat > .env << EOF
+        APP_NAME="Engineering Faculty Students' Union - University of Moratuwa"
+        APP_ENV=production
+        APP_KEY=${{ secrets.APP_KEY }}
+        APP_DEBUG=false
+        APP_URL=${{ secrets.APP_URL }}
+        
+        APP_LOCALE=en
+        APP_FALLBACK_LOCALE=en
+        APP_FAKER_LOCALE=en_US
+        
+        APP_MAINTENANCE_DRIVER=file
+        
+        PHP_CLI_SERVER_WORKERS=4
+        
+        BCRYPT_ROUNDS=12
+        
+        LOG_CHANNEL=stack
+        LOG_STACK=single
+        LOG_DEPRECATIONS_CHANNEL=null
+        LOG_LEVEL=debug
+        
+        DB_CONNECTION=mysql
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_PORT=${{ secrets.DB_PORT }}
+        DB_DATABASE=${{ secrets.DB_DB }}
+        DB_USERNAME=${{ secrets.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        
+        SESSION_DRIVER=database
+        SESSION_LIFETIME=120
+        SESSION_ENCRYPT=false
+        SESSION_PATH=/
+        SESSION_DOMAIN=null
+        
+        BROADCAST_CONNECTION=log
+        FILESYSTEM_DISK=local
+        QUEUE_CONNECTION=database
+        
+        CACHE_STORE=database
+        
+        MEMCACHED_HOST=127.0.0.1
+        
+        REDIS_CLIENT=phpredis
+        REDIS_HOST=127.0.0.1
+        REDIS_PASSWORD=null
+        REDIS_PORT=6379
+        
+        MAIL_MAILER=${{ secrets.MAIL_MAILER || 'log' }}
+        MAIL_SCHEME=null
+        MAIL_HOST=${{ secrets.MAIL_HOST || '127.0.0.1' }}
+        MAIL_PORT=${{ secrets.MAIL_PORT || '2525' }}
+        MAIL_USERNAME=${{ secrets.MAIL_USERNAME || 'null' }}
+        MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD || 'null' }}
+        MAIL_FROM_ADDRESS="${{ secrets.MAIL_FROM_ADDRESS || 'hello@example.com' }}"
+        MAIL_FROM_NAME="Laravel"
+        
+        AWS_ACCESS_KEY_ID=
+        AWS_SECRET_ACCESS_KEY=
+        AWS_DEFAULT_REGION=us-east-1
+        AWS_BUCKET=
+        AWS_USE_PATH_STYLE_ENDPOINT=false
+
+        VITE_APP_NAME="Engineering Faculty Students' Union - University of Moratuwa"
+        EOF
+      
+    - name: Run Laravel optimization commands
+      run: |
+        # Generate application key if not set
+        php artisan key:generate --force
+        
+        # Clear any existing cached files
+        php artisan config:clear
+        php artisan route:clear
+        php artisan view:clear
+        php artisan cache:clear
+        
+        # Run Laravel optimization commands for production
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+        php artisan optimize
+        
+        # Set proper file permissions for deployment
+        find . -type f -exec chmod 644 {} \; 2>/dev/null || true
+        find . -type d -exec chmod 755 {} \; 2>/dev/null || true
+        chmod -R 755 storage
+        chmod -R 755 bootstrap/cache
+        chmod -R 755 public
+      
+    - name: Deploy entire Laravel app to FTP root
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: /
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/tests/**
+          **/.github/**
+          **/.env.example
+          **/README.md
+          
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Deployment successful!"
+          echo "Laravel app deployed to FTP root with public directory as web root"
+        else
+          echo "❌ Deployment failed!"
+        fi
