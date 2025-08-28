@@ -272,23 +272,4 @@
             </div>
         </div>
     </section>
-
-    <!-- Call to Action -->
-    <section class="bg-blue-600 py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold text-white mb-4">Join Our Community</h2>
-            <p class="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
-                Be part of a legacy that's shaping the future of engineering. Connect with us today 
-                and discover how EFSU can enhance your academic journey.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('contact') }}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                    Contact Us
-                </a>
-                <a href="{{ route('events') }}" class="border border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                    Upcoming Events
-                </a>
-            </div>
-        </div>
-    </section>
 </x-layouts.public>
