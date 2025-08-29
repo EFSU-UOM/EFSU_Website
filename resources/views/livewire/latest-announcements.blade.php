@@ -1,6 +1,35 @@
 <?php
 
-use function Livewire\Volt\{state};
+use App\Models\Announcement;
+use function Livewire\Volt\{computed};
+
+$announcements = computed(function() {
+    return Announcement::where('is_active', true)
+        ->where(function($query) {
+            $query->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+        })
+        ->latest()
+        ->limit(3)
+        ->get();
+});
+
+$getBadgeColor = function($type) {
+    return match($type) {
+        'urgent' => 'error',
+        'academic' => 'info',
+        'general' => 'primary',
+        default => 'primary'
+    };
+};
+
+$getTimeAgo = function($createdAt) {
+    $diff = now()->diffInHours($createdAt);
+    if ($diff < 24) {
+        return $diff < 1 ? 'Just now' : $diff . ' hours ago';
+    }
+    return now()->diffInDays($createdAt) . ' days ago';
+};
 
 ?>
 
@@ -16,45 +45,18 @@ use function Livewire\Volt\{state};
         </x-mary-header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Sample Announcement Cards -->
-            <x-mary-card class="border border-primary/20 bg-primary/5">
-                <div class="flex items-start justify-between mb-3">
-                    <x-mary-badge value="Urgent" color="primary" />
-                    <span class="text-sm text-base-content/60">2 hours ago</span>
-                </div>
-                <h3 class="text-lg font-semibold text-base-content mb-2">Registration Deadline Extended</h3>
-                <p class="text-base-content/70 mb-4">The registration deadline for the upcoming Tech Symposium has
-                    been extended to next Friday.</p>
-                <x-mary-button link="#" variant="link" color="primary" size="sm">
-                    Read More →
-                </x-mary-button>
-            </x-mary-card>
-
-            <x-mary-card>
-                <div class="flex items-start justify-between mb-3">
-                    <x-mary-badge value="Event" color="primary" />
-                    <span class="text-sm text-base-content/60">1 day ago</span>
-                </div>
-                <h3 class="text-lg font-semibold text-base-content mb-2">Annual Career Fair 2024</h3>
-                <p class="text-base-content/70 mb-4">Join us for the biggest career fair of the year with 50+
-                    companies participating.</p>
-                <x-mary-button link="#" variant="link" color="primary" size="sm">
-                    Read More →
-                </x-mary-button>
-            </x-mary-card>
-
-            <x-mary-card>
-                <div class="flex items-start justify-between mb-3">
-                    <x-mary-badge value="Academic" color="primary" />
-                    <span class="text-sm text-base-content/60">3 days ago</span>
-                </div>
-                <h3 class="text-lg font-semibold text-base-content mb-2">New Academic Calendar Released</h3>
-                <p class="text-base-content/70 mb-4">The academic calendar for the next semester has been
-                    published. Check important dates.</p>
-                <x-mary-button link="#" variant="link" color="primary" size="sm">
-                    Read More →
-                </x-mary-button>
-            </x-mary-card>
+            @foreach($this->announcements as $announcement)
+                <x-mary-card class="{{ $announcement->type === 'urgent' ? 'border border-primary/20 bg-primary/5' : '' }}">
+                    <div class="flex items-start justify-between mb-3">
+                        <x-mary-badge value="{{ ucfirst($announcement->type) }}" class="badge-{{ $this->getBadgeColor($announcement->type) }}" />
+                        <span class="text-sm text-base-content/60">{{ $this->getTimeAgo($announcement->created_at) }}</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-base-content mb-2">{{ $announcement->title }}</h3>
+                    <div class="text-base-content/70 mb-4 [&_a]:text-primary [&_a]:underline">
+                        {!! $announcement->content !!}
+                    </div>
+                </x-mary-card>
+            @endforeach
         </div>
     </div>
 </section>
