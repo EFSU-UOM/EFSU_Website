@@ -1,8 +1,8 @@
 name: Deploy Laravel to cPanel
 
 on:
-  push:
-    branches: [ main, production ]
+  # push:
+  #   branches: [ main, production ]
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -118,7 +118,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: /
+        server-dir: /htdocs
         exclude: |
           **/.git*
           **/.git*/**
