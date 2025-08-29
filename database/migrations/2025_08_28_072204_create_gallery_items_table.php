@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('type'); // image, video
             $table->string('file_path');
             $table->string('category')->default('events'); // events, seminars, trips, activities
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('link')->nullable();
             $table->timestamps();
         });
     }

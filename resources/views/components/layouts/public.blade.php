@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-base-200 text-base-content font-sans antialiased">
+    <body class="min-h-screen bg-base-100 text-base-content font-sans antialiased">
         <!-- Navigation Header -->
         <header class="bg-base-100 shadow-sm border-b border-base-200">
             <div class="navbar container mx-auto px-4 sm:px-6 lg:px-8">
