@@ -9,6 +9,8 @@ restartPolicyType = "on_failure"
 
 [env]
 PORT = { default = "8000" }
+APP_ENV = { default = "production" }
+APP_DEBUG = { default = "false" }
 DB_CONNECTION = { default = "pgsql" }
 DB_HOST = { default = "${{ POSTGRES_HOST }}" }
 DB_PORT = { default = "${{ POSTGRES_PORT }}" }
