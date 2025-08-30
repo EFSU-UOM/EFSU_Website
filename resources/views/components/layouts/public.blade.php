@@ -30,7 +30,7 @@
                                 <x-mary-icon name="o-chevron-down" class="ms-1" />
                             </x-mary-button>
                         </x-slot:trigger>
-                        <x-mary-menu class="menu menu-sm">
+                        <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('about') }}">About EFSU</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
@@ -44,7 +44,7 @@
                                 <x-mary-icon name="o-chevron-down" class="ms-1" />
                             </x-mary-button>
                         </x-slot:trigger>
-                        <x-mary-menu class="menu menu-sm">
+                        <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('events') }}">Events</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('news') }}">News</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('gallery') }}">Gallery</x-mary-menu-item>
@@ -58,23 +58,63 @@
                                 <x-mary-icon name="o-chevron-down" class="ms-1" />
                             </x-mary-button>
                         </x-slot:trigger>
-                        <x-mary-menu class="menu menu-sm">
+                        <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         </x-mary-menu>
                     </x-mary-dropdown>
+                    @auth
+                    @if (auth()->user() && auth()->user()->isAdmin())
+                        <x-mary-button class="btn-primary" link="{{ route('dashboard') }}" label="Admin Dashboard" />
+                    @else
+                        <x-mary-dropdown align="end">
+                            <x-slot:trigger>
+                                <div class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">
+                                        {{ auth()->user()->initials() }}
+                                    </div>
+                                    <div class="hidden sm:block text-left">
+                                        <div class="text-sm font-medium">{{ auth()->user()->name }}</div>
+                                        <div class="text-xs opacity-60">Member</div>
+                                    </div>
+                                    <x-mary-icon name="o-chevron-down" class="w-4 h-4 opacity-60" />
+                                </div>
+                            </x-slot:trigger>
+                            <x-mary-menu class="menu menu-md w-56">
+                                <div class="px-3 py-3 border-b border-base-200 bg-base-50">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
+                                            {{ auth()->user()->initials() }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-sm">{{ auth()->user()->name }}</div>
+                                            <div class="text-xs opacity-70">{{ auth()->user()->email }}</div>
+                                            <div class="text-xs text-primary font-medium">Member</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <x-mary-menu-item link="{{ route('settings.profile') }}" class="py-3">
+                                    <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
+                                    <span class="font-medium">My Profile</span>
+                                </x-mary-menu-item>
+                                <x-mary-menu-item class="py-3 text-error hover:bg-error/10">
+                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                        @csrf
+                                        <button type="submit" class="flex items-center w-full text-left">
+                                            <x-mary-icon name="o-arrow-right-on-rectangle" class="me-3 w-5 h-5" />
+                                            <span class="font-medium">Logout</span>
+                                        </button>
+                                    </form>
+                                </x-mary-menu-item>
+                            </x-mary-menu>
+                        </x-mary-dropdown>
+                    @endif
+                    @else
+                        <x-mary-button class="btn-primary" link="{{ route('login') }}" label="Login" />
+                    @endauth
                     </x-mary-menu>
                 </div>
-
-                {{-- <div class="navbar-end hidden md:flex items-center gap-3">
-                    @auth
-                        <x-mary-button class="btn-primary" link="{{ route('dashboard') }}" label="Dashboard" />
-                    @else
-                        <x-mary-button variant="link" link="{{ route('login') }}" label="Login" />
-                        <x-mary-button class="btn-primary" link="{{ route('register') }}" label="Register" />
-                    @endauth
-                </div> --}}
 
                 <!-- Mobile menu -->
                 <div class="navbar-end md:hidden">
@@ -98,10 +138,19 @@
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
                             @auth
-                                <x-mary-menu-item link="{{ route('dashboard') }}">Dashboard</x-mary-menu-item>
+                                @if (auth()->user() && auth()->user()->isAdmin())
+                                    <x-mary-menu-item link="{{ route('dashboard') }}">Dashboard</x-mary-menu-item>
+                                @else
+                                    <x-mary-menu-item link="{{ route('settings.profile') }}">Profile</x-mary-menu-item>
+                                    <x-mary-menu-item>
+                                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left">Logout</button>
+                                        </form>
+                                    </x-mary-menu-item>
+                                @endif
                             @else
                                 <x-mary-menu-item link="{{ route('login') }}">Login</x-mary-menu-item>
-                                <x-mary-menu-item link="{{ route('register') }}">Register</x-mary-menu-item>
                             @endauth
                         </x-mary-menu>
                     </x-mary-dropdown>
