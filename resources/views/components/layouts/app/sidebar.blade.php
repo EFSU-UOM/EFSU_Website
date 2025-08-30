@@ -76,8 +76,8 @@
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        <flux:header class="lg:hiddenc ">
+            <flux:sidebar.toggle class="lg:hidden" icon="bars-" inset="left" />
 
             <flux:spacer />
 

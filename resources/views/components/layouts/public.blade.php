@@ -13,7 +13,7 @@
                         <div class="h-8 w-8 rounded-lg overflow-hidden">
                             <img src="{{ asset('android-chrome-192x192.png') }}" alt="EFSU logo" class="h-full w-full object-contain" />
                         </div>
-                        <span class="text-xl font-semibold">Engineering Faculty Students Union</span>
+                    <span class="text-base sm:text-xl font-semibold">Engineering Faculty Students Union</span>
                     </a>
                 </div>
 
@@ -76,8 +76,8 @@
                 </div> --}}
 
                 <!-- Mobile menu -->
-                <div class="navbar-end md:hidden">
-                    <x-mary-dropdown align="end">
+                <div class="navbar-end md:hidden" >
+                    <x-mary-dropdown align="end" >
                         <x-slot:trigger>
                             <x-mary-button class="btn-ghost btn-square" aria-label="Open menu">
                                 <x-mary-icon name="o-bars-3" />
@@ -95,12 +95,12 @@
                             <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
-                            @auth
+                            <!-- @auth
                                 <x-mary-menu-item link="{{ route('dashboard') }}">Dashboard</x-mary-menu-item>
                             @else
                                 <x-mary-menu-item link="{{ route('login') }}">Login</x-mary-menu-item>
                                 <x-mary-menu-item link="{{ route('register') }}">Register</x-mary-menu-item>
-                            @endauth
+                            @endauth -->
                         </x-mary-menu>
                     </x-mary-dropdown>
                 </div>
