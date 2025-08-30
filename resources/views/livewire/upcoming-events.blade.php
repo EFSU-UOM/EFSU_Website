@@ -1,81 +1,76 @@
 <?php
 
+use App\Models\Event;
 use function Livewire\Volt\{state};
+
+state(['events' => fn() => Event::orderBy('start_datetime', 'asc')->limit(6)->get()]);
 
 ?>
 
 <section class="bg-base-200 py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-base-content">Upcoming Events</h2>
+            <h2 class="text-2xl font-bold text-base-content">Events</h2>
             <div class="flex space-x-4">
                 <x-mary-button label="Add to Calendar" class="btn-primary" />
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100">
-                <x-slot name="figure">
-                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                         alt="Tech Conference" class="w-full h-48 object-cover">
-                </x-slot>
+            @forelse($events as $event)
+                <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100">
+                    <x-slot name="figure">
+                        <img src="{{ $event->image_url ?: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' }}"
+                             alt="{{ $event->title }}" class="w-full h-48 object-cover">
+                    </x-slot>
 
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <x-mary-badge value="Conference" class="badge-primary" />
-                        <span class="text-sm text-base-content/60">Sep 15, 2024</span>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <x-mary-badge value="{{ ucfirst($event->type) }}" 
+                                class="{{ $event->type === 'cultural' ? 'badge-primary' : ($event->type === 'community' ? 'badge-accent' : 'badge-success') }}" />
+                            @if($event->start_datetime)
+                                <span class="text-xs text-base-content/60">{{ $event->start_datetime->format('M d, Y') }}</span>
+                            @endif
+                        </div>
+                        <h3 class="text-lg font-semibold text-base-content mb-2">{{ $event->title }}</h3>
+                        @if($event->description)
+                            <p class="text-sm text-base-content/80 mb-4">{{ Str::limit($event->description, 100) }}</p>
+                        @endif
+                        
+                        <div class="flex flex-col space-y-2 mb-4">
+                            @if($event->facebook_page_url)
+                                <a href="{{ $event->facebook_page_url }}" target="_blank" class="btn btn-outline btn-sm">
+                                    <x-mary-icon name="o-link" class="w-4 h-4 mr-1" />
+                                    Facebook Page
+                                </a>
+                            @endif
+                            
+                            @if($event->facebook_album_urls && count($event->facebook_album_urls) > 0)
+                                @if(count($event->facebook_album_urls) === 1)
+                                    <a href="{{ $event->facebook_album_urls[0] }}" target="_blank" class="btn btn-outline btn-sm">
+                                        <x-mary-icon name="o-link" class="w-4 h-4 mr-1" />
+                                        Event Album
+                                    </a>
+                                @else
+                                    <h4 class="text-sm font-medium text-base-content/80">Event Albums:</h4>
+                                    <div class="flex flex-col space-y-1">
+                                        @foreach($event->facebook_album_urls as $index => $albumUrl)
+                                            <a href="{{ $albumUrl }}" target="_blank" class="btn btn-outline btn-xs">
+                                                <x-mary-icon name="o-link" class="w-3 h-3 mr-1" />
+                                                Album {{ $index + 1 }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
                     </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Annual Tech Symposium</h3>
-                    <p class="text-base-content/70 mb-4">Join industry leaders for insights on emerging technologies and their impact on engineering.</p>
-                    <div class="flex items-center text-sm text-base-content/60 mb-4">
-                        <x-mary-icon name="o-map-pin" class="w-4 h-4 mr-1" />
-                        Main Auditorium
-                    </div>
-                    <x-mary-button label="Register Now" class="btn-primary w-full" />
+                </x-mary-card>
+            @empty
+                <div class="col-span-full text-center py-8">
+                    <p class="text-base-content/60">No upcoming events available.</p>
                 </div>
-            </x-mary-card>
-
-            <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100">
-                <x-slot name="figure">
-                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                         alt="Workshop" class="w-full h-48 object-cover">
-                </x-slot>
-
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <x-mary-badge value="Workshop" class="badge-success" />
-                        <span class="text-sm text-base-content/60">Sep 22, 2024</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">AI & Machine Learning Workshop</h3>
-                    <p class="text-base-content/70 mb-4">Hands-on workshop covering fundamentals of AI and practical machine learning applications.</p>
-                    <div class="flex items-center text-sm text-base-content/60 mb-4">
-                        <x-mary-icon name="o-map-pin" class="w-4 h-4 mr-1" />
-                        Computer Lab 2
-                    </div>
-                    <x-mary-button label="Register Now" class="btn-success w-full" />
-                </div>
-            </x-mary-card>
-
-            <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100">
-                <x-slot name="figure">
-                    <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                         alt="Social Event" class="w-full h-48 object-cover">
-                </x-slot>
-
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <x-mary-badge value="Social" class="badge-accent" />
-                        <span class="text-sm text-base-content/60">Oct 5, 2024</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Engineering Gala Night</h3>
-                    <p class="text-base-content/70 mb-4">Annual celebration bringing together students, faculty, and alumni for an evening of networking.</p>
-                    <div class="flex items-center text-sm text-base-content/60 mb-4">
-                        <x-mary-icon name="o-map-pin" class="w-4 h-4 mr-1" />
-                        Grand Hall
-                    </div>
-                    <x-mary-button label="Register Now" class="btn-accent w-full" />
-                </div>
-            </x-mary-card>
+            @endforelse
         </div>
     </div>
 </section>

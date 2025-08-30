@@ -61,6 +61,7 @@
                         <x-mary-menu class="menu menu-sm">
                             <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         </x-mary-menu>
                     </x-mary-dropdown>
                     </x-mary-menu>
@@ -91,6 +92,7 @@
                             <x-mary-menu-item link="{{ route('news') }}">News</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('gallery') }}">Gallery</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>

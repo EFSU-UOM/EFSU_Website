@@ -25,9 +25,7 @@
                     </div>
                     <h2 class="text-2xl font-bold text-base-content mb-4">Our Mission</h2>
                     <p class="text-base-content/70">
-                        To empower engineering students by providing a comprehensive platform for academic support, 
-                        professional development, and community building. We strive to bridge the gap between 
-                        academic learning and real-world application.
+                        To produce world class graduates, create knowledge, provide professional services and outreach activities in the disciplines of engineering and related fields by creating an environment conductive to nurturing the inquiring mind and developing skills for a diversity of challenges, thus contributing to the sustainable, scientific, technological, social and economic development of Sri Lanka.
                     </p>
                 </x-mary-card>
 
@@ -41,9 +39,7 @@
                     </div>
                     <h2 class="text-2xl font-bold text-base-content mb-4">Our Vision</h2>
                     <p class="text-base-content/70">
-                        To be the leading student union that creates innovative engineers equipped with technical 
-                        expertise, leadership skills, and social responsibility to shape the future of technology 
-                        and society.
+                        To be the leading faculty for academic excellence in engineering sciences and their applications through education, knowledge creation, innovation and transfer of technology.
                     </p>
                 </x-mary-card>
 
