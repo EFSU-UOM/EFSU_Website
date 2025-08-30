@@ -64,7 +64,7 @@
                         </x-mary-menu>
                     </x-mary-dropdown>
                     @auth
-                    @if (auth()->user()->isAdmin())
+                    @if (auth()->user() && auth()->user()->isAdmin())
                         <x-mary-button class="btn-primary" link="{{ route('dashboard') }}" label="Admin Dashboard" />
                     @else
                         <x-mary-dropdown align="end">
@@ -136,7 +136,7 @@
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
                             @auth
-                                @if (auth()->user()->isAdmin())
+                                @if (auth()->user() && auth()->user()->isAdmin())
                                     <x-mary-menu-item link="{{ route('dashboard') }}">Dashboard</x-mary-menu-item>
                                 @else
                                     <x-mary-menu-item link="{{ route('settings.profile') }}">Profile</x-mary-menu-item>
