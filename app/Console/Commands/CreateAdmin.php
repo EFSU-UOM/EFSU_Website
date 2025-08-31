@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 
 class CreateAdmin extends Command
@@ -27,13 +28,36 @@ class CreateAdmin extends Command
      */
     public function handle()
     {
-        $user = User::create([
-            'email' => $this->argument('email'),
-            'name' => $this->argument('name'),
-            'password' => Hash::make($this->argument('password')),
+        $email = $this->argument('email');
+        $name = $this->argument('name');
+        $password = $this->argument('password');
+
+        $validator = Validator::make([
+            'email' => $email,
+            'name' => $name,
+            'password' => $password,
+        ], [
+            'email' => 'required|email|unique:users,email',
+            'name' => 'required|string|min:2|max:255',
+            'password' => 'required|string|min:8',
         ]);
 
-        $user->update(['role' => 'admin']);
+        if ($validator->fails()) {
+            $this->error('Validation failed:');
+            foreach ($validator->errors()->all() as $error) {
+                $this->error('- ' . $error);
+            }
+            return 1;
+        }
+
+        $user = User::create([
+            'email' => $email,
+            'name' => $name,
+            'password' => Hash::make($password),
+        ]);
+        
+        $user->role = 'admin';
+        $user->save();
 
         
         $this->info('Admin user created successfully!');
