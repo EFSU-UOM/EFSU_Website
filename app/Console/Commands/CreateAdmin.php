@@ -32,9 +32,9 @@ class CreateAdmin extends Command
             'name' => $this->argument('name'),
             'password' => Hash::make($this->argument('password')),
         ]);
-        
-        $user->role = 'admin';
-        $user->save();
+
+        $user->update(['role' => 'admin']);
+
         
         $this->info('Admin user created successfully!');
     }
