@@ -44,9 +44,14 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
-Route::view('dashboard', 'dashboard.home')
-    ->middleware(['admin', 'auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['admin', 'auth', 'verified'])->group(function () {
+    Route::view('dashboard', 'dashboard.home')->name('dashboard');
+    Route::view('/dashboard/announcements', 'dashboard.announcements')->name('dashboard.announcements');
+    Route::view('/dashboard/merch', 'dashboard.merch')->name('dashboard.merch');
+    Route::view('/dashboard/news-articles', 'dashboard.news-articles')->name('dashboard.news-articles');
+    Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
+    Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');

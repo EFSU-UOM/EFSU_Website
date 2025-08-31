@@ -83,6 +83,26 @@
                                     <x-mary-icon name="o-home" class="w-5 h-5" />
                                     {{ __('Dashboard') }}
                                 </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.announcements') }}" :active="request()->routeIs('dashboard.announcements')" wire:navigate>
+                                    <x-mary-icon name="o-megaphone" class="w-5 h-5" />
+                                    {{ __('Announcements') }}
+                                </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.merch') }}" :active="request()->routeIs('dashboard.merch')" wire:navigate>
+                                    <x-mary-icon name="o-shopping-bag" class="w-5 h-5" />
+                                    {{ __('Merch') }}
+                                </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.news-articles') }}" :active="request()->routeIs('dashboard.news-articles')" wire:navigate>
+                                    <x-mary-icon name="o-newspaper" class="w-5 h-5" />
+                                    {{ __('News Articles') }}
+                                </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.gallery-items') }}" :active="request()->routeIs('dashboard.gallery-items')" wire:navigate>
+                                    <x-mary-icon name="o-photo" class="w-5 h-5" />
+                                    {{ __('Gallery Items') }}
+                                </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.events') }}" :active="request()->routeIs('dashboard.events')" wire:navigate>
+                                    <x-mary-icon name="o-calendar" class="w-5 h-5" />
+                                    {{ __('Events') }}
+                                </x-mary-menu-item>
                         </x-mary-menu>
                     </div>
 
