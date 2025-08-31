@@ -22,7 +22,6 @@ class Event extends Model
         'max_participants',
         'facebook_page_url',
         'facebook_album_urls',
-        'user_id',
     ];
 
     protected $casts = [
@@ -31,9 +30,4 @@ class Event extends Model
         'requires_registration' => 'boolean',
         'facebook_album_urls' => 'array',
     ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 }

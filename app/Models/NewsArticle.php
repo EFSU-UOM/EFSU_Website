@@ -15,7 +15,6 @@ class NewsArticle extends Model
         'image_url',
         'is_published',
         'is_featured',
-        'user_id',
         'published_at'
     ];
 
@@ -24,9 +23,4 @@ class NewsArticle extends Model
         'is_featured' => 'boolean',
         'published_at' => 'datetime'
     ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 }

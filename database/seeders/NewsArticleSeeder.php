@@ -3,20 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\NewsArticle;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class NewsArticleSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminUser = User::first();
-        
-        if (!$adminUser) {
-            $this->command->warn('No users found. Please run UserSeeder first.');
-            return;
-        }
-
         $articles = [
             [
                 'title' => 'Congratulations to the 2024/25 Engineering Intake',
@@ -26,7 +18,6 @@ class NewsArticleSeeder extends Seeder
                 'image_url' => 'https://i.ibb.co/ZpT74My2/t.jpg',
                 'is_published' => true,
                 'is_featured' => false,
-                'user_id' => $adminUser->id,
                 'published_at' => now()->subDays(21)
             ]
         ];

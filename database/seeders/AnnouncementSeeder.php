@@ -3,20 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Announcement;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class AnnouncementSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminUser = User::first();
-        
-        if (!$adminUser) {
-            $this->command->warn('No users found. Please run UserSeeder first.');
-            return;
-        }
-
         $announcements = [
             [
                 'title' => 'New Responsibilities Elected',
@@ -24,7 +16,6 @@ class AnnouncementSeeder extends Seeder
                 'type' => 'general',
                 'is_active' => true,
                 'is_featured' => true,
-                'user_id' => $adminUser->id,
                 'expires_at' => now()->addWeeks(2),
             ],
             [
@@ -33,7 +24,6 @@ class AnnouncementSeeder extends Seeder
                 'type' => 'general',
                 'is_active' => true,
                 'is_featured' => false,
-                'user_id' => $adminUser->id,
                 'expires_at' => now()->addMonth(),
             ],
             [
@@ -42,7 +32,6 @@ class AnnouncementSeeder extends Seeder
                 'type' => 'urgent',
                 'is_active' => true,
                 'is_featured' => false,
-                'user_id' => $adminUser->id,
                 'expires_at' => now()->addMonths(6),
             ],
         ];

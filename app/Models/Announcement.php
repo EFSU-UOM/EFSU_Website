@@ -14,7 +14,6 @@ class Announcement extends Model
         'is_active',
         'is_featured',
         'image_url',
-        'user_id',
         'expires_at'
     ];
 

@@ -19,7 +19,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_featured')->default(false);
             $table->string('image_url')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });

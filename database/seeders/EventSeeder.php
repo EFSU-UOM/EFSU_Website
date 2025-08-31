@@ -3,20 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class EventSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminUser = User::first();
-        
-        if (!$adminUser) {
-            $this->command->warn('No users found. Please run UserSeeder first.');
-            return;
-        }
-
         $events = [
             [
                 'title' => 'සොයුරු සත්කාර',
@@ -32,7 +24,6 @@ class EventSeeder extends Seeder
                 'facebook_album_urls' => [
                     'https://www.facebook.com/share/1JmDMGDspX/?mibextid=wwXIfr'
                 ],
-                'user_id' => $adminUser->id,
             ],
             [
                 'title' => 'මැවිසුරු රගසොබා',
@@ -52,7 +43,6 @@ class EventSeeder extends Seeder
                     'https://www.facebook.com/share/1C6b1Fmpr6/?mibextid=wwXIfr',
                     'https://www.facebook.com/share/1FsGHZK7Wb/?mibextid=wwXIfr'
                 ],
-                'user_id' => $adminUser->id,
             ],
             [
                 'title' => 'දේදුනු ගංතොට',
@@ -68,7 +58,6 @@ class EventSeeder extends Seeder
                 'facebook_album_urls' => [
                     'https://www.facebook.com/share/1786nUGAkn/?mibextid=wwXIfr'
                 ],
-                'user_id' => $adminUser->id,
             ],
         ];
 

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('image_url')->nullable();
             $table->boolean('is_published')->default(false);
             $table->boolean('is_featured')->default(false);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
