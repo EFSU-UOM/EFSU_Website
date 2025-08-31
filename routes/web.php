@@ -44,7 +44,7 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
-Route::view('dashboard', 'dashboard')
+Route::view('dashboard', 'dashboard.home')
     ->middleware(['admin', 'auth', 'verified'])
     ->name('dashboard');
 
