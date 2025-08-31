@@ -32,8 +32,7 @@ new class extends Component {
 
     public function getNewsArticlesProperty()
     {
-        return NewsArticle::with('user')
-            ->latest()
+        return NewsArticle::latest()
             ->paginate(10);
     }
 
@@ -89,7 +88,6 @@ new class extends Component {
             'published_at' => $this->published_at ?: now(),
             'is_published' => $this->is_published,
             'is_featured' => $this->is_featured,
-            'user_id' => auth()->id(),
         ];
 
         if ($this->image) {
