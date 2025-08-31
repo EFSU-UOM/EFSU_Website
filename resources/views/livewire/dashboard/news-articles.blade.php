@@ -91,7 +91,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = $this->image->store('news-articles', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('news-articles', 'public');
         }
 
         NewsArticle::create($data);
@@ -125,9 +125,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($article->image_url) {
-                Storage::disk('public')->delete($article->image_url);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $article->image_url));
             }
-            $data['image_url'] = $this->image->store('news-articles', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('news-articles', 'public');
         }
 
         $article->update($data);
@@ -147,7 +147,7 @@ new class extends Component {
         $article = NewsArticle::findOrFail($this->deleteId);
         
         if ($article->image_url) {
-            Storage::disk('public')->delete($article->image_url);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $article->image_url));
         }
 
         $article->delete();

@@ -88,7 +88,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = $this->image->store('merch', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('merch', 'public');
         }
 
         Merch::create($data);
@@ -121,9 +121,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($merch->image_url) {
-                Storage::disk('public')->delete($merch->image_url);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $merch->image_url));
             }
-            $data['image_url'] = $this->image->store('merch', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('merch', 'public');
         }
 
         $merch->update($data);
@@ -143,7 +143,7 @@ new class extends Component {
         $merch = Merch::findOrFail($this->deleteId);
         
         if ($merch->image_url) {
-            Storage::disk('public')->delete($merch->image_url);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $merch->image_url));
         }
 
         $merch->delete();

@@ -89,7 +89,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = $this->image->store('announcements', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('announcements', 'public');
         }
 
         Announcement::create($data);
@@ -121,9 +121,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($announcement->image_url) {
-                Storage::disk('public')->delete($announcement->image_url);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $announcement->image_url));
             }
-            $data['image_url'] = $this->image->store('announcements', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('announcements', 'public');
         }
 
         $announcement->update($data);
@@ -143,7 +143,7 @@ new class extends Component {
         $announcement = Announcement::findOrFail($this->deleteId);
         
         if ($announcement->image_url) {
-            Storage::disk('public')->delete($announcement->image_url);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $announcement->image_url));
         }
 
         $announcement->delete();
