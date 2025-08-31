@@ -46,7 +46,7 @@ $getTimeAgo = function($createdAt) {
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($this->announcements as $announcement)
-                <x-mary-card class="{{ $announcement->type === 'urgent' ? 'border border-primary/20 bg-primary/5' : '' }}">
+                <x-mary-card class="{{ $announcement->is_featured ? 'border border-secondary/20 bg-secondary/5' : '' }}">
                     <div class="flex items-start justify-between mb-3">
                         <x-mary-badge value="{{ ucfirst($announcement->type) }}" class="badge-{{ $this->getBadgeColor($announcement->type) }}" />
                         <span class="text-sm text-base-content/60">{{ $this->getTimeAgo($announcement->created_at) }}</span>
