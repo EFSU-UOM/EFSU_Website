@@ -24,7 +24,6 @@ return new class extends Migration
             $table->integer('max_participants')->nullable();
             $table->string('facebook_page_url')->nullable();
             $table->json('facebook_album_urls')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
