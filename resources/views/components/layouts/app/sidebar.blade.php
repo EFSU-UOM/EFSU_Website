@@ -3,130 +3,125 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
-
-            <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
-
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
-
-            <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
-
-            <!-- Desktop User Menu -->
-            <flux:dropdown class="hidden lg:block" position="bottom" align="start">
-                <flux:profile
-                    :name="auth()->user()->name"
-                    :initials="auth()->user()->initials()"
-                    icon:trailing="chevrons-up-down"
-                />
-
-                <flux:menu class="w-[220px]">
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                    <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
-                                    >
+    <body class="min-h-screen bg-base-100">
+        <div class="drawer lg:drawer-open">
+            <input id="main-sidebar" type="checkbox" class="drawer-toggle" />
+            
+            <div class="drawer-content flex flex-col">
+                <!-- Mobile Header -->
+                <div class="navbar lg:hidden bg-base-100 border-b border-base-200">
+                    <div class="navbar-start">
+                        <label for="main-sidebar" class="btn btn-ghost btn-square drawer-button lg:hidden">
+                            <x-mary-icon name="o-bars-3" />
+                        </label>
+                    </div>
+                    
+                    <div class="navbar-end">
+                        <x-mary-dropdown align="end" no-x-anchor right>
+                            <x-slot:trigger>
+                                <div class="flex items-center space-x-2 p-2 rounded-lg hover:bg-base-200 cursor-pointer">
+                                    <div class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">
                                         {{ auth()->user()->initials() }}
-                                    </span>
-                                </span>
-
-                                <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    </div>
+                                    <x-mary-icon name="o-chevron-down" class="w-4 h-4" />
                                 </div>
-                            </div>
-                        </div>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <flux:menu.radio.group>
-                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown>
-        </flux:sidebar>
-
-        <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
-
-            <flux:spacer />
-
-            <flux:dropdown position="top" align="end">
-                <flux:profile
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevron-down"
-                />
-
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                    <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
-                                    >
-                                        {{ auth()->user()->initials() }}
-                                    </span>
-                                </span>
-
-                                <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                            </x-slot:trigger>
+                            <x-mary-menu class="menu menu-md w-56 z-50">
+                                <div class="px-3 py-3 border-b border-base-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
+                                            {{ auth()->user()->initials() }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-sm">{{ auth()->user()->name }}</div>
+                                            <div class="text-xs opacity-70">{{ auth()->user()->email }}</div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <x-mary-menu-item link="{{ route('settings.profile') }}" wire:navigate>
+                                    <x-mary-icon name="o-cog-6-tooth" class="w-5 h-5" />
+                                    Settings
+                                </x-mary-menu-item>
+                                <x-mary-menu-separator />
+                                <x-mary-menu-item>
+                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                        @csrf
+                                        <button type="submit" class="flex items-center w-full text-left">
+                                            <x-mary-icon name="o-arrow-right-on-rectangle" class="w-5 h-5 mr-2" />
+                                            Log Out
+                                        </button>
+                                    </form>
+                                </x-mary-menu-item>
+                            </x-mary-menu>
+                        </x-mary-dropdown>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <main class="flex-1 p-4">
+                    {{ $slot }}
+                </main>
+            </div>
+            
+            <div class="drawer-side">
+                <label for="main-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
+                <div class="w-64 min-h-full bg-base-100 border-r border-base-200 flex flex-col">
+                    <!-- Logo -->
+                    <div class="p-4 border-b border-base-200">
+                        <a href="{{ route('home') }}" class="flex items-center space-x-2" wire:navigate>
+                           <div class="h-8 w-8 rounded-lg overflow-hidden">
+                                <img src="{{ asset('android-chrome-192x192.png') }}" alt="EFSU logo" class="h-full w-full object-contain" />
                             </div>
-                        </div>
-                    </flux:menu.radio.group>
+                            <span class="text-xl font-semibold">Engineering Faculty Students Union</span>
+                        </a>
+                    </div>
 
-                    <flux:menu.separator />
+                    <!-- Navigation -->
+                    <div class="flex-1 p-4">
+                        <x-mary-menu class="menu menu-vertical w-full">
+                            <x-mary-menu-item link="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" wire:navigate>
+                                    <x-mary-icon name="o-home" class="w-5 h-5" />
+                                    {{ __('Dashboard') }}
+                                </x-mary-menu-item>
+                        </x-mary-menu>
+                    </div>
 
-                    <flux:menu.radio.group>
-                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
-                    </flux:menu.radio.group>
-
-                    <flux:menu.separator />
-
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown>
-        </flux:header>
-
-        {{ $slot }}
-
-        @fluxScripts
+                    <!-- Desktop User Menu -->
+                    <div class="p-4 border-t border-base-200 hidden lg:block">
+                        <x-mary-dropdown no-x-anchor top>
+                            <x-slot:trigger>
+                                <div class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
+                                            {{ auth()->user()->initials() }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-sm">{{ auth()->user()->name }}</div>
+                                            <div class="text-xs opacity-70">{{ auth()->user()->email }}</div>
+                                        </div>
+                                    </div>
+                                    <x-mary-icon name="o-chevron-up" class="w-4 h-4 opacity-60" />
+                                </div>
+                            </x-slot:trigger>
+                            <x-mary-menu class="menu menu-md">
+                                <x-mary-menu-item link="{{ route('settings.profile') }}">
+                                    <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
+                                    <span class="font-medium">My Profile</span>
+                                </x-mary-menu-item>
+                                <x-mary-menu-item class="text-error hover:bg-error/10">
+                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                        @csrf
+                                        <button type="submit" class="flex items-center w-full text-left">
+                                            <x-mary-icon name="o-arrow-right-on-rectangle" class="me-3 w-5 h-5" />
+                                            <span class="font-medium">Logout</span>
+                                        </button>
+                                    </form>
+                                </x-mary-menu-item>
+                            </x-mary-menu>
+                        </x-mary-dropdown>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
