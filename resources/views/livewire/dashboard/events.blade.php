@@ -35,8 +35,7 @@ new class extends Component {
 
     public function getEventsProperty()
     {
-        return Event::with('user')
-            ->latest()
+        return Event::latest()
             ->paginate(10);
     }
 
@@ -102,7 +101,6 @@ new class extends Component {
             'max_participants' => $this->max_participants ?: null,
             'facebook_page_url' => $this->facebook_page_url,
             'facebook_album_urls' => $this->facebook_album_urls ? array_filter(explode("\n", $this->facebook_album_urls)) : null,
-            'user_id' => auth()->id(),
         ];
 
         if ($this->image) {
