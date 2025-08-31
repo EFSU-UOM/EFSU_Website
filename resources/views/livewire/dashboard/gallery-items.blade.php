@@ -87,7 +87,7 @@ new class extends Component {
         ];
 
         if ($this->file) {
-            $data['file_path'] = $this->file->store('gallery', 'public');
+            $data['file_path'] = '/storage/' . $this->file->store('gallery', 'public');
         }
 
         GalleryItem::create($data);
@@ -119,9 +119,9 @@ new class extends Component {
 
         if ($this->file) {
             if ($item->file_path) {
-                Storage::disk('public')->delete($item->file_path);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $item->file_path));
             }
-            $data['file_path'] = $this->file->store('gallery', 'public');
+            $data['file_path'] = '/storage/' . $this->file->store('gallery', 'public');
         }
 
         $item->update($data);
@@ -141,7 +141,7 @@ new class extends Component {
         $item = GalleryItem::findOrFail($this->deleteId);
         
         if ($item->file_path) {
-            Storage::disk('public')->delete($item->file_path);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $item->file_path));
         }
 
         $item->delete();

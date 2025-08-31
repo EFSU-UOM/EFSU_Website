@@ -104,7 +104,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = $this->image->store('events', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('events', 'public');
         }
 
         Event::create($data);
@@ -145,9 +145,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($event->image_url) {
-                Storage::disk('public')->delete($event->image_url);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $event->image_url));
             }
-            $data['image_url'] = $this->image->store('events', 'public');
+            $data['image_url'] = '/storage/' . $this->image->store('events', 'public');
         }
 
         $event->update($data);
@@ -167,7 +167,7 @@ new class extends Component {
         $event = Event::findOrFail($this->deleteId);
         
         if ($event->image_url) {
-            Storage::disk('public')->delete($event->image_url);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $event->image_url));
         }
 
         $event->delete();
