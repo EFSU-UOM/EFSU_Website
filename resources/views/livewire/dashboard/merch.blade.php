@@ -23,6 +23,7 @@ new class extends Component {
     public $image = null;
     public $stock_quantity = '';
     public $is_available = true;
+    public $currentImageUrl = null;
 
     public function mount()
     {
@@ -57,6 +58,7 @@ new class extends Component {
         $this->price = $merch->price;
         $this->stock_quantity = $merch->stock_quantity;
         $this->is_available = $merch->is_available;
+        $this->currentImageUrl = $merch->image_url;
         $this->showEditModal = true;
     }
 
@@ -162,6 +164,7 @@ new class extends Component {
         $this->image = null;
         $this->stock_quantity = '';
         $this->is_available = true;
+        $this->currentImageUrl = null;
     }
 }; ?>
 
@@ -289,14 +292,20 @@ new class extends Component {
 
     <!-- Create Modal -->
     <x-mary-modal wire:model="showCreateModal" title="Create Merch Item" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-textarea wire:model="description" label="Description" rows="4" required />
                 <x-mary-input wire:model="category" label="Category" required />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="description" label="Description" rows="4" required />
+                </div>
                 <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
                 <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
-                <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
-                <x-mary-checkbox wire:model="is_available" label="Available" />
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
+                </div>
+                <div class="md:col-span-2">
+                    <x-mary-checkbox wire:model="is_available" label="Available" />
+                </div>
             </div>
             <x-slot:actions>
                 <x-mary-button label="Cancel" wire:click="closeCreateModal" />
@@ -306,14 +315,36 @@ new class extends Component {
 
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit Merch Item" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-textarea wire:model="description" label="Description" rows="4" required />
                 <x-mary-input wire:model="category" label="Category" required />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="description" label="Description" rows="4" required />
+                </div>
                 <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
                 <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
-                <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
-                <x-mary-checkbox wire:model="is_available" label="Available" />
+                
+                @if($currentImageUrl)
+                    <div class="form-control md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">Current Image</span>
+                        </label>
+                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
+                            <img src="{{ $currentImageUrl }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">{{ basename($currentImageUrl) }}</p>
+                                <p class="text-xs text-base-content/70">Click below to change image</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="image" label="Image (optional - leave blank to keep current)" accept="image/*" />
+                </div>
+                <div class="md:col-span-2">
+                    <x-mary-checkbox wire:model="is_available" label="Available" />
+                </div>
             </div>
             <x-slot:actions>
                 <x-mary-button label="Cancel" wire:click="closeEditModal" />

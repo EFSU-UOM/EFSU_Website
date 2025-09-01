@@ -24,6 +24,7 @@ new class extends Component {
     public $published_at = '';
     public $is_published = true;
     public $is_featured = false;
+    public $currentImageUrl = null;
 
     public function mount()
     {
@@ -59,6 +60,7 @@ new class extends Component {
         $this->published_at = $article->published_at ? $article->published_at->format('Y-m-d\TH:i') : '';
         $this->is_published = $article->is_published;
         $this->is_featured = $article->is_featured;
+        $this->currentImageUrl = $article->image_url;
         $this->showEditModal = true;
     }
 
@@ -167,6 +169,7 @@ new class extends Component {
         $this->published_at = '';
         $this->is_published = true;
         $this->is_featured = false;
+        $this->currentImageUrl = null;
     }
 }; ?>
 
@@ -300,14 +303,20 @@ new class extends Component {
 
     <!-- Create Modal -->
     <x-mary-modal wire:model="showCreateModal" title="Create News Article" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
-                <x-mary-textarea wire:model="content" label="Content" rows="6" required />
                 <x-mary-input wire:model="category" label="Category" required />
-                <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
+                </div>
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="content" label="Content" rows="6" required />
+                </div>
                 <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
-                <div class="flex gap-4">
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
+                </div>
+                <div class="flex gap-4 md:col-span-2">
                     <x-mary-checkbox wire:model="is_published" label="Published" />
                     <x-mary-checkbox wire:model="is_featured" label="Featured" />
                 </div>
@@ -320,14 +329,36 @@ new class extends Component {
 
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit News Article" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
-                <x-mary-textarea wire:model="content" label="Content" rows="6" required />
                 <x-mary-input wire:model="category" label="Category" required />
-                <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
+                </div>
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="content" label="Content" rows="6" required />
+                </div>
                 <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
-                <div class="flex gap-4">
+                
+                @if($currentImageUrl)
+                    <div class="form-control md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">Current Image</span>
+                        </label>
+                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
+                            <img src="{{ $currentImageUrl }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">{{ basename($currentImageUrl) }}</p>
+                                <p class="text-xs text-base-content/70">Click below to change image</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="image" label="Image (optional - leave blank to keep current)" accept="image/*" />
+                </div>
+                <div class="flex gap-4 md:col-span-2">
                     <x-mary-checkbox wire:model="is_published" label="Published" />
                     <x-mary-checkbox wire:model="is_featured" label="Featured" />
                 </div>
