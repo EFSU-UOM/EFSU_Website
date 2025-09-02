@@ -22,6 +22,7 @@ new class extends Component {
     public $file = null;
     public $category = '';
     public $link = '';
+    public $currentFilePath = null;
 
     public function mount()
     {
@@ -56,6 +57,7 @@ new class extends Component {
         $this->type = $item->type;
         $this->category = $item->category;
         $this->link = $item->link;
+        $this->currentFilePath = $item->file_path;
         $this->showEditModal = true;
     }
 
@@ -159,6 +161,7 @@ new class extends Component {
         $this->file = null;
         $this->category = '';
         $this->link = '';
+        $this->currentFilePath = null;
     }
 }; ?>
 
@@ -285,17 +288,21 @@ new class extends Component {
 
     <!-- Create Modal -->
     <x-mary-modal wire:model="showCreateModal" title="Create Gallery Item" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-textarea wire:model="description" label="Description" rows="3" />
+                <x-mary-input wire:model="category" label="Category" required />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="description" label="Description" rows="3" />
+                </div>
                 <x-mary-select wire:model="type" label="Type" :options="[
                     ['id' => 'image', 'name' => 'Image'],
                     ['id' => 'video', 'name' => 'Video'],
                     ['id' => 'document', 'name' => 'Document']
                 ]" required />
-                <x-mary-input wire:model="category" label="Category" required />
-                <x-mary-file wire:model="file" label="File" required />
                 <x-mary-input wire:model="link" label="Link (optional)" type="url" />
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="file" label="File" required />
+                </div>
             </div>
             <x-slot:actions>
                 <x-mary-button label="Cancel" wire:click="closeCreateModal" />
@@ -305,17 +312,47 @@ new class extends Component {
 
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit Gallery Item" class="backdrop-blur">
-            <div class="grid gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-textarea wire:model="description" label="Description" rows="3" />
+                <x-mary-input wire:model="category" label="Category" required />
+                <div class="md:col-span-2">
+                    <x-mary-textarea wire:model="description" label="Description" rows="3" />
+                </div>
                 <x-mary-select wire:model="type" label="Type" :options="[
                     ['id' => 'image', 'name' => 'Image'],
                     ['id' => 'video', 'name' => 'Video'],
                     ['id' => 'document', 'name' => 'Document']
                 ]" required />
-                <x-mary-input wire:model="category" label="Category" required />
-                <x-mary-file wire:model="file" label="File (optional)" />
                 <x-mary-input wire:model="link" label="Link (optional)" type="url" />
+                
+                @if($currentFilePath)
+                    <div class="form-control md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">Current File</span>
+                        </label>
+                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
+                            @if($type === 'image')
+                                <img src="{{ $currentFilePath }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
+                            @elseif($type === 'video')
+                                <video class="w-20 h-20 object-cover rounded-lg" controls>
+                                    <source src="{{ $currentFilePath }}" type="video/mp4">
+                                </video>
+                            @else
+                                <div class="w-20 h-20 bg-base-300 rounded-lg flex items-center justify-center">
+                                    <x-mary-icon name="o-document" class="w-8 h-8" />
+                                </div>
+                            @endif
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">{{ basename($currentFilePath) }}</p>
+                                <p class="text-xs text-base-content/70">Click below to change file</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="md:col-span-2">
+                    <x-mary-file wire:model="file" label="File (optional - leave blank to keep current)" />
+                </div>
             </div>
             <x-slot:actions>
                 <x-mary-button label="Cancel" wire:click="closeEditModal" />
