@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\ComplaintController;
 
+use App\Models\ForumPost;
+
 Route::get('/', function () {
     return view('home');
 })->name('home');
@@ -28,6 +30,10 @@ Route::get('/resources', function () {
 Route::get('/forum', function () {
     return view('forum');
 })->name('forum');
+
+Route::get('/forum/{post}', function (int $post) {
+    return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
+})->name('forum.post');
 
 Route::get('/gallery', function () {
     return view('gallery');
