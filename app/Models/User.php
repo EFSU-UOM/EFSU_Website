@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AccessLevel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -24,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'contact',
         'password',
+        'access_level',
     ];
 
     /**
@@ -46,6 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'access_level' => AccessLevel::class,
         ];
     }
 
@@ -63,7 +66,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->access_level->value <= AccessLevel::ADMIN->value;
+    }
+
+    public function hasAccessLevel(AccessLevel $requiredLevel): bool
+    {
+        return $this->access_level->canAccess($requiredLevel);
+    }
+
+    public function getAccessLevelLabel(): string
+    {
+        return $this->access_level->label();
     }
 
     public function posts(): HasMany
