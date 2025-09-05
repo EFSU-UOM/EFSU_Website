@@ -32,8 +32,8 @@ class PaymentController extends Controller
         }
         
         // Verify the hash
-        $merchant_secret = env('PAYHERE_MERCHANT_SECRET');
-        if ($merchant_secret) {
+        $merchant_secret = config('payhere.merchant_secret');
+        if ($merchant_secret && $merchant_secret !== 'your_merchant_secret') {
             $local_md5sig = strtoupper(md5($merchant_id . $order_id . $payhere_amount . $payhere_currency . $status_code . strtoupper(md5($merchant_secret))));
             
             if ($local_md5sig !== $md5sig) {

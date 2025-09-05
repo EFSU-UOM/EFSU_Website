@@ -27,7 +27,7 @@ mount(function () {
 });
 
 $serviceChargeRate = function () {
-    return 0.033;
+    return config('payhere.service_charge_rate');
 };
 
 $cartItems = computed(function () {
