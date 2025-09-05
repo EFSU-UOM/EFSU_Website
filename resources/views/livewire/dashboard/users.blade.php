@@ -83,7 +83,7 @@ new class extends Component {
     {
         $this->showModal = false;
         $this->selectedUser = null;
-        $this->newAccessLevel = 100;
+        $this->newAccessLevel = AccessLevel::USER->value;
     }
 
     public function updateAccessLevel()
