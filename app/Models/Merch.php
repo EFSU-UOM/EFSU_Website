@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MerchType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,5 +23,6 @@ class Merch extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'is_available' => 'boolean',
+        'category' => MerchType::class,
     ];
 }

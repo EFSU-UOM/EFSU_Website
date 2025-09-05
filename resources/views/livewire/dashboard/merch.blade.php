@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MerchType;
 use App\Models\Merch;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -294,7 +295,7 @@ new class extends Component {
     <x-mary-modal wire:model="showCreateModal" title="Create Merch Item" class="backdrop-blur">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-input wire:model="category" label="Category" required />
+                <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])->toArray()" required />
                 <div class="md:col-span-2">
                     <x-mary-textarea wire:model="description" label="Description" rows="4" required />
                 </div>
@@ -317,7 +318,7 @@ new class extends Component {
     <x-mary-modal wire:model="showEditModal" title="Edit Merch Item" class="backdrop-blur">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-input wire:model="category" label="Category" required />
+                <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])->toArray()" required />
                 <div class="md:col-span-2">
                     <x-mary-textarea wire:model="description" label="Description" rows="4" required />
                 </div>
