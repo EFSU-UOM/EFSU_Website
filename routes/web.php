@@ -50,6 +50,16 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
+Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
+
+Route::get('/payment/success', function () {
+    $orderId = request('order_id');
+    return view('payment-success', ['orderId' => $orderId]);
+})->name('payment.success');
+
+Route::view('/payment/cancel', 'payment-cancel')->name('payment.cancel');
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cart', function () {
         return view('cart');
@@ -63,11 +73,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('payment', ['orderId' => $orderId]);
     })->name('payment');
 });
-
-// Payment callbacks (no auth required as PayHere calls these)
-Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
-Route::get('/payment/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
-Route::get('/payment/cancel', [App\Http\Controllers\PaymentController::class, 'cancel'])->name('payment.cancel');
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
