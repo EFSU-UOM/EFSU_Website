@@ -66,7 +66,7 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');

@@ -34,7 +34,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         $this->validate([
             'token' => ['required'],
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'ends_with:@uom.lk'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
