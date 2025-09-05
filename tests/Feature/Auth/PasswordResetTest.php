@@ -64,3 +64,21 @@ test('password can be reset with valid token', function () {
         return true;
     });
 });
+
+test('password reset requires uom.lk email domain', function () {
+    $response = Volt::test('auth.forgot-password')
+        ->set('email', 'test@example.com')
+        ->call('sendPasswordResetLink');
+
+    $response->assertHasErrors('email');
+});
+
+test('password reset with valid token requires uom.lk email domain', function () {
+    $response = Volt::test('auth.reset-password', ['token' => 'fake-token'])
+        ->set('email', 'test@example.com')
+        ->set('password', 'password')
+        ->set('password_confirmation', 'password')
+        ->call('resetPassword');
+
+    $response->assertHasErrors('email');
+});
