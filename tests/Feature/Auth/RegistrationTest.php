@@ -14,6 +14,7 @@ test('new users can register', function () {
         ->set('email', 'user@uom.lk')
         ->set('password', 'password')
         ->set('password_confirmation', 'password')
+        ->set('contact', '762225674')
         ->call('register');
 
     $response
@@ -29,6 +30,7 @@ test('registration requires uom.lk email domain', function () {
         ->set('email', 'test@example.com')
         ->set('password', 'password')
         ->set('password_confirmation', 'password')
+        ->set('contact', '762225674')
         ->call('register');
 
     $response->assertHasErrors('email');

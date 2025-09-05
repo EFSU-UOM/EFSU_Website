@@ -9,6 +9,7 @@ use Livewire\Volt\Component;
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $contact = '';
 
     /**
      * Mount the component.
@@ -17,6 +18,7 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->contact = Auth::user()->contact ?? '';
     }
 
     /**
@@ -28,22 +30,10 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
+            'contact' => ['nullable', 'string', 'regex:/^[1-9][0-9]{8}$/', 'size:9'],
         ]);
 
         $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
 
         $user->save();
 
@@ -72,12 +62,13 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout heading="{{ __('Profile') }}" subheading="{{ __('Update your name and email address') }}">
+    <x-settings.layout heading="{{ __('Profile') }}" subheading="{{ __('Update your name and contact information') }}">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <x-mary-input wire:model="name" label="{{ __('Name') }}" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <x-mary-input wire:model="email" label="{{ __('Email') }}" type="email" required autocomplete="email" />
+                <x-mary-input wire:model="email" label="{{ __('Email') }}" type="email" readonly disabled class="bg-gray-100" />
+                <p class="mt-1 text-sm text-gray-600">{{ __('Email cannot be modified') }}</p>
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                     <x-mary-alert color="warning" class="mt-4">
@@ -96,6 +87,13 @@ new class extends Component {
                     @endif
                 @endif
             </div>
+
+            <x-mary-input
+                label="Whatsapp No."
+                wire:model="contact"
+                prefix="+94"
+                type="text"
+                placeholder="771234567" />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">

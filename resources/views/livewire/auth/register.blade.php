@@ -11,6 +11,7 @@ use Livewire\Volt\Component;
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $contact = '';
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -22,6 +23,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class, 'ends_with:@uom.lk'],
+            'contact' => ['required', 'string', 'regex:/^[1-9][0-9]{8}$/', 'size:9'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -64,6 +66,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
             autocomplete="email"
             placeholder="name.batch@uom.lk"
         />
+
+        <x-mary-input
+            label="Whatsapp No."
+            wire:model="contact"
+            prefix="+94"
+            type="text"
+            required
+            placeholder="771234567" />
 
         <x-mary-input
             wire:model="password"

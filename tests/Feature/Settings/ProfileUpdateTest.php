@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Volt;
 
 test('profile page is displayed', function () {
-    $this->actingAs($user = User::factory()->create());
+    $user = User::factory()->create();
+    $this->actingAs($user);
 
     $this->get(route('settings.profile'))->assertOk();
 });
@@ -16,7 +18,7 @@ test('profile information can be updated', function () {
 
     $response = Volt::test('settings.profile')
         ->set('name', 'Test User')
-        ->set('email', 'test@example.com')
+        ->set('contact', '771234567')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -24,23 +26,38 @@ test('profile information can be updated', function () {
     $user->refresh();
 
     expect($user->name)->toEqual('Test User');
-    expect($user->email)->toEqual('test@example.com');
-    expect($user->email_verified_at)->toBeNull();
+    expect($user->contact)->toEqual('771234567');
 });
 
-test('email verification status is unchanged when email address is unchanged', function () {
+test('contact number can be updated with valid format', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
 
     $response = Volt::test('settings.profile')
-        ->set('name', 'Test User')
-        ->set('email', $user->email)
+        ->set('name', $user->name)
+        ->set('contact', '771234567')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
 
-    expect($user->refresh()->email_verified_at)->not->toBeNull();
+    expect($user->refresh()->contact)->toEqual('771234567');
+});
+
+test('contact number validation rejects invalid formats', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    // Test invalid formats
+    foreach (['012345678', '77123456', '7712345678', 'abc123456'] as $invalidContact) {
+        $response = Volt::test('settings.profile')
+            ->set('name', $user->name)
+            ->set('contact', $invalidContact)
+            ->call('updateProfileInformation');
+
+        $response->assertHasErrors(['contact']);
+    }
 });
 
 test('user can delete their account', function () {
@@ -57,7 +74,7 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     expect($user->fresh())->toBeNull();
-    expect(auth()->check())->toBeFalse();
+    expect(Auth::check())->toBeFalse();
 });
 
 test('correct password must be provided to delete account', function () {
