@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Actions\CreateComplaint;
 use Livewire\Volt\Volt;
 
 
@@ -52,7 +51,7 @@ Route::get('/store', function () {
 
 
 Route::middleware('auth')->get('/complaints', function () {
-    return view('complaints'); // your Blade page
+    return view('complaints'); 
 })->name('complaints');
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
