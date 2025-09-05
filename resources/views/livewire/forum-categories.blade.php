@@ -13,15 +13,15 @@ state([
 
 $categories = computed(function () {
     return collect(ForumCategory::cases())->map(function ($category) {
-        $posts = ForumPost::where('category', $category)->get();
+        $topicsCount = ForumPost::where('category', $category)->count();
+        
         return [
             'category' => $category,
             'label' => $category->label(),
             'description' => $category->description(),
             'icon' => $category->icon(),
             'color' => $category->color(),
-            'topics' => $posts->count(),
-            'posts_count' => $posts->sum('comments_count') + $posts->count(),
+            'posts_count' => $topicsCount,
         ];
     });
 });
@@ -101,8 +101,7 @@ $createPost = function () {
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">{{ $categoryData['label'] }}</h3>
                     <p class="text-base-content/70 text-sm mb-4">{{ $categoryData['description'] }}</p>
-                    <div class="flex items-center justify-between text-sm text-base-content/60">
-                        <span>{{ $categoryData['topics'] }} topics</span>
+                    <div class="flex items-center justify-end text-sm text-base-content/60">
                         <span>{{ $categoryData['posts_count'] }} posts</span>
                     </div>
                 </x-mary-card>

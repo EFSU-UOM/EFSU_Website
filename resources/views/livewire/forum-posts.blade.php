@@ -271,7 +271,7 @@ $downvote = function ($postId) {
                                     <span>•</span>
                                     <span>{{ $post->comments_count }} replies</span>
                                     <span>•</span>
-                                    <span>{{ $post->upvotes + $post->downvotes }} votes</span>
+                                    <span>{{ $post->totalVotes() }} votes</span>
                                 </div>
                             </div>
                         </div>
