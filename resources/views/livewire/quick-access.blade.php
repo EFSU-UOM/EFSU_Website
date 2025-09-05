@@ -40,12 +40,17 @@ use function Livewire\Volt\{state};
                 <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                     <x-mary-icon name="o-chat-bubble-left-right" class="w-6 h-6 text-primary" />
                 </div>
-                <h3 class="text-lg font-semibold text-base-content mb-2">Discussion Forum</h3>
-                <p class="text-base-content/70 mb-4">Connect with peers and discuss academic topics.</p>
-                <x-mary-button link="{{ route('forum') }}" variant="link" color="secondary" size="sm">
+                <h3 class="text-lg font-semibold text-base-content mb-2">Complaint Box</h3>
+                <p class="text-base-content/70 mb-4">Raise your concerns or report issues related to university services and facilities..</p>
+                <x-mary-button link="{{ route('complaints.create') }}" variant="link" color="secondary" size="sm">
                     Join Discussion →
                 </x-mary-button>
             </x-mary-card>
+
+
+
+
+
 
             <!-- Resources Card -->
             <x-mary-card class="shadow-sm hover:shadow-md transition-shadow">
