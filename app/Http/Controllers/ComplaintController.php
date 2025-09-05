@@ -15,7 +15,7 @@ class ComplaintController extends Controller
 
     public function create()
     {
-        return view('complaints.create');
+        return view('components.auth-complaints');
     }
 
     public function store(Request $request)
