@@ -138,4 +138,9 @@ class ForumPost extends Model
     {
         return $query->where('is_pinned', true);
     }
+
+    public function totalVotes(): int
+    {
+        return $this->upvotes + $this->downvotes;
+    }
 }
