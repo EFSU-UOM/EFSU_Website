@@ -21,8 +21,9 @@ mount(function () {
     
     // Pre-fill with user data if available
     $user = auth()->user();
-    $this->first_name = $user->name ? explode(' ', $user->name)[0] : '';
-    $this->last_name = $user->name && str_contains($user->name, ' ') ? explode(' ', $user->name, 2)[1] : '';
+    $nameParts = $user->name ? explode(' ', trim($user->name), 2) : [];
+    $this->first_name = $nameParts[0] ?? '';
+    $this->last_name = $nameParts[1] ?? '';
     $this->email = $user->email;
 });
 
