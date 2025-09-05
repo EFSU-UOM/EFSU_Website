@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\ComplaintController;
 
 Route::get('/', function () {
     return view('home');
@@ -43,6 +44,12 @@ Route::get('/contact', function () {
 Route::get('/store', function () {
     return view('store');
 })->name('store');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/complaints', [ComplaintController::class, 'create'])->name('complaints.create');
+    Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
+});
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
