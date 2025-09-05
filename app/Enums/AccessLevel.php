@@ -15,7 +15,7 @@ enum AccessLevel: int
             AccessLevel::SUPER_ADMIN => 'Super Admin',
             AccessLevel::ADMIN => 'Admin',
             AccessLevel::MODERATOR => 'Moderator',
-            AccessLevel::USER => 'User',
+            AccessLevel::USER => 'Member',
         };
     }
 
