@@ -19,17 +19,29 @@ $cartItems = computed(function () {
 });
 
 $updateQuantity = function ($cartId, $quantity) {
+    $cartItem = Cart::find($cartId);
+    if (!$cartItem) {
+        session()->flash('error', 'Cart item not found!');
+        return;
+    }
+    
     if ($quantity <= 0) {
-        Cart::find($cartId)->delete();
+        $cartItem->delete();
         session()->flash('success', 'Item removed from cart!');
     } else {
-        Cart::find($cartId)->update(['quantity' => $quantity]);
+        $cartItem->update(['quantity' => $quantity]);
         session()->flash('success', 'Quantity updated!');
     }
 };
 
 $removeItem = function ($cartId) {
-    Cart::find($cartId)->delete();
+    $cartItem = Cart::find($cartId);
+    if (!$cartItem) {
+        session()->flash('error', 'Cart item not found!');
+        return;
+    }
+    
+    $cartItem->delete();
     session()->flash('success', 'Item removed from cart!');
 };
 
@@ -68,6 +80,9 @@ $getTotalPrice = function () {
         <!-- Flash Messages -->
         @if (session('success'))
             <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success mb-6" />
+        @endif
+        @if (session('error'))
+            <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
         @endif
 
         @auth
