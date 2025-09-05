@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AccessLevel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('contact')->nullable();
-            $table->integer('access_level')->default(100);
+            $table->integer('access_level')->default(AccessLevel::USER->value);
             $table->rememberToken();
             $table->timestamps();
         });
