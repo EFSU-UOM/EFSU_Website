@@ -31,6 +31,10 @@ $openNewPostModal = function () {
         $this->js('alert("Please log in to create a new post.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to create posts.")');
+        return;
+    }
 
     $this->showNewPostModal = true;
     $this->newPostTitle = '';
@@ -48,6 +52,10 @@ $closeNewPostModal = function () {
 $createPost = function () {
     if (!auth()->check()) {
         $this->js('alert("Please log in to create a new post.")');
+        return;
+    }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to create posts.")');
         return;
     }
 
