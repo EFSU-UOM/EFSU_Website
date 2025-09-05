@@ -13,7 +13,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public function sendPasswordResetLink(): void
     {
         $this->validate([
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'ends_with:@uom.lk'],
         ]);
 
         Password::sendResetLink($this->only('email'));
@@ -23,27 +23,37 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+    <div class="text-center">
+        <h1 class="text-2xl font-semibold text-base-content">{{ __('Forgot password') }}</h1>
+        <p class="mt-1 text-sm text-base-content/70">{{ __('Enter your email to receive a password reset link') }}</p>
+    </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    @if (session('status'))
+        <x-mary-alert class="alert-info text-center">
+            {{ session('status') }}
+        </x-mary-alert>
+    @endif
 
     <form method="POST" wire:submit="sendPasswordResetLink" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
+        <x-mary-input
             wire:model="email"
-            :label="__('Email Address')"
+            label="{{ __('Email Address') }}"
             type="email"
+            icon="o-envelope"
             required
             autofocus
-            placeholder="email@example.com"
+            placeholder="name.batch@uom.lk"
         />
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Email password reset link') }}</flux:button>
+        <x-mary-button type="submit" class="btn-primary w-full" spinner="sendPasswordResetLink">
+            {{ __('Email password reset link') }}
+        </x-mary-button>
     </form>
 
-    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
+    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-base-content/60">
         <span>{{ __('Or, return to') }}</span>
-        <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+        <x-mary-button :href="route('login')" class="btn-link px-0" wire:navigate>
+            {{ __('log in') }}
+        </x-mary-button>
     </div>
 </div>

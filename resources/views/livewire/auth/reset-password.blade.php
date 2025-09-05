@@ -34,7 +34,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         $this->validate([
             'token' => ['required'],
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'ends_with:@uom.lk'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -69,47 +69,48 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Reset password')" :description="__('Please enter your new password below')" />
+    <x-mary-header :title="__('Reset password')" :subtitle="__('Please enter your new password below')" />
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    @if (session('status'))
+        <x-mary-alert color="success" icon="o-check-circle" class="text-center">
+            {{ session('status') }}
+        </x-mary-alert>
+    @endif
 
     <form method="POST" wire:submit="resetPassword" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
+        <x-mary-input
             wire:model="email"
             :label="__('Email')"
             type="email"
+            icon="o-envelope"
             required
             autocomplete="email"
         />
 
-        <!-- Password -->
-        <flux:input
+        <x-mary-input
             wire:model="password"
             :label="__('Password')"
             type="password"
+            icon="o-lock-closed"
             required
             autocomplete="new-password"
             :placeholder="__('Password')"
-            viewable
         />
 
-        <!-- Confirm Password -->
-        <flux:input
+        <x-mary-input
             wire:model="password_confirmation"
             :label="__('Confirm password')"
             type="password"
+            icon="o-lock-closed"
             required
             autocomplete="new-password"
             :placeholder="__('Confirm password')"
-            viewable
         />
 
         <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
+            <x-mary-button type="submit" color="primary" class="w-full" icon="o-arrow-right">
                 {{ __('Reset password') }}
-            </flux:button>
+            </x-mary-button>
         </div>
     </form>
 </div>
