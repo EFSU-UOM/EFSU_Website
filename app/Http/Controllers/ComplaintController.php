@@ -13,13 +13,11 @@ class ComplaintController extends Controller
         $this->middleware('auth'); // only logged-in users
     }
 
-    // Show the form
     public function create()
     {
         return view('complaints.create');
     }
 
-    // Store complaint
     public function store(Request $request)
     {
         $request->validate([
