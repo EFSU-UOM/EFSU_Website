@@ -59,6 +59,24 @@ Route::middleware('auth')->group(function () {
 Route::get('/cart', function () {
     return view('cart');
 })->name('cart');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/cart', function () {
+        return view('cart');
+    })->name('cart');
+
+    Route::get('/checkout', function () {
+        return view('checkout');
+    })->name('checkout');
+
+    Route::get('/payment/{orderId}', function ($orderId) {
+        return view('payment', ['orderId' => $orderId]);
+    })->name('payment');
+});
+
+// Payment callbacks (no auth required as PayHere calls these)
+Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
+Route::get('/payment/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/cancel', [App\Http\Controllers\PaymentController::class, 'cancel'])->name('payment.cancel');
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
@@ -77,4 +95,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

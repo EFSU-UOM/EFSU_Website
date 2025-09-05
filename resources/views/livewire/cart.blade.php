@@ -159,9 +159,9 @@ $getTotalPrice = function () {
                                         <span class="text-primary">LKR {{ number_format($this->getTotalPrice(), 0) }}</span>
                                     </div>
                                 </div>
-                                
-                                <x-mary-button label="Proceed to Checkout" class="btn-primary w-full" />
-                                
+
+                                <x-mary-button label="Proceed to Checkout" class="btn-primary w-full" link="{{ route('checkout') }}" />
+
                                 <div class="mt-4 text-center">
                                     <p class="text-xs text-base-content/60">
                                         Secure checkout powered by EFSU
