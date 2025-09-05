@@ -56,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/complaints', [ComplaintController::class, 'create'])->name('complaints.create');
     Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
 });
+Route::get('/cart', function () {
+    return view('cart');
+})->name('cart');
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
