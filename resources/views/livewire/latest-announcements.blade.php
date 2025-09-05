@@ -23,13 +23,6 @@ $getBadgeColor = function($type) {
     };
 };
 
-$getTimeAgo = function($createdAt) {
-    $diff = now()->diffInHours($createdAt);
-    if ($diff < 24) {
-        return $diff < 1 ? 'Just now' : $diff . ' hours ago';
-    }
-    return now()->diffInDays($createdAt) . ' days ago';
-};
 
 ?>
 
@@ -49,7 +42,7 @@ $getTimeAgo = function($createdAt) {
                 <x-mary-card class="{{ $announcement->is_featured ? 'border border-secondary/20 bg-secondary/5' : '' }}">
                     <div class="flex items-start justify-between mb-3">
                         <x-mary-badge value="{{ ucfirst($announcement->type) }}" class="badge-{{ $this->getBadgeColor($announcement->type) }}" />
-                        <span class="text-sm text-base-content/60">{{ $this->getTimeAgo($announcement->created_at) }}</span>
+                        <span class="text-sm text-base-content/60">{{ $announcement->getTimeAgo() }}</span>
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">{{ $announcement->title }}</h3>
                     <div class="text-base-content/70 mb-4 [&_a]:text-primary [&_a]:underline">
