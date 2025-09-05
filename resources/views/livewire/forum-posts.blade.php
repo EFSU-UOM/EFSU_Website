@@ -153,6 +153,10 @@ $upvote = function ($postId) {
         $this->js('alert("Please log in to vote on posts.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote on posts.")');
+        return;
+    }
     
     $post = ForumPost::find($postId);
     if ($post) {
@@ -164,6 +168,10 @@ $upvote = function ($postId) {
 $downvote = function ($postId) {
     if (!auth()->check()) {
         $this->js('alert("Please log in to vote on posts.")');
+        return;
+    }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote on posts.")');
         return;
     }
     

@@ -36,6 +36,10 @@ $postComment = function () {
         $this->js('alert("Please log in to post a comment.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to post comments.")');
+        return;
+    }
 
     if (empty(trim($this->newComment))) {
         return;
@@ -84,6 +88,10 @@ $upvotePost = function () {
         $this->js('alert("Please log in to vote.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote.")');
+        return;
+    }
     
     $post = ForumPost::find($this->postId);
     if ($post) {
@@ -95,6 +103,10 @@ $upvotePost = function () {
 $downvotePost = function () {
     if (!auth()->check()) {
         $this->js('alert("Please log in to vote.")');
+        return;
+    }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote.")');
         return;
     }
     
@@ -110,6 +122,10 @@ $upvoteComment = function ($commentId) {
         $this->js('alert("Please log in to vote.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote.")');
+        return;
+    }
     
     $comment = ForumComment::find($commentId);
     if ($comment) {
@@ -121,6 +137,10 @@ $upvoteComment = function ($commentId) {
 $downvoteComment = function ($commentId) {
     if (!auth()->check()) {
         $this->js('alert("Please log in to vote.")');
+        return;
+    }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to vote.")');
         return;
     }
     
