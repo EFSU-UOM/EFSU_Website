@@ -30,9 +30,9 @@ class ChangeUserAccessLevel extends Command
         $email = $this->argument('email');
         $accessLevel = (int) $this->argument('level');
 
-        $validLevels = [0, 1, 10, 100];
+        $validLevels = array_column(AccessLevel::cases(), 'value');
         if (!in_array($accessLevel, $validLevels)) {
-            $this->error('Invalid access level. Valid levels: 0 (Super Admin), 1 (Admin), 10 (Moderator), 100 (User)');
+            $this->error('Invalid access level. Valid levels: ' . implode(', ', $validLevels));
             return 1;
         }
 
