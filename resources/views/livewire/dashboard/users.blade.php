@@ -14,7 +14,7 @@ new class extends Component {
     public string $accessLevelFilter = '';
     public bool $showModal = false;
     public ?User $selectedUser = null;
-    public int $newAccessLevel = 100;
+    public int $newAccessLevel = AccessLevel::USER->value;
 
     public function mount()
     {
