@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            $table->string('category'); // tshirts, caps, wristbands, stickers
+            $table->enum('category', ['tshirts', 'caps', 'wristbands', 'stickers']);
             $table->decimal('price', 8, 2);
             $table->string('image_url')->nullable();
             $table->boolean('is_available')->default(true);
