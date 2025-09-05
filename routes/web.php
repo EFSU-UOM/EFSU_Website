@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+// use App\Livewire\Actions\CreateComplaint;
 use Livewire\Volt\Volt;
+
+use App\Models\ForumPost;
 
 use App\Models\ForumPost;
 
@@ -29,6 +32,15 @@ Route::get('/resources', function () {
 Route::get('/forum', function () {
     return view('forum');
 })->name('forum');
+
+Route::get('/forum/{post}', function (int $post) {
+    return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
+})->name('forum.post');
+
+Route::get('/lost-and-found', function () {
+    return view('lost-and-found');
+})->name('lost-and-found');
+
 
 Route::get('/forum/{post}', function (int $post) {
     return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
@@ -88,8 +100,10 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
     Route::view('/dashboard/users', 'dashboard.users')->name('dashboard.users');
+    Route::view('/dashboard/users', 'dashboard.users')->name('dashboard.users');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
@@ -98,4 +112,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
+require __DIR__ . '/auth.php';
 require __DIR__ . '/auth.php';

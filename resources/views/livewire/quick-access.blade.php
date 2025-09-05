@@ -47,6 +47,11 @@ use function Livewire\Volt\{state};
                 </x-mary-button>
             </x-mary-card>
 
+
+
+
+
+
             <!-- Resources Card -->
             <x-mary-card class="shadow-sm hover:shadow-md transition-shadow">
                 <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
