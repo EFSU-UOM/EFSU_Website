@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MerchType;
 use App\Models\Merch;
 use function Livewire\Volt\{state, computed};
 
@@ -24,13 +25,12 @@ $filteredMerch = computed(function () {
             <x-mary-select
                         wire:model.live="selectedCategory"
                         class="w-48"
-                        :options="[
-                            ['name' => 'All Categories', 'id' => ''],
-                            ['name' => 'T-Shirts', 'id' => 'tshirts'],
-                            ['name' => 'Caps', 'id' => 'caps'],
-                            ['name' => 'Wrist Bands', 'id' => 'wristbands'],
-                            ['name' => 'Stickers', 'id' => 'stickers'],
-                        ]"
+                        :options="collect([['name' => 'All Categories', 'id' => '']])->merge(
+                            collect(App\Enums\MerchType::cases())->map(fn($case) => [
+                                'name' => $case->label(), 
+                                'id' => $case->value
+                            ])
+                        )->toArray()"
                     />
         </x-slot:actions>
     </x-mary-header>
@@ -45,7 +45,7 @@ $filteredMerch = computed(function () {
 
                     <div class="">
                         <div class="flex items-center justify-between mb-2">
-                            <x-mary-badge value="{{ ucfirst($item->category) }}" class="badge-outline" />
+                            <x-mary-badge value="{{ $item->category->label() }}" class="badge-outline" />
                             @if($item->stock_quantity <= 5 && $item->stock_quantity > 0)
                                 <x-mary-badge value="Low Stock" class="badge-warning" />
                             @elseif($item->stock_quantity === 0)
