@@ -13,7 +13,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public function sendPasswordResetLink(): void
     {
         $this->validate([
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'ends_with:@uom.lk'],
         ]);
 
         Password::sendResetLink($this->only('email'));
