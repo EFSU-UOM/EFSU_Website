@@ -50,6 +50,10 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
+Route::get('/cart', function () {
+    return view('cart');
+})->name('cart');
+
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
     Route::view('/dashboard/announcements', 'dashboard.announcements')->name('dashboard.announcements');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\MerchType;
+use App\Models\Cart;
 use App\Models\Merch;
 use function Livewire\Volt\{state, computed};
 
@@ -16,12 +17,49 @@ $filteredMerch = computed(function () {
     return $query->orderBy('name')->get();
 });
 
+$isInCart = function ($merchId) {
+    if (!auth()->check()) {
+        return false;
+    }
+    
+    return Cart::where('user_id', auth()->id())
+               ->where('merch_id', $merchId)
+               ->exists();
+};
+
+$addToCart = function ($merchId) {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    $existingCart = Cart::where('user_id', auth()->id())
+                       ->where('merch_id', $merchId)
+                       ->first();
+    
+    if ($existingCart) {
+        $existingCart->increment('quantity');
+        session()->flash('success', 'Quantity updated in cart!');
+    } else {
+        Cart::create([
+            'user_id' => auth()->id(),
+            'merch_id' => $merchId,
+            'quantity' => 1,
+        ]);
+        session()->flash('success', 'Item added to cart!');
+    }
+};
+
 ?>
 
 <section class="bg-base-200 py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <x-mary-header title="Union Merchandise" subtitle="Show your EFSU pride with our official merchandise collection">
         <x-slot:actions>
+            @auth
+                <x-mary-button icon="o-shopping-cart" class="btn-primary mr-4" link="/cart">
+                    Cart
+                </x-mary-button>
+            @endauth
             <x-mary-select
                         wire:model.live="selectedCategory"
                         class="w-48"
@@ -56,11 +94,19 @@ $filteredMerch = computed(function () {
                         <p class="text-base-content/70 mb-4">{{ $item->description }}</p>
                         <div class="flex items-center justify-between">
                             <span class="text-lg font-bold text-primary">LKR {{ number_format($item->price, 0) }}</span>
-                            @if($item->is_available && $item->stock_quantity > 0)
-                                <x-mary-button label="Order Now" class="btn-primary btn-sm" />
+                            @auth
+                                @if($item->is_available && $item->stock_quantity > 0)
+                                    @if($this->isInCart($item->id))
+                                        <x-mary-button label="In Cart" class="btn-disabled btn-sm" disabled />
+                                    @else
+                                        <x-mary-button label="Add to Cart" class="btn-primary btn-sm" wire:click="addToCart({{ $item->id }})" />
+                                    @endif
+                                @else
+                                    <x-mary-button label="Unavailable" class="btn-disabled btn-sm" disabled />
+                                @endif
                             @else
-                                <x-mary-button label="Unavailable" class="btn-disabled btn-sm" disabled />
-                            @endif
+                                <x-mary-button label="Login to Buy" class="btn-outline btn-sm" link="{{ route('login') }}" />
+                            @endauth
                         </div>
                         @if($item->stock_quantity > 0)
                             <div class="mt-2">
