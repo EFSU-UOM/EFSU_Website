@@ -20,8 +20,8 @@ mount(function ($orderId) {
 });
 
 $generatePayHereHash = function () {
-    $merchant_id = env('PAYHERE_MERCHANT_ID');
-    $merchant_secret = env('PAYHERE_MERCHANT_SECRET');
+    $merchant_id = config('payhere.merchant_id');
+    $merchant_secret = config('payhere.merchant_secret');
     
     $order_id = $this->order->order_id;
     $amount = number_format($this->order->total_amount, 2, '.', '');
@@ -44,6 +44,12 @@ $getItemsList = function () {
     return $this->order->orderItems->map(function ($item) {
         return $item->merch->name . ' x' . $item->quantity;
     })->join(', ');
+};
+
+$getPayHereUrl = function () {
+    return config('payhere.sandbox') 
+        ? config('payhere.urls.sandbox') 
+        : config('payhere.urls.production');
 };
 
 ?>
@@ -88,12 +94,12 @@ $getItemsList = function () {
 
                 <!-- PayHere Payment Form -->
                 <div class="text-center">                    
-                    <form method="post" action="{{ env('PAYHERE_URL') }}" class="space-y-0">
+                    <form method="post" action="{{ $this->getPayHereUrl() }}" class="space-y-0">
                         <!-- PayHere Configuration -->
-                        <input type="hidden" name="merchant_id" value="{{ env('PAYHERE_MERCHANT_ID') }}">
-                        <input type="hidden" name="return_url" value="{{ url('/payment/success') }}">
-                        <input type="hidden" name="cancel_url" value="{{ url('/payment/cancel') }}">
-                        <input type="hidden" name="notify_url" value="{{ url('/payment/notify') }}">
+                        <input type="hidden" name="merchant_id" value="{{ config('payhere.merchant_id') }}">
+                        <input type="hidden" name="return_url" value="{{ config('payhere.callback_urls.return') }}">
+                        <input type="hidden" name="cancel_url" value="{{ config('payhere.callback_urls.cancel') }}">
+                        <input type="hidden" name="notify_url" value="{{ config('payhere.callback_urls.notify') }}">
                         
                         <!-- Order Details -->
                         <input type="hidden" name="order_id" value="{{ $this->order->order_id }}">

@@ -5,7 +5,7 @@ use App\Models\Merch;
 use function Livewire\Volt\{state, computed};
 
 $serviceChargeRate = function () {
-    return 0.033;
+    return config('payhere.service_charge_rate');
 };
 
 $cartItems = computed(function () {
@@ -179,8 +179,8 @@ $getTotalPrice = function () {
                 <h3 class="text-xl font-semibold text-base-content mb-2">Please log in to view your cart</h3>
                 <p class="text-base-content/60 mb-6">You need to be logged in to add items to your cart</p>
                 <div class="space-x-4">
-                    <x-mary-button label="Log In" class="btn-primary" link="/login" />
-                    <x-mary-button label="Browse Merchandise" class="btn-outline" link="/union-merchandise" />
+                    <x-mary-button label="Log In" class="btn-primary" link="{{ route('login') }}" />
+                    <x-mary-button label="Browse Merchandise" class="btn-outline" link="{{ route('store') }}" />
                 </div>
             </div>
         @endauth
