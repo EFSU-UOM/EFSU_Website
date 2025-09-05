@@ -76,13 +76,4 @@ class PaymentController extends Controller
         return response('OK', 200);
     }
     
-    public function success(Request $request)
-    {
-        return view('payment-success');
-    }
-    
-    public function cancel(Request $request)
-    {
-        return view('payment-cancel');
-    }
 }
