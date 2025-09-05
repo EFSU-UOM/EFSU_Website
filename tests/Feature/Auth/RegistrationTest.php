@@ -11,14 +11,26 @@ test('registration screen can be rendered', function () {
 test('new users can register', function () {
     $response = Volt::test('auth.register')
         ->set('name', 'Test User')
-        ->set('email', 'test@example.com')
+        ->set('email', 'user@uom.lk')
         ->set('password', 'password')
         ->set('password_confirmation', 'password')
         ->call('register');
 
     $response
         ->assertHasNoErrors()
-        ->assertRedirect(route('home', absolute: false));
+        ->assertRedirect(route('verification.notice', absolute: false));
 
     $this->assertAuthenticated();
+});
+
+test('registration requires uom.lk email domain', function () {
+    $response = Volt::test('auth.register')
+        ->set('name', 'Test User')
+        ->set('email', 'test@example.com')
+        ->set('password', 'password')
+        ->set('password_confirmation', 'password')
+        ->call('register');
+
+    $response->assertHasErrors('email');
+    $this->assertGuest();
 });
