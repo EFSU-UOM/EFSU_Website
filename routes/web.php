@@ -57,6 +57,7 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('/dashboard/news-articles', 'dashboard.news-articles')->name('dashboard.news-articles');
     Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
+    Route::view('dashboard/users', 'dashboard.users')->name('dashboard.users');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

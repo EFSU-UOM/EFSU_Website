@@ -103,6 +103,10 @@
                                     <x-mary-icon name="o-calendar" class="w-5 h-5" />
                                     {{ __('Events') }}
                                 </x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('dashboard.users') }}" :active="request()->routeIs('dashboard.users*')" wire:navigate>
+                                    <x-mary-icon name="o-users" class="w-5 h-5" />
+                                    {{ __('Users') }}
+                                </x-mary-menu-item>
                         </x-mary-menu>
                     </div>
 
