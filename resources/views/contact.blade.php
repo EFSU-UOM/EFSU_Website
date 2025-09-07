@@ -87,9 +87,9 @@
                                 <div>
                                     <h3 class="text-lg font-semibold text-base-content">Office Address</h3>
                                     <p class="text-base-content/70 mt-1">
-                                        Engineering Faculty Building<br>
-                                        Room 205, Second Floor<br>
-                                        University Campus, Main Block
+                                        ESFU office,<br>
+                                        First Floor,<br>
+                                        Wala canteen Building
                                     </p>
                                 </div>
                             </div>
@@ -99,10 +99,11 @@
                                     <x-mary-icon name="o-phone" class="w-6 h-6 text-success" />
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-semibold text-base-content">Phone</h3>
+                                    <h3 class="text-lg font-semibold text-base-content">Phone Contacts</h3>
                                     <p class="text-base-content/70 mt-1">
-                                        +1 (555) 123-4567<br>
-                                        +1 (555) 123-4568 (Emergency)
+                                        21 Batch - Samitha: 0717910819<br>
+                                        22 Batch - Chanuka: 0775681545<br>
+                                        23 Batch - Gishan: 0763510388
                                     </p>
                                 </div>
                             </div>
@@ -114,55 +115,247 @@
                                 <div>
                                     <h3 class="text-lg font-semibold text-base-content">Email</h3>
                                     <p class="text-base-content/70 mt-1">
-                                        info@efsu.edu<br>
-                                        president@efsu.edu
+                                        contact@efsu-uom.lk<br>
+                                        efsu@uom.lk
                                     </p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-warning/10">
-                                    <x-mary-icon name="o-clock" class="w-6 h-6 text-warning" />
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-base-content">Office Hours</h3>
-                                    <p class="text-base-content/70 mt-1">
-                                        Monday - Friday: 9:00 AM - 5:00 PM<br>
-                                        Saturday: 10:00 AM - 2:00 PM<br>
-                                        Sunday: Closed
-                                    </p>
-                                </div>
-                            </div>
+                            
                         </div>
                     </x-mary-card>
 
                     <!-- Social Media -->
                     <x-mary-card title="Follow Us" shadow class="bg-base-100">
                         <div class="flex gap-3">
-                            <x-mary-button class="btn-primary btn-circle">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                </svg>
-                            </x-mary-button>
-                            <x-mary-button class="btn-info btn-circle">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                                </svg>
-                            </x-mary-button>
-                            <x-mary-button class="btn-secondary btn-circle">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.042-3.441.219-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.357-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012 12.017z"/>
-                                </svg>
-                            </x-mary-button>
-                            <x-mary-button class="btn-accent btn-circle">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                                </svg>
-                            </x-mary-button>
+                            <a href="https://www.facebook.com/efsuuom" target="_blank" rel="noopener noreferrer">
+                                <x-mary-button class="btn-primary btn-circle">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    </svg>
+                                </x-mary-button>
+                            </a>
                         </div>
                     </x-mary-card>
+                    
                 </div>
             </div>
         </div>
     </section>
+    <!-- Committee Members -->
+        <section class="py-10 bg-base-200">
+            <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <x-mary-header
+                    title="Our Team"
+                    subtitle="Meet the Engineering Faculty Students Union committee members"
+                    size="lg"
+                    class="mb-12"
+                />
+
+                @php
+                    $leaders = [
+                        [
+                            'name' => 'Charuka Dissanayeke',
+                            'position' => 'President',
+                            'email' => 'president@efsu-uom.lk',
+                            'phone' => '+94 71 711 4853',
+                            'icon' => '👨‍💼',
+                            'bg' => 'bg-primary'
+                        ],
+                        [
+                            'name' => 'Pramodya Meegalle',
+                            'position' => 'Secretary',
+                            'email' => 'secretary@efsu-uom.lk',
+                            'phone' => '+94 78 531 3027',
+                            'icon' => '📋',
+                            'bg' => 'bg-secondary'
+                        ],
+                        [
+                            'name' => 'Maleesha Kavinda',
+                            'position' => 'Vice President',
+                            'email' => 'vicepresident@efsu-uom.lk',
+                            'phone' => '+94 70 449 8462',
+                            'icon' => '👨‍💼',
+                            'bg' => 'bg-accent'
+                        ],
+                        [
+                            'name' => 'Sahan Cooray',
+                            'position' => 'Vice Secretary',
+                            'email' => 'vicesecretary@efsu-uom.lk',
+                            'phone' => '+94 76 699 0124',
+                            'icon' => '📝',
+                            'bg' => 'bg-info'
+                        ],
+                        [
+                            'name' => 'Pivithuru Hasintha',
+                            'position' => 'Treasurer',
+                            'email' => 'treasurer@efsu-uom.lk',
+                            'phone' => '+94 71 787 5495',
+                            'icon' => '💰',
+                            'bg' => 'bg-success'
+                        ],
+                        [
+                            'name' => 'Lasindu Induwara',
+                            'position' => 'Editor',
+                            'email' => 'editor@efsu-uom.lk',
+                            'phone' => '+94 78 584 9870',
+                            'icon' => '✏️',
+                            'bg' => 'bg-warning'
+                        ],
+                    ];
+
+                    $committeeMembers = [
+                        [
+                            'name' => 'Kaveesha Gimhana',
+                            'position' => 'Committee Member',
+                            'email' => 'kaveeshag@efsu-uom.lk',
+                            'phone' => '+94 70 207 5700',
+                            'icon' => '👥',
+                            'bg' => 'bg-orange-400'
+                        ],
+                        [
+                            'name' => 'Shamitha Maduwantha',
+                            'position' => 'Committee Member',
+                            'email' => 'shamitha@efsu-uom.lk',
+                            'phone' => '+94 71 791 0819',
+                            'icon' => '👥',
+                            'bg' => 'bg-purple-500'
+                        ],
+                        [
+                            'name' => 'Chanuka Maneesha',
+                            'position' => 'Committee Member',
+                            'email' => 'chanuka@efsu-uom.lk',
+                            'phone' => '+94 77 568 1545',
+                            'icon' => '👥',
+                            'bg' => 'bg-teal-500'
+                        ],
+                        [
+                            'name' => 'Shivamayinthan Nadeshamurthi',
+                            'position' => 'Committee Member',
+                            'email' => 'shivamayinthan@efsu-uom.lk',
+                            'phone' => '+94 76 637 0873',
+                            'icon' => '👥',
+                            'bg' => 'bg-indigo-500'
+                        ],
+                        [
+                            'name' => 'Kaveesha Nirmal',
+                            'position' => 'Committee Member',
+                            'email' => 'kaveesha@efsu-uom.lk',
+                            'phone' => '+94 77 690 7920',
+                            'icon' => '👥',
+                            'bg' => 'bg-pink-500'
+                        ],
+                        [
+                            'name' => 'Gishan Chamith',
+                            'position' => 'Committee Member',
+                            'email' => 'gishan@efsu-uom.lk',
+                            'phone' => '+94 76 351 0388',
+                            'icon' => '👥',
+                            'bg' => 'bg-emerald-500'
+                        ],
+                        [
+                            'name' => 'Sithum Ransidu',
+                            'position' => 'Committee Member',
+                            'email' => 'sithum@efsu-uom.lk',
+                            'phone' => '+94 70 163 2029',
+                            'icon' => '👥',
+                            'bg' => 'bg-red-500'
+                        ]
+                    ];
+                @endphp
+
+                {{-- Top Leader (President only) --}}
+                <div class="mb-10">
+                    @php $president = $leaders[0]; @endphp
+                    <x-mary-card class="w-full md:w-2/3 mx-auto p-6 text-center" shadow>
+                        <div class="flex justify-center">
+                            <x-mary-avatar class="!w-20 !h-20 {{ $president['bg'] }}">
+                                <span class="text-white text-4xl">{{ $president['icon'] }}</span>
+                            </x-mary-avatar>
+                        </div>
+                        <h2 class="mt-4 text-2xl font-bold">{{ $president['name'] }}</h2>
+                        <p class="text-lg text-base-content/70">{{ $president['position'] }}</p>
+                        <div class="mt-4 space-y-2 text-sm text-base-content/60">
+                            <div class="flex justify-center items-center gap-2">
+                                <x-mary-icon name="o-envelope" class="w-4 h-4" />
+                                <a href="mailto:{{ $president['email'] }}" class="hover:text-primary">
+                                    {{ $president['email'] }}
+                                </a>
+                            </div>
+                            <div class="flex justify-center items-center gap-2">
+                                <x-mary-icon name="o-phone" class="w-4 h-4" />
+                                <a href="tel:{{ $president['phone'] }}" class="hover:text-primary">
+                                    {{ $president['phone'] }}
+                                </a>
+                            </div>
+                        </div>
+                    </x-mary-card>
+                </div>
+
+                {{-- Other Main Leaders --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    @foreach(array_slice($leaders, 1) as $leader)
+                        <x-mary-card class="p-4" shadow>
+                            <div class="flex items-center gap-3 mb-4">
+                                <x-mary-avatar class="!w-14 !h-14 {{ $leader['bg'] }}">
+                                    <span class="text-white text-2xl">{{ $leader['icon'] }}</span>
+                                </x-mary-avatar>
+                                <div>
+                                    <h3 class="font-semibold text-lg">{{ $leader['name'] }}</h3>
+                                    <p class="text-sm text-base-content/70">{{ $leader['position'] }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-base-content/60">
+                                <div class="flex items-center gap-2">
+                                    <x-mary-icon name="o-envelope" class="w-4 h-4" />
+                                    <a href="mailto:{{ $leader['email'] }}" class="hover:text-primary">
+                                        {{ $leader['email'] }}
+                                    </a>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <x-mary-icon name="o-phone" class="w-4 h-4" />
+                                    <a href="tel:{{ $leader['phone'] }}" class="hover:text-primary">
+                                        {{ $leader['phone'] }}
+                                    </a>
+                                </div>
+                            </div>
+                        </x-mary-card>
+                    @endforeach
+                </div>
+
+                {{-- Committee Members --}}
+                <h3 class="text-xl font-semibold mb-6">Committee Members</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach($committeeMembers as $member)
+                        <x-mary-card class="w-full" shadow>
+                            <div class="flex items-center gap-3 mb-4">
+                                <x-mary-avatar class="!w-12 !h-12 {{ $member['bg'] }}">
+                                    <span class="text-white text-xl">{{ $member['icon'] }}</span>
+                                </x-mary-avatar>
+                                <div>
+                                    <h3 class="font-semibold text-base-content">{{ $member['name'] }}</h3>
+                                    <p class="text-sm text-base-content/70">{{ $member['position'] }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-base-content/60">
+                                <div class="flex items-center gap-2">
+                                    <x-mary-icon name="o-envelope" class="w-4 h-4" />
+                                    <a href="mailto:{{ $member['email'] }}" class="hover:text-primary">
+                                        {{ $member['email'] }}
+                                    </a>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <x-mary-icon name="o-phone" class="w-4 h-4" />
+                                    <a href="tel:{{ $member['phone'] }}" class="hover:text-primary">
+                                        {{ $member['phone'] }}
+                                    </a>
+                                </div>
+                            </div>
+                        </x-mary-card>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+    
 </x-layouts.public>
