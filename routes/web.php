@@ -35,6 +35,11 @@ Route::get('/forum/{post}', function (int $post) {
     return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
 })->name('forum.post');
 
+Route::get('/lost-and-found', function () {
+    return view('lost-and-found');
+})->name('lost-and-found');
+
+
 Route::get('/gallery', function () {
     return view('gallery');
 })->name('gallery');
@@ -81,6 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/payment/{orderId}', function ($orderId) {
         return view('payment', ['orderId' => $orderId]);
     })->name('payment');
+
 });
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
