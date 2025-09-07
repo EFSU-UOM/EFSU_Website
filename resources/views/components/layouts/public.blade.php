@@ -189,14 +189,14 @@
                             social engagement, and professional development.
                         </p>
                         <div class="flex space-x-2">
-                            <x-mary-button class="btn-ghost btn-square" link="#" aria-label="Facebook">
+                            <a class="btn-ghost btn-square" href="https://www.facebook.com/efsuuom" aria-label="Facebook">
                                 <x-mary-icon name="o-hand-thumb-up" class="h-5 w-5" />
                                 <span class="sr-only">Facebook</span>
-                            </x-mary-button>
-                            <x-mary-button class="btn-ghost btn-square" link="#" aria-label="Instagram">
-                                <x-mary-icon name="o-camera" class="h-5 w-5" />
-                                <span class="sr-only">Instagram</span>
-                            </x-mary-button>
+                            </a>
+                            <a class="btn-ghost btn-square" href="https://github.com/EFSU-UOM/EFSU_Website" aria-label="GitHub">
+                                <x-mary-icon name="s-code-bracket" class="h-5 w-5" />
+                                <span class="sr-only">GitHub</span>
+                            </a>
                         </div>
                     </div>
 
@@ -225,6 +225,7 @@
                 <div class="text-center">
                     <p class="opacity-70 mb-2">
                         &copy; {{ date('Y') }} Engineering Faculty Students Union. All rights reserved.
+                        @if(Route::currentRouteName() === 'about')
                         <br>
                         Developed by
                         <a href="https://github.com/SuhasDissa" class="link link-hover font-medium" target="_blank"
@@ -237,6 +238,7 @@
                         This project is licensed under GPL v3.0 |
                         <a href="https://github.com/EFSU-UOM/EFSU_Website" class="link link-hover font-medium"
                             target="_blank" rel="noopener">View Source Code</a>
+                        @endif
                     </p>
                 </div>
             </div>
