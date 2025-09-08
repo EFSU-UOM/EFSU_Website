@@ -6,6 +6,12 @@ use App\Http\Controllers\ComplaintController;
 
 use App\Models\ForumPost;
 
+
+
+
+use App\Models\ForumPost;
+
+
 Route::get('/', function () {
     return view('home');
 })->name('home');
