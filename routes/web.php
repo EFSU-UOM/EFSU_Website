@@ -4,12 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Actions\CreateComplaint;
 use Livewire\Volt\Volt;
 
-<<<<<<< HEAD
 
 
-=======
+
+
 use App\Models\ForumPost;
->>>>>>> 123c0cd6e3efe2378c5cf6ec159db4f9d87dd529
+
 
 Route::get('/', function () {
     return view('home');
