@@ -120,7 +120,7 @@
     </section>
 
     <!-- Tools & Software Section -->
-    <section class="bg-base-100 py-16" style="display: none;">
+    <section class="bg-base-100 py-16 hidden">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-base-content mb-8">Useful Tools & Software</h2>
             
