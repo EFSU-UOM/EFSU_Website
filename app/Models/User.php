@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\AccessLevel;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -21,7 +23,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'contact',
         'password',
+        'access_level',
     ];
 
     /**
@@ -44,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'access_level' => AccessLevel::class,
         ];
     }
 
@@ -61,6 +66,31 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->access_level->value <= AccessLevel::ADMIN->value;
+    }
+
+    public function hasAccessLevel(AccessLevel $requiredLevel): bool
+    {
+        return $this->access_level->canAccess($requiredLevel);
+    }
+
+    public function getAccessLevelLabel(): string
+    {
+        return $this->access_level->label();
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(ForumPost::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ForumComment::class);
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(ForumVote::class);
     }
 }

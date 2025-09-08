@@ -20,7 +20,7 @@ state(['events' => fn() => Event::orderBy('start_datetime', 'asc')->limit(6)->ge
             @forelse($events as $event)
                 <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100">
                     <x-slot name="figure">
-                        <img src="{{ $event->image_url ?: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' }}"
+                        <img src="{{ Storage::url($event->image_url) }}"
                              alt="{{ $event->title }}" class="w-full h-48 object-cover">
                     </x-slot>
 

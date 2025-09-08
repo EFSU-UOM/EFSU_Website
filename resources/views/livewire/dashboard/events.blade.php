@@ -14,20 +14,20 @@ new class extends Component {
     public $showDeleteModal = false;
     public $deleteId = null;
     public $editId = null;
-    
+
     // Form fields
     public $title = '';
     public $description = '';
     public $type = 'general';
     public $location = '';
     public $image = null;
+    public $currentImageUrl = null;
     public $start_datetime = '';
     public $end_datetime = '';
     public $requires_registration = false;
     public $max_participants = '';
     public $facebook_page_url = '';
     public $facebook_album_urls = '';
-    public $currentImageUrl = null;
 
     public function mount()
     {
@@ -36,8 +36,7 @@ new class extends Component {
 
     public function getEventsProperty()
     {
-        return Event::latest()
-            ->paginate(10);
+        return Event::latest()->paginate(10);
     }
 
     public function openCreateModal()
@@ -84,7 +83,7 @@ new class extends Component {
             'description' => 'required|string',
             'type' => 'required|string|max:255',
             'location' => 'required|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'required|image|max:2048',
             'start_datetime' => 'required|date|after:now',
             'end_datetime' => 'required|date|after:start_datetime',
             'max_participants' => 'nullable|integer|min:1',
@@ -106,7 +105,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = '/storage/' . $this->image->store('events', 'public');
+            $data['image_url'] = $this->image->store('events', 'public');
         }
 
         Event::create($data);
@@ -122,7 +121,7 @@ new class extends Component {
             'description' => 'required|string',
             'type' => 'required|string|max:255',
             'location' => 'required|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|file|image|max:2048',
             'start_datetime' => 'required|date',
             'end_datetime' => 'required|date|after:start_datetime',
             'max_participants' => 'nullable|integer|min:1',
@@ -145,11 +144,11 @@ new class extends Component {
             'facebook_album_urls' => $this->facebook_album_urls ? array_filter(explode("\n", $this->facebook_album_urls)) : null,
         ];
 
-        if ($this->image) {
+        if ($this->image && is_object($this->image)) {
             if ($event->image_url) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $event->image_url));
+                Storage::disk('public')->delete($event->image_url);
             }
-            $data['image_url'] = '/storage/' . $this->image->store('events', 'public');
+            $data['image_url'] = $this->image->store('events', 'public');
         }
 
         $event->update($data);
@@ -167,13 +166,13 @@ new class extends Component {
     public function delete()
     {
         $event = Event::findOrFail($this->deleteId);
-        
+
         if ($event->image_url) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $event->image_url));
+            Storage::disk('public')->delete($event->image_url);
         }
 
         $event->delete();
-        
+
         $this->showDeleteModal = false;
         $this->deleteId = null;
         session()->flash('success', 'Event deleted successfully.');
@@ -211,7 +210,8 @@ new class extends Component {
 
         <!-- Flash Messages -->
         @if (session('success'))
-            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success" />
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle"
+                class="alert-success" />
         @endif
 
         <!-- Stats Cards -->
@@ -231,7 +231,8 @@ new class extends Component {
                         <x-mary-icon name="o-clock" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Upcoming</div>
-                    <div class="stat-value text-success">{{ $this->events->where('start_datetime', '>', now())->count() }}</div>
+                    <div class="stat-value text-success">
+                        {{ $this->events->where('start_datetime', '>', now())->count() }}</div>
                 </div>
             </div>
             <div class="stats shadow">
@@ -240,7 +241,8 @@ new class extends Component {
                         <x-mary-icon name="o-user-group" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Reg. Required</div>
-                    <div class="stat-value text-warning">{{ $this->events->where('requires_registration', true)->count() }}</div>
+                    <div class="stat-value text-warning">
+                        {{ $this->events->where('requires_registration', true)->count() }}</div>
                 </div>
             </div>
             <div class="stats shadow">
@@ -249,7 +251,8 @@ new class extends Component {
                         <x-mary-icon name="o-check" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Past</div>
-                    <div class="stat-value text-info">{{ $this->events->where('end_datetime', '<', now())->count() }}</div>
+                    <div class="stat-value text-info">{{ $this->events->where('end_datetime', '<', now())->count() }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -263,21 +266,19 @@ new class extends Component {
                     ['key' => 'location', 'label' => 'Location'],
                     ['key' => 'start_datetime', 'label' => 'Start Date'],
                     ['key' => 'requires_registration', 'label' => 'Registration'],
-                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false]
+                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
                 ]" :rows="$this->events" with-pagination>
-                    
+
                     @scope('cell_title', $event)
                         <div>
                             <div class="font-semibold">{{ $event->title }}</div>
-                            <div class="text-sm opacity-70 truncate max-w-xs">{{ Str::limit($event->description, 60) }}</div>
+                            <div class="text-sm opacity-70 truncate max-w-xs">{{ Str::limit($event->description, 60) }}
+                            </div>
                         </div>
                     @endscope
 
                     @scope('cell_type', $event)
-                        <x-mary-badge 
-                            :value="$event->type" 
-                            class="badge-ghost"
-                        />
+                        <x-mary-badge :value="$event->type" class="badge-ghost" />
                     @endscope
 
                     @scope('cell_location', $event)
@@ -292,7 +293,7 @@ new class extends Component {
                     @endscope
 
                     @scope('cell_requires_registration', $event)
-                        @if($event->requires_registration)
+                        @if ($event->requires_registration)
                             <x-mary-badge value="Required" class="badge-warning" />
                         @else
                             <x-mary-badge value="Open" class="badge-success" />
@@ -301,18 +302,10 @@ new class extends Component {
 
                     @scope('cell_actions', $event)
                         <div class="flex gap-2">
-                            <x-mary-button 
-                                icon="o-pencil" 
-                                size="xs" 
-                                class="btn-ghost"
-                                wire:click="openEditModal({{ $event->id }})"
-                            />
-                            <x-mary-button 
-                                icon="o-trash" 
-                                size="xs" 
-                                class="btn-ghost text-error"
-                                wire:click="confirmDelete({{ $event->id }})"
-                            />
+                            <x-mary-button icon="o-pencil" size="xs" class="btn-ghost"
+                                wire:click="openEditModal({{ $event->id }})" />
+                            <x-mary-button icon="o-trash" size="xs" class="btn-ghost text-error"
+                                wire:click="confirmDelete({{ $event->id }})" />
                         </div>
                     @endscope
                 </x-mary-table>
@@ -321,7 +314,8 @@ new class extends Component {
     </div>
 
     <!-- Create Modal -->
-    <x-mary-modal wire:model="showCreateModal" title="Create Event" class="backdrop-blur">
+    @if ($showCreateModal)
+        <x-mary-modal wire:model="showCreateModal" title="Create Event" class="backdrop-blur">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <x-mary-input wire:model="title" label="Title" required />
                 <x-mary-input wire:model="type" label="Type" required />
@@ -334,10 +328,14 @@ new class extends Component {
                 <x-mary-datetime wire:model="end_datetime" label="End Date & Time" required />
                 <x-mary-input wire:model="facebook_page_url" label="Facebook Page URL (optional)" type="url" />
                 <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="facebook_album_urls" label="Facebook Album URLs (one per line)" rows="3" />
+                    <x-mary-textarea wire:model="facebook_album_urls" label="Facebook Album URLs (one per line)"
+                        rows="3" />
                 </div>
                 <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
+                    <x-mary-file wire:model="image" label="Image" accept="image/*" crop-after-change>
+                        <img src="{{ $image ? $image->temporaryUrl() : '/placeholder.avif' }}" alt="Preview"
+                            class="w-full h-full object-cover rounded-lg" />
+                    </x-mary-file>
                 </div>
                 <div class="md:col-span-2">
                     <x-mary-checkbox wire:model="requires_registration" label="Requires Registration" />
@@ -347,51 +345,40 @@ new class extends Component {
                 <x-mary-button label="Cancel" wire:click="closeCreateModal" />
                 <x-mary-button label="Create" wire:click="store" class="btn-primary" />
             </x-slot:actions>
-    </x-mary-modal>
-
+        </x-mary-modal>
+    @endif
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit Event" class="backdrop-blur">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-input wire:model="type" label="Type" required />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="description" label="Description" rows="4" required />
-                </div>
-                <x-mary-input wire:model="location" label="Location" required />
-                <x-mary-input wire:model="max_participants" label="Max Participants (optional)" type="number" />
-                <x-mary-datetime wire:model="start_datetime" label="Start Date & Time" required />
-                <x-mary-datetime wire:model="end_datetime" label="End Date & Time" required />
-                <x-mary-input wire:model="facebook_page_url" label="Facebook Page URL (optional)" type="url" />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="facebook_album_urls" label="Facebook Album URLs (one per line)" rows="3" />
-                </div>
-                
-                @if($currentImageUrl)
-                    <div class="form-control md:col-span-2">
-                        <label class="label">
-                            <span class="label-text">Current Image</span>
-                        </label>
-                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
-                            <img src="{{ $currentImageUrl }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
-                            <div class="flex-1">
-                                <p class="text-sm font-medium">{{ basename($currentImageUrl) }}</p>
-                                <p class="text-xs text-base-content/70">Click below to change image</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                
-                <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional - leave blank to keep current)" accept="image/*" />
-                </div>
-                <div class="md:col-span-2">
-                    <x-mary-checkbox wire:model="requires_registration" label="Requires Registration" />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-mary-input wire:model="title" label="Title" required />
+            <x-mary-input wire:model="type" label="Type" required />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="description" label="Description" rows="4" required />
             </div>
-            <x-slot:actions>
-                <x-mary-button label="Cancel" wire:click="closeEditModal" />
-                <x-mary-button label="Update" wire:click="update" class="btn-primary" />
-            </x-slot:actions>
+            <x-mary-input wire:model="location" label="Location" required />
+            <x-mary-input wire:model="max_participants" label="Max Participants (optional)" type="number" />
+            <x-mary-datetime wire:model="start_datetime" label="Start Date & Time" required />
+            <x-mary-datetime wire:model="end_datetime" label="End Date & Time" required />
+            <x-mary-input wire:model="facebook_page_url" label="Facebook Page URL (optional)" type="url" />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="facebook_album_urls" label="Facebook Album URLs (one per line)"
+                    rows="3" />
+            </div>
+
+            <div class="md:col-span-2">
+                <x-mary-file wire:model="image" label="Image" accept="image/*" crop-after-change>
+                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}" alt="Preview"
+                        class="w-full h-full object-cover rounded-lg" />
+                </x-mary-file>
+            </div>
+            <div class="md:col-span-2">
+                <x-mary-checkbox wire:model="requires_registration" label="Requires Registration" />
+            </div>
+        </div>
+        <x-slot:actions>
+            <x-mary-button label="Cancel" wire:click="closeEditModal" />
+            <x-mary-button label="Update" wire:click="update" class="btn-primary" />
+        </x-slot:actions>
     </x-mary-modal>
 
     <!-- Delete Confirmation Modal -->

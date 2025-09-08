@@ -4,8 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Actions\CreateComplaint;
 use Livewire\Volt\Volt;
 
+<<<<<<< HEAD
 
 
+=======
+use App\Models\ForumPost;
+>>>>>>> 123c0cd6e3efe2378c5cf6ec159db4f9d87dd529
 
 Route::get('/', function () {
     return view('home');
@@ -32,6 +36,15 @@ Route::get('/forum', function () {
     return view('forum');
 })->name('forum');
 
+Route::get('/forum/{post}', function (int $post) {
+    return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
+})->name('forum.post');
+
+Route::get('/lost-and-found', function () {
+    return view('lost-and-found');
+})->name('lost-and-found');
+
+
 Route::get('/gallery', function () {
     return view('gallery');
 })->name('gallery');
@@ -51,9 +64,36 @@ Route::get('/store', function () {
 
 
 
+
 Route::middleware('auth')->get('/complaints', function () {
     return view('complaints'); // your Blade page
 })->name('complaints');
+
+Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
+
+Route::get('/payment/success', function () {
+    $orderId = request('order_id');
+    return view('payment-success', ['orderId' => $orderId]);
+})->name('payment.success');
+
+Route::view('/payment/cancel', 'payment-cancel')->name('payment.cancel');
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/cart', function () {
+        return view('cart');
+    })->name('cart');
+
+    Route::get('/checkout', function () {
+        return view('checkout');
+    })->name('checkout');
+
+    Route::get('/payment/{orderId}', function ($orderId) {
+        return view('payment', ['orderId' => $orderId]);
+    })->name('payment');
+
+});
+
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
@@ -62,9 +102,10 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('/dashboard/news-articles', 'dashboard.news-articles')->name('dashboard.news-articles');
     Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
+    Route::view('/dashboard/users', 'dashboard.users')->name('dashboard.users');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
@@ -72,4 +113,4 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

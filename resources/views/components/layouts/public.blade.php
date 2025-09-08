@@ -37,7 +37,6 @@
                         </x-slot:trigger>
                         <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('about') }}">About EFSU</x-mary-menu-item>
-                            <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
                         </x-mary-menu>
                     </x-mary-dropdown>
@@ -68,58 +67,61 @@
                              <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         </x-mary-menu>
                     </x-mary-dropdown>
                     @auth
-                        @if (auth()->user() && auth()->user()->isAdmin())
-                            <x-mary-button class="btn-primary" link="{{ route('dashboard') }}" label="Admin Dashboard" />
-                        @else
-                            <x-mary-dropdown align="end">
-                                <x-slot:trigger>
+                        <x-mary-dropdown align="end">
+                            <x-slot:trigger>
+                                <div
+                                    class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
                                     <div
-                                        class="flex items-center space-x-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+                                        class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">
+                                        {{ auth()->user()->initials() }}
+                                    </div>
+                                    <div class="hidden sm:block text-left">
+                                        <div class="text-sm font-medium">{{ auth()->user()->name }}</div>
+                                        <div class="text-xs opacity-60">{{ auth()->user()->getAccessLevelLabel() }}</div>
+                                    </div>
+                                    <x-mary-icon name="o-chevron-down" class="w-4 h-4 opacity-60" />
+                                </div>
+                            </x-slot:trigger>
+                            <x-mary-menu class="menu menu-md w-56">
+                                <div class="px-3 py-3 border-b border-base-200 bg-base-50">
+                                    <div class="flex items-center space-x-3">
                                         <div
-                                            class="w-8 h-8 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold text-sm">
+                                            class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
                                             {{ auth()->user()->initials() }}
                                         </div>
-                                        <div class="hidden sm:block text-left">
-                                            <div class="text-sm font-medium">{{ auth()->user()->name }}</div>
-                                            <div class="text-xs opacity-60">Member</div>
-                                        </div>
-                                        <x-mary-icon name="o-chevron-down" class="w-4 h-4 opacity-60" />
-                                    </div>
-                                </x-slot:trigger>
-                                <x-mary-menu class="menu menu-md w-56">
-                                    <div class="px-3 py-3 border-b border-base-200 bg-base-50">
-                                        <div class="flex items-center space-x-3">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
-                                                {{ auth()->user()->initials() }}
-                                            </div>
-                                            <div>
-                                                <div class="font-semibold text-sm">{{ auth()->user()->name }}</div>
-                                                <div class="text-xs opacity-70">{{ auth()->user()->email }}</div>
-                                                <div class="text-xs text-primary font-medium">Member</div>
-                                            </div>
+                                        <div>
+                                            <div class="font-semibold text-sm">{{ auth()->user()->name }}</div>
+                                            <div class="text-xs opacity-70">{{ auth()->user()->email }}</div>
+                                            <div class="text-xs text-primary font-medium">{{ auth()->user()->getAccessLevelLabel() }}</div>
                                         </div>
                                     </div>
-                                    <x-mary-menu-item link="{{ route('settings.profile') }}" class="py-3">
-                                        <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
-                                        <span class="font-medium">My Profile</span>
+                                </div>
+                                @if (auth()->user()->isAdmin())
+                                    <x-mary-menu-item link="{{ route('dashboard') }}" class="py-3">
+                                        <x-mary-icon name="o-cog-6-tooth" class="me-3 w-5 h-5" />
+                                        <span class="font-medium">Admin Dashboard</span>
                                     </x-mary-menu-item>
-                                    <x-mary-menu-item class="py-3 text-error hover:bg-error/10">
-                                        <form method="POST" action="{{ route('logout') }}" class="w-full">
-                                            @csrf
-                                            <button type="submit" class="flex items-center w-full text-left">
-                                                <x-mary-icon name="o-arrow-right-on-rectangle" class="me-3 w-5 h-5" />
-                                                <span class="font-medium">Logout</span>
-                                            </button>
-                                        </form>
-                                    </x-mary-menu-item>
-                                </x-mary-menu>
-                            </x-mary-dropdown>
-                        @endif
+                                @endif
+                                <x-mary-menu-item link="{{ route('settings.profile') }}" class="py-3">
+                                    <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
+                                    <span class="font-medium">My Profile</span>
+                                </x-mary-menu-item>
+                                <x-mary-menu-item class="py-3 text-error hover:bg-error/10">
+                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                        @csrf
+                                        <button type="submit" class="flex items-center w-full text-left">
+                                            <x-mary-icon name="o-arrow-right-on-rectangle" class="me-3 w-5 h-5" />
+                                            <span class="font-medium">Logout</span>
+                                        </button>
+                                    </form>
+                                </x-mary-menu-item>
+                            </x-mary-menu>
+                        </x-mary-dropdown>
                     @else
                         <x-mary-button class="btn-primary" link="{{ route('login') }}" label="Login" />
                     @endauth
@@ -144,9 +146,9 @@
                         <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
+                        <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('gallery') }}">Gallery</x-mary-menu-item>
-                        <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
                         @auth
@@ -193,14 +195,14 @@
                             social engagement, and professional development.
                         </p>
                         <div class="flex space-x-2">
-                            <x-mary-button class="btn-ghost btn-square" link="#" aria-label="Facebook">
+                            <a class="btn-ghost btn-square" href="https://www.facebook.com/efsuuom" aria-label="Facebook">
                                 <x-mary-icon name="o-hand-thumb-up" class="h-5 w-5" />
                                 <span class="sr-only">Facebook</span>
-                            </x-mary-button>
-                            <x-mary-button class="btn-ghost btn-square" link="#" aria-label="Instagram">
-                                <x-mary-icon name="o-camera" class="h-5 w-5" />
-                                <span class="sr-only">Instagram</span>
-                            </x-mary-button>
+                            </a>
+                            <a class="btn-ghost btn-square" href="https://github.com/EFSU-UOM/EFSU_Website" aria-label="GitHub">
+                                <x-mary-icon name="s-code-bracket" class="h-5 w-5" />
+                                <span class="sr-only">GitHub</span>
+                            </a>
                         </div>
                     </div>
 
@@ -218,7 +220,6 @@
                         <h3 class="text-sm font-semibold tracking-wider uppercase mb-4 opacity-70">Connect</h3>
                         <x-mary-menu class="menu menu-vertical p-0">
                             <x-mary-menu-item link="{{ route('contact') }}">Contact Us</x-mary-menu-item>
-                            <x-mary-menu-item link="{{ route('alumni') }}">Alumni Network</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('gallery') }}">Photo Gallery</x-mary-menu-item>
                         </x-mary-menu>
                     </div>
@@ -229,6 +230,7 @@
                 <div class="text-center">
                     <p class="opacity-70 mb-2">
                         &copy; {{ date('Y') }} Engineering Faculty Students Union. All rights reserved.
+                        @if(Route::currentRouteName() === 'about')
                         <br>
                         Developed by
                         <a href="https://github.com/SuhasDissa" class="link link-hover font-medium" target="_blank"
@@ -241,6 +243,7 @@
                         This project is licensed under GPL v3.0 |
                         <a href="https://github.com/EFSU-UOM/EFSU_Website" class="link link-hover font-medium"
                             target="_blank" rel="noopener">View Source Code</a>
+                        @endif
                     </p>
                 </div>
             </div>

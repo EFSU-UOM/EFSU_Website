@@ -73,8 +73,8 @@ new class extends Component {
         $this->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:image,video,document',
-            'file' => 'required|file|max:10240',
+            'type' => 'required|in:image',
+            'file' => 'required|file|image|max:2048',
             'category' => 'required|string|max:255',
             'link' => 'nullable|url',
         ]);
@@ -89,7 +89,7 @@ new class extends Component {
         ];
 
         if ($this->file) {
-            $data['file_path'] = '/storage/' . $this->file->store('gallery', 'public');
+            $data['file_path'] = $this->file->store('gallery', 'public');
         }
 
         GalleryItem::create($data);
@@ -103,8 +103,8 @@ new class extends Component {
         $this->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:image,video,document',
-            'file' => 'nullable|file|max:10240',
+            'type' => 'required|in:image',
+            'file' => 'nullable|file|image|max:2048',
             'category' => 'required|string|max:255',
             'link' => 'nullable|url',
         ]);
@@ -119,11 +119,11 @@ new class extends Component {
             'link' => $this->link,
         ];
 
-        if ($this->file) {
+        if ($this->file && is_object($this->file)) {
             if ($item->file_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $item->file_path));
+                Storage::disk('public')->delete($item->file_path);
             }
-            $data['file_path'] = '/storage/' . $this->file->store('gallery', 'public');
+            $data['file_path'] = $this->file->store('gallery', 'public');
         }
 
         $item->update($data);
@@ -143,7 +143,7 @@ new class extends Component {
         $item = GalleryItem::findOrFail($this->deleteId);
         
         if ($item->file_path) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $item->file_path));
+            Storage::disk('public')->delete($item->file_path);
         }
 
         $item->delete();
@@ -295,13 +295,14 @@ new class extends Component {
                     <x-mary-textarea wire:model="description" label="Description" rows="3" />
                 </div>
                 <x-mary-select wire:model="type" label="Type" :options="[
-                    ['id' => 'image', 'name' => 'Image'],
-                    ['id' => 'video', 'name' => 'Video'],
-                    ['id' => 'document', 'name' => 'Document']
+                    ['id' => 'image', 'name' => 'Image']
                 ]" required />
                 <x-mary-input wire:model="link" label="Link (optional)" type="url" />
                 <div class="md:col-span-2">
-                    <x-mary-file wire:model="file" label="File" required />
+                    <x-mary-file wire:model="file" label="Image" required accept="image/*" crop-after-change>
+                        <img src="{{ $file ? $file->temporaryUrl() : '/placeholder.avif' }}" alt="Preview"
+                            class="w-full h-full object-cover rounded-lg" />
+                    </x-mary-file>
                 </div>
             </div>
             <x-slot:actions>
@@ -319,39 +320,15 @@ new class extends Component {
                     <x-mary-textarea wire:model="description" label="Description" rows="3" />
                 </div>
                 <x-mary-select wire:model="type" label="Type" :options="[
-                    ['id' => 'image', 'name' => 'Image'],
-                    ['id' => 'video', 'name' => 'Video'],
-                    ['id' => 'document', 'name' => 'Document']
+                    ['id' => 'image', 'name' => 'Image']
                 ]" required />
                 <x-mary-input wire:model="link" label="Link (optional)" type="url" />
                 
-                @if($currentFilePath)
-                    <div class="form-control md:col-span-2">
-                        <label class="label">
-                            <span class="label-text">Current File</span>
-                        </label>
-                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
-                            @if($type === 'image')
-                                <img src="{{ $currentFilePath }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
-                            @elseif($type === 'video')
-                                <video class="w-20 h-20 object-cover rounded-lg" controls>
-                                    <source src="{{ $currentFilePath }}" type="video/mp4">
-                                </video>
-                            @else
-                                <div class="w-20 h-20 bg-base-300 rounded-lg flex items-center justify-center">
-                                    <x-mary-icon name="o-document" class="w-8 h-8" />
-                                </div>
-                            @endif
-                            <div class="flex-1">
-                                <p class="text-sm font-medium">{{ basename($currentFilePath) }}</p>
-                                <p class="text-xs text-base-content/70">Click below to change file</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                
                 <div class="md:col-span-2">
-                    <x-mary-file wire:model="file" label="File (optional - leave blank to keep current)" />
+                    <x-mary-file wire:model="file" label="Image" accept="image/*" crop-after-change>
+                        <img src="{{ $file ? $file->temporaryUrl() : ($currentFilePath ? Storage::url($currentFilePath) : '/placeholder.avif') }}" alt="Preview"
+                        class="w-full h-full object-cover rounded-lg" />
+                    </x-mary-file>
                 </div>
             </div>
             <x-slot:actions>

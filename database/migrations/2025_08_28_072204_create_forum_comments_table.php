@@ -13,11 +13,18 @@ return new class extends Migration
     {
         Schema::create('forum_comments', function (Blueprint $table) {
             $table->id();
-            $table->longText('content');
-            $table->foreignId('forum_post_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained('forum_posts')->onDelete('cascade');
             $table->foreignId('parent_id')->nullable()->constrained('forum_comments')->onDelete('cascade');
+            $table->text('content');
+            $table->integer('upvotes')->default(0);
+            $table->integer('downvotes')->default(0);
+            $table->integer('score')->default(0);
+            $table->integer('depth')->default(0); // for easier querying of nested levels
             $table->timestamps();
+
+            $table->index(['post_id', 'parent_id']);
+            $table->index(['post_id', 'score']);
         });
     }
 
