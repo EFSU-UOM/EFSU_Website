@@ -114,9 +114,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $filename = time() . '_' . $this->image->getClientOriginalName();
-            $path = $this->image->storeAs('lost-and-found', $filename, 'public');
-            $data['image'] = $path;
+            $data['image'] = $this->image->store('lost-and-found', 'public');
         }
 
         LostAndFound::create($data);
@@ -210,15 +208,11 @@ new class extends Component {
             'status' => $this->editingStatus,
         ];
 
-        if ($this->image) {
-            // Delete old image if exists
+         if ($this->image) {
             if ($this->selectedItem->image) {
                 Storage::disk('public')->delete($this->selectedItem->image);
             }
-
-            $filename = time() . '_' . $this->image->getClientOriginalName();
-            $path = $this->image->storeAs('lost-and-found', $filename, 'public');
-            $data['image'] = $path;
+            $data['image'] = $this->image->store('lost-and-found', 'public');
         }
 
         $this->selectedItem->update($data);
@@ -612,8 +606,10 @@ new class extends Component {
                         <div>
                             <x-mary-file wire:model="image" label="Item Photo (Optional)" accept="image/*"
                                 crop-after-change>
-                                <img src="{{ Storage::url($selectedItem->image) }}"
-                                    class="h-32 w-32 object-cover rounded-lg">
+                                @if (!empty($selectedItem->image))
+                                    <img src="{{ Storage::url($selectedItem->image) }}"
+                                        class="h-32 w-32 object-cover rounded-lg">
+                                @endif
                             </x-mary-file>
                         </div>
                     </form>
