@@ -35,7 +35,6 @@
                         </x-slot:trigger>
                         <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('about') }}">About EFSU</x-mary-menu-item>
-                            <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
                         </x-mary-menu>
                     </x-mary-dropdown>
@@ -142,7 +141,6 @@
                         <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('gallery') }}">Gallery</x-mary-menu-item>
-                        <x-mary-menu-item link="{{ route('alumni') }}">Alumni</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
                         @auth
@@ -214,7 +212,6 @@
                         <h3 class="text-sm font-semibold tracking-wider uppercase mb-4 opacity-70">Connect</h3>
                         <x-mary-menu class="menu menu-vertical p-0">
                             <x-mary-menu-item link="{{ route('contact') }}">Contact Us</x-mary-menu-item>
-                            <x-mary-menu-item link="{{ route('alumni') }}">Alumni Network</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('gallery') }}">Photo Gallery</x-mary-menu-item>
                         </x-mary-menu>
                     </div>
