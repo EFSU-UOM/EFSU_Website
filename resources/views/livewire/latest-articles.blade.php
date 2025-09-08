@@ -54,7 +54,7 @@ $getBadgeColor = function($category) {
             @foreach($this->articles as $article)
                 <x-mary-card class="bg-base-100 border border-base-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                     <x-slot:figure>
-                        <img src="{{ $article->image_url }}"
+                        <img src="{{ Storage::url($article->image_url) }}"
                              alt="{{ $article->title }}" class="w-full h-48 object-cover">
                     </x-slot:figure>
                         <div class="flex items-center mb-3">
