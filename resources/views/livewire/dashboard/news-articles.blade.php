@@ -14,7 +14,7 @@ new class extends Component {
     public $showDeleteModal = false;
     public $deleteId = null;
     public $editId = null;
-    
+
     // Form fields
     public $title = '';
     public $excerpt = '';
@@ -33,8 +33,7 @@ new class extends Component {
 
     public function getNewsArticlesProperty()
     {
-        return NewsArticle::latest()
-            ->paginate(10);
+        return NewsArticle::latest()->paginate(10);
     }
 
     public function openCreateModal()
@@ -78,7 +77,7 @@ new class extends Component {
             'excerpt' => 'required|string|max:500',
             'content' => 'required|string',
             'category' => 'required|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'required|image|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
@@ -93,7 +92,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = '/storage/' . $this->image->store('news-articles', 'public');
+            $data['image_url'] = $this->image->store('news-articles', 'public');
         }
 
         NewsArticle::create($data);
@@ -127,9 +126,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($article->image_url) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $article->image_url));
+                Storage::disk('public')->delete($article->image_url);
             }
-            $data['image_url'] = '/storage/' . $this->image->store('news-articles', 'public');
+            $data['image_url'] = $this->image->store('news-articles', 'public');
         }
 
         $article->update($data);
@@ -147,13 +146,13 @@ new class extends Component {
     public function delete()
     {
         $article = NewsArticle::findOrFail($this->deleteId);
-        
+
         if ($article->image_url) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $article->image_url));
+            Storage::disk('public')->delete($article->image_url);
         }
 
         $article->delete();
-        
+
         $this->showDeleteModal = false;
         $this->deleteId = null;
         session()->flash('success', 'News article deleted successfully.');
@@ -188,7 +187,8 @@ new class extends Component {
 
         <!-- Flash Messages -->
         @if (session('success'))
-            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success" />
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle"
+                class="alert-success" />
         @endif
 
         <!-- Stats Cards -->
@@ -208,7 +208,8 @@ new class extends Component {
                         <x-mary-icon name="o-check-circle" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Published</div>
-                    <div class="stat-value text-success">{{ $this->newsArticles->where('is_published', true)->count() }}</div>
+                    <div class="stat-value text-success">{{ $this->newsArticles->where('is_published', true)->count() }}
+                    </div>
                 </div>
             </div>
             <div class="stats shadow">
@@ -217,7 +218,8 @@ new class extends Component {
                         <x-mary-icon name="o-star" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Featured</div>
-                    <div class="stat-value text-warning">{{ $this->newsArticles->where('is_featured', true)->count() }}</div>
+                    <div class="stat-value text-warning">{{ $this->newsArticles->where('is_featured', true)->count() }}
+                    </div>
                 </div>
             </div>
             <div class="stats shadow">
@@ -226,7 +228,8 @@ new class extends Component {
                         <x-mary-icon name="o-eye-slash" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">Draft</div>
-                    <div class="stat-value text-info">{{ $this->newsArticles->where('is_published', false)->count() }}</div>
+                    <div class="stat-value text-info">{{ $this->newsArticles->where('is_published', false)->count() }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,9 +243,9 @@ new class extends Component {
                     ['key' => 'is_published', 'label' => 'Status'],
                     ['key' => 'is_featured', 'label' => 'Featured'],
                     ['key' => 'published_at', 'label' => 'Published'],
-                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false]
+                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
                 ]" :rows="$this->newsArticles" with-pagination>
-                    
+
                     @scope('cell_title', $article)
                         <div>
                             <div class="font-semibold">{{ $article->title }}</div>
@@ -251,27 +254,22 @@ new class extends Component {
                     @endscope
 
                     @scope('cell_category', $article)
-                        <x-mary-badge 
-                            :value="$article->category" 
-                            class="badge-ghost"
-                        />
+                        <x-mary-badge :value="$article->category" class="badge-ghost" />
                     @endscope
 
                     @scope('cell_is_published', $article)
-                        <x-mary-badge 
-                            :value="$article->is_published ? 'Published' : 'Draft'" 
-                            class="{{ $article->is_published ? 'badge-success' : 'badge-warning' }}"
-                        />
+                        <x-mary-badge :value="$article->is_published ? 'Published' : 'Draft'"
+                            class="{{ $article->is_published ? 'badge-success' : 'badge-warning' }}" />
                     @endscope
 
                     @scope('cell_is_featured', $article)
-                        @if($article->is_featured)
+                        @if ($article->is_featured)
                             <x-mary-icon name="o-star" class="w-5 h-5 text-warning" />
                         @endif
                     @endscope
 
                     @scope('cell_published_at', $article)
-                        @if($article->published_at)
+                        @if ($article->published_at)
                             <span class="text-base-content">
                                 {{ $article->published_at->format('M j, Y') }}
                             </span>
@@ -282,18 +280,10 @@ new class extends Component {
 
                     @scope('cell_actions', $article)
                         <div class="flex gap-2">
-                            <x-mary-button 
-                                icon="o-pencil" 
-                                size="xs" 
-                                class="btn-ghost"
-                                wire:click="openEditModal({{ $article->id }})"
-                            />
-                            <x-mary-button 
-                                icon="o-trash" 
-                                size="xs" 
-                                class="btn-ghost text-error"
-                                wire:click="confirmDelete({{ $article->id }})"
-                            />
+                            <x-mary-button icon="o-pencil" size="xs" class="btn-ghost"
+                                wire:click="openEditModal({{ $article->id }})" />
+                            <x-mary-button icon="o-trash" size="xs" class="btn-ghost text-error"
+                                wire:click="confirmDelete({{ $article->id }})" />
                         </div>
                     @endscope
                 </x-mary-table>
@@ -303,70 +293,61 @@ new class extends Component {
 
     <!-- Create Modal -->
     <x-mary-modal wire:model="showCreateModal" title="Create News Article" class="backdrop-blur">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-input wire:model="category" label="Category" required />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
-                </div>
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="content" label="Content" rows="6" required />
-                </div>
-                <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
-                <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
-                </div>
-                <div class="flex gap-4 md:col-span-2">
-                    <x-mary-checkbox wire:model="is_published" label="Published" />
-                    <x-mary-checkbox wire:model="is_featured" label="Featured" />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-mary-input wire:model="title" label="Title" required />
+            <x-mary-input wire:model="category" label="Category" required />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
             </div>
-            <x-slot:actions>
-                <x-mary-button label="Cancel" wire:click="closeCreateModal" />
-                <x-mary-button label="Create" wire:click="store" class="btn-primary" />
-            </x-slot:actions>
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="content" label="Content" rows="6" required />
+            </div>
+            <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
+            <div class="md:col-span-2">
+                <x-mary-file wire:model="image" label="Image" accept="image/*" crop-after-change>
+                    <img src="{{ $image ? $image->temporaryUrl() : '/placeholder.avif' }}" alt="Preview"
+                        class="w-full h-full object-cover rounded-lg" />
+                </x-mary-file>
+            </div>
+            <div class="flex gap-4 md:col-span-2">
+                <x-mary-checkbox wire:model="is_published" label="Published" />
+                <x-mary-checkbox wire:model="is_featured" label="Featured" />
+            </div>
+        </div>
+        <x-slot:actions>
+            <x-mary-button label="Cancel" wire:click="closeCreateModal" />
+            <x-mary-button label="Create" wire:click="store" class="btn-primary" />
+        </x-slot:actions>
     </x-mary-modal>
 
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit News Article" class="backdrop-blur">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-mary-input wire:model="title" label="Title" required />
-                <x-mary-input wire:model="category" label="Category" required />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
-                </div>
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="content" label="Content" rows="6" required />
-                </div>
-                <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
-                
-                @if($currentImageUrl)
-                    <div class="form-control md:col-span-2">
-                        <label class="label">
-                            <span class="label-text">Current Image</span>
-                        </label>
-                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
-                            <img src="{{ $currentImageUrl }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
-                            <div class="flex-1">
-                                <p class="text-sm font-medium">{{ basename($currentImageUrl) }}</p>
-                                <p class="text-xs text-base-content/70">Click below to change image</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                
-                <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional - leave blank to keep current)" accept="image/*" />
-                </div>
-                <div class="flex gap-4 md:col-span-2">
-                    <x-mary-checkbox wire:model="is_published" label="Published" />
-                    <x-mary-checkbox wire:model="is_featured" label="Featured" />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-mary-input wire:model="title" label="Title" required />
+            <x-mary-input wire:model="category" label="Category" required />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="excerpt" label="Excerpt" rows="3" required />
             </div>
-            <x-slot:actions>
-                <x-mary-button label="Cancel" wire:click="closeEditModal" />
-                <x-mary-button label="Update" wire:click="update" class="btn-primary" />
-            </x-slot:actions>
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="content" label="Content" rows="6" required />
+            </div>
+            <x-mary-datetime wire:model="published_at" label="Published At (optional)" />
+
+            <div class="md:col-span-2">
+                <x-mary-file wire:model="image" label="Image" accept="image/*" crop-after-change>
+                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}"
+                        alt="Preview" class="w-full h-full object-cover rounded-lg" />
+                </x-mary-file>
+            </div>
+            <div class="flex gap-4 md:col-span-2">
+                <x-mary-checkbox wire:model="is_published" label="Published" />
+                <x-mary-checkbox wire:model="is_featured" label="Featured" />
+            </div>
+        </div>
+        <x-slot:actions>
+            <x-mary-button label="Cancel" wire:click="closeEditModal" />
+            <x-mary-button label="Update" wire:click="update" class="btn-primary" />
+        </x-slot:actions>
     </x-mary-modal>
 
     <!-- Delete Confirmation Modal -->

@@ -77,7 +77,7 @@ $addToCart = function ($merchId) {
             @forelse($this->filteredMerch as $item)
                 <x-mary-card class="shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-base-100 max-w-sm mx-auto">
                     <x-slot name="figure">
-                        <img src="{{ $item->image_url ?: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' }}"
+                        <img src="{{ $item->image_url ? Storage::url($item->image_url) : '/placeholder.avif' }}"
                             alt="{{ $item->name }}" class="w-full h-48 object-cover">
                     </x-slot>
 
