@@ -3,8 +3,7 @@
 
 <head>
     @include('partials.head')
-        <!-- Livewire styles -->
-    @livewireStyles
+
 </head>
 
 <body class="min-h-screen bg-base-100 text-base-content font-sans antialiased">
