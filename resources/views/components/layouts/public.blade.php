@@ -65,7 +65,7 @@
                         <x-mary-menu class="menu menu-md">
                             <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                              <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
-                            <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
+                       
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
@@ -144,7 +144,7 @@
                         <x-mary-menu-item link="{{ route('news') }}">News</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
-                        <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
+                   
                         <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
