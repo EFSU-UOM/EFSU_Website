@@ -13,15 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'sangeeth@uom.lk',
-            'contact' => '0771234567',
-            'password' => '1',
-            'access_level' => 0
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'sangeeth@uom.lk',
+        //     'contact' => '0771234567',
+        //     'password' => '1',
+        //     'access_level' => 0
+        // ]);
 
         $this->call([
             GalleryItemSeeder::class,
