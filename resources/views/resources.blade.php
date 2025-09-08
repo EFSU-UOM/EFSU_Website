@@ -12,16 +12,7 @@
     <!-- Resource Categories -->
     <section class="bg-base-200 py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
-                    <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Course Materials</h3>
-                    <p class="text-base-content/70 text-sm">Lecture notes, assignments, and study guides</p>
-                </x-mary-card>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
 
                 <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
                     <div class="w-16 h-16 bg-info/10 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -43,16 +34,6 @@
                     <p class="text-base-content/70 text-sm">Links to library, counseling, and support services</p>
                 </x-mary-card>
 
-                <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
-                    <div class="w-16 h-16 bg-warning/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Tools</h3>
-                    <p class="text-base-content/70 text-sm">Software, calculators, and useful utilities</p>
-                </x-mary-card>
             </div>
 
             <!-- Search Bar -->
@@ -62,66 +43,6 @@
         </div>
     </section>
 
-    <!-- Course Materials Section -->
-    <section class="bg-base-100 py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-base-content mb-8">Course Materials</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Course Material Cards -->
-                <x-mary-card class="bg-base-200 rounded-xl p-6 hover:bg-base-300 transition-colors">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <x-mary-badge label="PDF" color="error" />
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Data Structures & Algorithms</h3>
-                    <p class="text-base-content/70 text-sm mb-4">Complete lecture notes and practice problems for CS301</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/60">Updated: March 2024</span>
-                        <x-mary-button label="Download" color="error" icon="o-arrow-down-tray" href="#" class="btn-sm" />
-                    </div>
-                </x-mary-card>
-
-                <x-mary-card class="bg-base-200 rounded-xl p-6 hover:bg-base-300 transition-colors">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
-                        <x-mary-badge label="Excel" color="success" />
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Engineering Mathematics</h3>
-                    <p class="text-base-content/70 text-sm mb-4">Formula sheets and solved examples for MATH201</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/60">Updated: March 2024</span>
-                        <x-mary-button label="Download" color="success" icon="o-arrow-down-tray" href="#" class="btn-sm" />
-                    </div>
-                </x-mary-card>
-
-                <x-mary-card class="bg-base-200 rounded-xl p-6 hover:bg-base-300 transition-colors">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </div>
-                        <x-mary-badge label="ZIP" color="warning" />
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Circuit Analysis Lab</h3>
-                    <p class="text-base-content/70 text-sm mb-4">Lab manuals and simulation files for EE102</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-base-content/60">Updated: February 2024</span>
-                        <x-mary-button label="Download" color="warning" icon="o-arrow-down-tray" href="#" class="btn-sm" />
-                    </div>
-                </x-mary-card>
-            </div>
-        </div>
-    </section>
 
     <!-- Student Services Section -->
     <section class="bg-base-200 py-16">
@@ -138,7 +59,9 @@
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">University Library</h3>
                     <p class="text-base-content/70 text-sm">Access digital resources, book catalog, and study spaces</p>
-                    <x-mary-button label="Visit Library →" color="primary" href="#" variant="link" class="mt-2" />
+                    <a href="https://uom.lk/lib" target="_blank" class="inline-block mt-2 px-4 py-2 text-primary hover:text-primary-focus text-sm font-medium transition-colors">
+                        Visit Library →
+                    </a>
                 </x-mary-card>
 
                 <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
@@ -149,7 +72,9 @@
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">Student Counseling</h3>
                     <p class="text-base-content/70 text-sm">Mental health support and academic counseling services</p>
-                    <x-mary-button label="Get Support →" color="success" href="#" variant="link" class="mt-2" />
+                    <a href="https://uom.lk/scu" target="_blank" class="inline-block mt-2 px-4 py-2 text-success hover:text-success-focus text-sm font-medium transition-colors">
+                        Get Support →
+                    </a>
                 </x-mary-card>
 
                 <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
@@ -160,19 +85,12 @@
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">Career Services</h3>
                     <p class="text-base-content/70 text-sm">Job placement, internships, and career guidance</p>
-                    <x-mary-button label="Learn More →" color="secondary" href="#" variant="link" class="mt-2" />
+                    <a href="https://uom.lk/efac/career" target="_blank" class="inline-block mt-2 px-4 py-2 text-secondary hover:text-secondary-focus text-sm font-medium transition-colors">
+                        Learn More →
+                    </a>
                 </x-mary-card>
 
-                <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div class="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Financial Aid</h3>
-                    <p class="text-base-content/70 text-sm">Scholarships, grants, and financial assistance programs</p>
-                    <x-mary-button label="Apply Now →" color="warning" href="#" variant="link" class="mt-2" />
-                </x-mary-card>
+                
 
                 <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center mb-4">
@@ -182,7 +100,9 @@
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">Academic Records</h3>
                     <p class="text-base-content/70 text-sm">Transcripts, grades, and academic documentation</p>
-                    <x-mary-button label="Access Portal →" color="error" href="#" variant="link" class="mt-2" />
+                    <a href="https://lms.uom.lk" target="_blank" class="inline-block mt-2 px-4 py-2 text-error hover:text-error-focus text-sm font-medium transition-colors">
+                        Access Portal →
+                    </a>
                 </x-mary-card>
 
                 <x-mary-card class="bg-base-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
@@ -193,14 +113,16 @@
                     </div>
                     <h3 class="text-lg font-semibold text-base-content mb-2">Research Opportunities</h3>
                     <p class="text-base-content/70 text-sm">Undergraduate research programs and faculty projects</p>
-                    <x-mary-button label="Explore →" color="info" href="#" variant="link" class="mt-2" />
+                    <a href="https://uom.lk/eru" target="_blank" class="inline-block mt-2 px-4 py-2 text-info hover:text-info-focus text-sm font-medium transition-colors">
+                        Explore →
+                    </a>
                 </x-mary-card>
             </div>
         </div>
     </section>
 
     <!-- Tools & Software Section -->
-    <section class="bg-base-100 py-16">
+    <section class="bg-base-100 py-16" style="display: none;">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-base-content mb-8">Useful Tools & Software</h2>
             
