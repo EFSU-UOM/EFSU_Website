@@ -15,16 +15,16 @@ new class extends Component {
     public $showDeleteModal = false;
     public $deleteId = null;
     public $editId = null;
-    
+
     // Form fields
     public $name = '';
     public $description = '';
     public $category = '';
     public $price = '';
     public $image = null;
+    public $currentImageUrl = null;
     public $stock_quantity = '';
     public $is_available = true;
-    public $currentImageUrl = null;
 
     public function mount()
     {
@@ -33,8 +33,7 @@ new class extends Component {
 
     public function getMerchProperty()
     {
-        return Merch::latest()
-            ->paginate(10);
+        return Merch::latest()->paginate(10);
     }
 
     public function openCreateModal()
@@ -55,7 +54,7 @@ new class extends Component {
         $this->editId = $id;
         $this->name = $merch->name;
         $this->description = $merch->description;
-        $this->category = $merch->category;
+        $this->category = $merch->category->value;
         $this->price = $merch->price;
         $this->stock_quantity = $merch->stock_quantity;
         $this->is_available = $merch->is_available;
@@ -77,7 +76,7 @@ new class extends Component {
             'description' => 'required|string',
             'category' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'required|image|max:2048',
             'stock_quantity' => 'required|integer|min:0',
         ]);
 
@@ -91,7 +90,7 @@ new class extends Component {
         ];
 
         if ($this->image) {
-            $data['image_url'] = '/storage/' . $this->image->store('merch', 'public');
+            $data['image_url'] = $this->image->store('merch', 'public');
         }
 
         Merch::create($data);
@@ -124,9 +123,9 @@ new class extends Component {
 
         if ($this->image) {
             if ($merch->image_url) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $merch->image_url));
+                Storage::disk('public')->delete($merch->image_url);
             }
-            $data['image_url'] = '/storage/' . $this->image->store('merch', 'public');
+            $data['image_url'] = $this->image->store('merch', 'public');
         }
 
         $merch->update($data);
@@ -144,13 +143,13 @@ new class extends Component {
     public function delete()
     {
         $merch = Merch::findOrFail($this->deleteId);
-        
+
         if ($merch->image_url) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $merch->image_url));
+            Storage::disk('public')->delete($merch->image_url);
         }
 
         $merch->delete();
-        
+
         $this->showDeleteModal = false;
         $this->deleteId = null;
         session()->flash('success', 'Merch item deleted successfully.');
@@ -163,9 +162,9 @@ new class extends Component {
         $this->category = '';
         $this->price = '';
         $this->image = null;
+        $this->currentImageUrl = null;
         $this->stock_quantity = '';
         $this->is_available = true;
-        $this->currentImageUrl = null;
     }
 }; ?>
 
@@ -184,7 +183,8 @@ new class extends Component {
 
         <!-- Flash Messages -->
         @if (session('success'))
-            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success" />
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle"
+                class="alert-success" />
         @endif
 
         <!-- Stats Cards -->
@@ -213,7 +213,8 @@ new class extends Component {
                         <x-mary-icon name="o-archive-box" class="w-8 h-8" />
                     </div>
                     <div class="stat-title">In Stock</div>
-                    <div class="stat-value text-warning">{{ $this->merch->where('stock_quantity', '>', 0)->count() }}</div>
+                    <div class="stat-value text-warning">{{ $this->merch->where('stock_quantity', '>', 0)->count() }}
+                    </div>
                 </div>
             </div>
             <div class="stats shadow">
@@ -236,21 +237,19 @@ new class extends Component {
                     ['key' => 'price', 'label' => 'Price'],
                     ['key' => 'stock_quantity', 'label' => 'Stock'],
                     ['key' => 'is_available', 'label' => 'Status'],
-                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false]
+                    ['key' => 'actions', 'label' => 'Actions', 'sortable' => false],
                 ]" :rows="$this->merch" with-pagination>
-                    
+
                     @scope('cell_name', $merch)
                         <div>
                             <div class="font-semibold">{{ $merch->name }}</div>
-                            <div class="text-sm opacity-70 truncate max-w-xs">{{ Str::limit($merch->description, 60) }}</div>
+                            <div class="text-sm opacity-70 truncate max-w-xs">{{ Str::limit($merch->description, 60) }}
+                            </div>
                         </div>
                     @endscope
 
                     @scope('cell_category', $merch)
-                        <x-mary-badge 
-                            :value="$merch->category" 
-                            class="badge-ghost"
-                        />
+                        <x-mary-badge :value="$merch->category->label()" class="badge-ghost" />
                     @endscope
 
                     @scope('cell_price', $merch)
@@ -264,26 +263,16 @@ new class extends Component {
                     @endscope
 
                     @scope('cell_is_available', $merch)
-                        <x-mary-badge 
-                            :value="$merch->is_available ? 'Available' : 'Unavailable'" 
-                            class="{{ $merch->is_available ? 'badge-success' : 'badge-error' }}"
-                        />
+                        <x-mary-badge :value="$merch->is_available ? 'Available' : 'Unavailable'"
+                            class="{{ $merch->is_available ? 'badge-success' : 'badge-error' }}" />
                     @endscope
 
                     @scope('cell_actions', $merch)
                         <div class="flex gap-2">
-                            <x-mary-button 
-                                icon="o-pencil" 
-                                size="xs" 
-                                class="btn-ghost"
-                                wire:click="openEditModal({{ $merch->id }})"
-                            />
-                            <x-mary-button 
-                                icon="o-trash" 
-                                size="xs" 
-                                class="btn-ghost text-error"
-                                wire:click="confirmDelete({{ $merch->id }})"
-                            />
+                            <x-mary-button icon="o-pencil" size="xs" class="btn-ghost"
+                                wire:click="openEditModal({{ $merch->id }})" />
+                            <x-mary-button icon="o-trash" size="xs" class="btn-ghost text-error"
+                                wire:click="confirmDelete({{ $merch->id }})" />
                         </div>
                     @endscope
                 </x-mary-table>
@@ -293,64 +282,60 @@ new class extends Component {
 
     <!-- Create Modal -->
     <x-mary-modal wire:model="showCreateModal" title="Create Merch Item" class="backdrop-blur">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])->toArray()" required />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="description" label="Description" rows="4" required />
-                </div>
-                <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
-                <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
-                <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" />
-                </div>
-                <div class="md:col-span-2">
-                    <x-mary-checkbox wire:model="is_available" label="Available" />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-mary-input wire:model="name" label="Name" required />
+            <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())
+                ->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])
+                ->toArray()" required />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="description" label="Description" rows="4" required />
             </div>
-            <x-slot:actions>
-                <x-mary-button label="Cancel" wire:click="closeCreateModal" />
-                <x-mary-button label="Create" wire:click="store" class="btn-primary" />
-            </x-slot:actions>
+            <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
+            <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
+            <div class="md:col-span-2">
+                <x-mary-file wire:model="image" label="Image (optional)" accept="image/*" crop-after-change>
+                    <img src="{{ $image ? $image->temporaryUrl() : '/placeholder.avif' }}" alt="Preview"
+                        class="w-full h-full object-cover rounded-lg" />
+                </x-mary-file>
+            </div>
+            <div class="md:col-span-2">
+                <x-mary-checkbox wire:model="is_available" label="Available" />
+            </div>
+        </div>
+        <x-slot:actions>
+            <x-mary-button label="Cancel" wire:click="closeCreateModal" />
+            <x-mary-button label="Create" wire:click="store" class="btn-primary" />
+        </x-slot:actions>
     </x-mary-modal>
 
     <!-- Edit Modal -->
     <x-mary-modal wire:model="showEditModal" title="Edit Merch Item" class="backdrop-blur">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-mary-input wire:model="name" label="Name" required />
-                <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])->toArray()" required />
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="description" label="Description" rows="4" required />
-                </div>
-                <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
-                <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
-                
-                @if($currentImageUrl)
-                    <div class="form-control md:col-span-2">
-                        <label class="label">
-                            <span class="label-text">Current Image</span>
-                        </label>
-                        <div class="flex flex-col items-center gap-4 p-4 bg-base-200 rounded-lg">
-                            <img src="{{ $currentImageUrl }}" alt="Current image" class="w-full h-full object-cover rounded-lg">
-                            <div class="flex-1">
-                                <p class="text-sm font-medium">{{ basename($currentImageUrl) }}</p>
-                                <p class="text-xs text-base-content/70">Click below to change image</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                
-                <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Image (optional - leave blank to keep current)" accept="image/*" />
-                </div>
-                <div class="md:col-span-2">
-                    <x-mary-checkbox wire:model="is_available" label="Available" />
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-mary-input wire:model="name" label="Name" required />
+            <x-mary-select wire:model="category" label="Category" :options="collect(App\Enums\MerchType::cases())
+                ->map(fn($case) => ['name' => $case->label(), 'id' => $case->value])
+                ->toArray()" required />
+            <div class="md:col-span-2">
+                <x-mary-textarea wire:model="description" label="Description" rows="4" required />
             </div>
-            <x-slot:actions>
-                <x-mary-button label="Cancel" wire:click="closeEditModal" />
-                <x-mary-button label="Update" wire:click="update" class="btn-primary" />
-            </x-slot:actions>
+            <x-mary-input wire:model="price" label="Price" type="number" step="0.01" required />
+            <x-mary-input wire:model="stock_quantity" label="Stock Quantity" type="number" required />
+
+            <div class="md:col-span-2">
+                <x-mary-file wire:model="image" label="Image"
+                    accept="image/*" crop-after-change>
+                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}"
+                        alt="Preview" class="w-full h-full object-cover rounded-lg" />
+            </x-mary-file>
+            </div>
+            <div class="md:col-span-2">
+                <x-mary-checkbox wire:model="is_available" label="Available" />
+            </div>
+        </div>
+        <x-slot:actions>
+            <x-mary-button label="Cancel" wire:click="closeEditModal" />
+            <x-mary-button label="Update" wire:click="update" class="btn-primary" />
+        </x-slot:actions>
     </x-mary-modal>
 
     <!-- Delete Confirmation Modal -->
