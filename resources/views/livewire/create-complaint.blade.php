@@ -1,43 +1,33 @@
 <?php
 
-namespace App\Http\Controllers;
-
 use App\Models\Complaint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Volt\Component;
 
-class ComplaintController extends Controller
-{
-    public function __construct()
-    {
-        $this->middleware('auth'); // only logged-in users
-    }
+new class extends Component {
+    public string $category = '';
+    public string $complaint_text = '';
 
-    public function create()
-    {
-        return view('components.auth-complaints');
-    }
+    protected array $rules = [
+        'category' => 'required|string|max:100',
+        'complaint_text' => 'required|string|min:10',
+    ];
 
-    public function store(Request $request)
+    public function submit()
     {
-        $request->validate([
-            'category' => 'required|string|max:100',
-            'complaint_text' => 'required|string',
-        ]);
+        $this->validate();
 
         Complaint::create([
             'user_id' => Auth::id(),
-            'category' => $request->category,
-            'complaint_text' => $request->complaint_text,
+            'category' => $this->category,
+            'complaint_text' => $this->complaint_text,
         ]);
 
-        return redirect()->back()->with('success', 'Your complaint has been submitted!');
+        session()->flash('success', 'Your complaint has been submitted!');
+        $this->reset();
     }
-}
+};
 ?>
-
-
-
 
 <div class="container mx-auto px-4 py-8 md:py-12">
 

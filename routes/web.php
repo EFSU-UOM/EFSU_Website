@@ -65,9 +65,10 @@ Route::get('/store', function () {
 
 
 
-Route::middleware('auth')->get('/complaints', function () {
-    return view('complaints'); // your Blade page
-})->name('complaints');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Volt::route('/complaints', 'create-complaint')
+        ->name('complaints');
+});
 
 Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
 
