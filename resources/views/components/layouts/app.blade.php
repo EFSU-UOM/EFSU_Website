@@ -1,5 +1,5 @@
 <x-layouts.public :title="$title ?? null">
-    <div class="p-2">
+    <div class="p-16">
         {{ $slot }}
     </div>
 </x-layouts.public>

@@ -1,7 +1,3 @@
 <x-layouts.public>
-
-  
-        @livewire('actions.create-complaint')
-
-
+        <livewire:create-complaint />
 </x-layouts.public>
