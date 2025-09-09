@@ -86,6 +86,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('payment', ['orderId' => $orderId]);
     })->name('payment');
 
+    Route::get('/complaints', function () {
+        return view('complaints');
+    })->name('complaints');
 });
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {
