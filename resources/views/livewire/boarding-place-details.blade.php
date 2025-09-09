@@ -21,7 +21,7 @@ new class extends Component {
     public $longitude = '';
     public $distance_to_university = '';
     public $price = '';
-    public $price_period = '';
+    public $payment_method = '';
     public $capacity = '';
     public $contact_phone = '';
     public $contact_email = '';
@@ -38,7 +38,7 @@ new class extends Component {
         'longitude' => 'nullable|numeric|between:-180,180',
         'distance_to_university' => 'nullable|numeric|min:0',
         'price' => 'nullable|numeric|min:0',
-        'price_period' => 'nullable|string|max:255',
+        'payment_method' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
         'contact_phone' => 'nullable|string|max:255',
         'contact_email' => 'nullable|email|max:255',
@@ -49,7 +49,7 @@ new class extends Component {
     {
         $this->boardingPlace = BoardingPlace::with('user', 'topLevelComments.user', 'topLevelComments.replies.user')->findOrFail($id);
         $this->boardingPlace->incrementViews();
-        $this->library = $this->boardingPlace->images;
+        $this->library = $this->boardingPlace->images ?: new Collection();
     }
 
     public function enableEdit()
@@ -66,7 +66,7 @@ new class extends Component {
         $this->longitude = $this->boardingPlace->longitude;
         $this->distance_to_university = $this->boardingPlace->distance_to_university;
         $this->price = $this->boardingPlace->price;
-        $this->price_period = $this->boardingPlace->price_period;
+        $this->payment_method = $this->boardingPlace->payment_method;
         $this->capacity = $this->boardingPlace->capacity;
         $this->contact_phone = $this->boardingPlace->contact_phone;
         $this->contact_email = $this->boardingPlace->contact_email;
@@ -78,7 +78,7 @@ new class extends Component {
         $this->files = [];
         
         // Safely restore images
-        $this->library = $this->boardingPlace->images;
+        $this->library = $this->boardingPlace->images ?: new Collection();
         
         $this->resetValidation();
     }
@@ -99,7 +99,7 @@ new class extends Component {
             'longitude' => $this->longitude ?: null,
             'distance_to_university' => $this->distance_to_university ?: null,
             'price' => $this->price ?: null,
-            'price_period' => $this->price_period ?: null,
+            'payment_method' => $this->payment_method ?: null,
             'capacity' => $this->capacity ?: null,
             'contact_phone' => $this->contact_phone ?: null,
             'contact_email' => $this->contact_email ?: null,
@@ -121,7 +121,7 @@ new class extends Component {
         $this->boardingPlace->refresh();
         
         // Safely refresh images
-        $this->library = $this->boardingPlace->images;
+        $this->library = $this->boardingPlace->images ?: new Collection();
         $this->editMode = false;
         $this->files = [];
 
@@ -203,8 +203,8 @@ new class extends Component {
                             <x-mary-input wire:model="location" label="Location" required />
 
                             <!-- Distance -->
-                            <x-mary-input wire:model="distance_to_university" label="Distance (km)" type="number"
-                                step="0.1" />
+                            <x-mary-input wire:model="distance_to_university" label="Distance (m)" type="number"
+                                step="1" />
 
                             <!-- Coordinates -->
                             <x-mary-input wire:model="latitude" label="Latitude" type="number" step="any" />
@@ -212,7 +212,7 @@ new class extends Component {
 
                             <!-- Price -->
                             <x-mary-input wire:model="price" label="Price" type="number" step="0.01" />
-                            <x-mary-select wire:model="price_period" label="Price Period">
+                            <x-mary-select wire:model="payment_method" label="Price Period">
                                 <option value="">Not specified</option>
                                 <option value="per month">Per Month</option>
                                 <option value="per semester">Per Semester</option>
@@ -228,7 +228,7 @@ new class extends Component {
 
                             <!-- Images -->
                              <div class="md:col-span-2">
-                                <x-mary-image-library wire:model="files" wire:library="library" :preview="$library ? collect($library) : new Collection()"
+                                <x-mary-image-library wire:model="files" wire:library="library" :preview="$library"
                                     label="Boarding images" />
                             </div> 
                         </div>

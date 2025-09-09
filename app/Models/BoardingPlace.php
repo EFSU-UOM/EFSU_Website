@@ -92,6 +92,6 @@ class BoardingPlace extends Model
             return 'Distance not specified';
         }
         
-        return number_format($this->distance_to_university, 1) . ' km from university';
+        return number_format($this->distance_to_university, 1) . ' m from university';
     }
 }

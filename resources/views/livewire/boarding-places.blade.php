@@ -21,7 +21,7 @@ new class extends Component {
     public $longitude = '';
     public $distance_to_university = '';
     public $price = '';
-    public $price_period = '';
+    public $payment_method = '';
     public $capacity = '';
     public $contact_phone = '';
     public $contact_email = '';
@@ -45,11 +45,12 @@ new class extends Component {
         'longitude' => 'nullable|numeric|between:-180,180',
         'distance_to_university' => 'nullable|numeric|min:0',
         'price' => 'nullable|numeric|min:0',
-        'price_period' => 'nullable|string|max:255',
+        'payment_method' => 'nullable|string|max:255',
         'capacity' => 'nullable|integer|min:1',
         'contact_phone' => 'nullable|string|max:255',
         'contact_email' => 'nullable|email|max:255',
-        'files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'files' => 'required|array|min:1',
+        'files.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
     public function mount()
@@ -64,7 +65,7 @@ new class extends Component {
 
     public function getPlacesProperty()
     {
-        $query = BoardingPlace::with('user')->active();
+        $query = BoardingPlace::with('user')->withCount('comments')->active();
 
         if (!empty($this->search)) {
             $query->where(function ($q) {
@@ -123,7 +124,7 @@ new class extends Component {
             'longitude' => $this->longitude ?: null,
             'distance_to_university' => $this->distance_to_university ?: null,
             'price' => $this->price ?: null,
-            'price_period' => $this->price_period ?: null,
+            'payment_method' => $this->payment_method ?: null,
             'capacity' => $this->capacity ?: null,
             'contact_phone' => $this->contact_phone ?: null,
             'contact_email' => $this->contact_email ?: null,
@@ -172,7 +173,7 @@ new class extends Component {
 
     private function resetForm()
     {
-        $this->reset(['title', 'description', 'location', 'latitude', 'longitude', 'distance_to_university', 'price', 'price_period', 'capacity', 'contact_phone', 'contact_email', 'files']);
+        $this->reset(['title', 'description', 'location', 'latitude', 'longitude', 'distance_to_university', 'price', 'payment_method', 'capacity', 'contact_phone', 'contact_email', 'files']);
         $this->library = new Collection();
     }
 
@@ -264,7 +265,7 @@ new class extends Component {
                 @enderror
 
                 <!-- Distance to University -->
-                <x-mary-input wire:model="distance_to_university" label="Distance to University (km)" type="number"
+                <x-mary-input wire:model="distance_to_university" label="Distance to University (m)" type="number"
                     step="0.1" />
                 @error('distance_to_university')
                     <span class="text-error text-sm">{{ $message }}</span>
@@ -289,7 +290,7 @@ new class extends Component {
                     <span class="text-error text-sm">{{ $message }}</span>
                 @enderror
 
-                <x-mary-select wire:model="price_period" label="Payment Method" placeholder="Select payment method"
+                <x-mary-select wire:model="payment_method" label="Payment Method" placeholder="Select payment method"
                     :options="[
                         ['name' => 'Per Person', 'id' => 'per_person'],
                         ['name' => 'Per Room', 'id' => 'per_room'],
@@ -318,7 +319,10 @@ new class extends Component {
                 <!-- Image Upload -->
                 <div class="md:col-span-2">
                     <x-mary-image-library wire:model="files" wire:library="library" :preview="$library"
-                        label="Boarding images" />
+                        label="Boarding images" required/>
+                    @error('files')
+                        <span class="text-error text-sm">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
         </div>
@@ -338,7 +342,7 @@ new class extends Component {
                     icon="o-magnifying-glass" />
 
                 <!-- Max Distance -->
-                <x-mary-input wire:model.live.debounce.300ms="maxDistance" placeholder="Max distance (km)"
+                <x-mary-input wire:model.live.debounce.300ms="maxDistance" placeholder="Max distance (m)"
                     type="number" />
 
                 <!-- Price Range -->
@@ -414,11 +418,17 @@ new class extends Component {
                                 @endif
                             </div>
 
-                            <div class="flex items-center text-base-content/60 text-sm mb-4">
-                                <x-mary-icon name="o-user" class="w-4 h-4 mr-1" />
-                                {{ $place->user->name }}
-                                <span class="mx-2">•</span>
-                                {{ $place->created_at->diffForHumans() }}
+                            <div class="flex items-center justify-between text-base-content/60 text-sm mb-4">
+                                <div class="flex items-center">
+                                    <x-mary-icon name="o-user" class="w-4 h-4 mr-1" />
+                                    {{ $place->user->name }}
+                                    <span class="mx-2">•</span>
+                                    {{ $place->created_at->diffForHumans() }}
+                                </div>
+                                <div class="flex items-center">
+                                    <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4 mr-1" />
+                                    {{ $place->comments_count }}
+                                </div>
                             </div>
 
                             <!-- Actions -->
