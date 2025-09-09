@@ -421,7 +421,8 @@ new class extends Component {
             @if ($this->items->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach ($this->items as $item)
-                        <x-mary-card class="bg-base-100 hover:shadow-lg transition-shadow">
+                        <div class="bg-base-100 hover:shadow-lg transition-shadow rounded-lg p-4 cursor-pointer" 
+                             wire:click="showDetails({{ $item->id }})">
                             <!-- Image -->
                             @if ($item->image)
                                 <div class="h-48 bg-base-200 rounded-lg overflow-hidden mb-4">
@@ -466,16 +467,12 @@ new class extends Component {
                             </div>
 
                             <!-- Actions -->
-                            <div class="flex gap-2">
-                                <x-mary-button wire:click="showDetails({{ $item->id }})"
-                                    class="btn-primary btn-sm flex-1">
-                                    View Details
-                                </x-mary-button>
-
-                                @auth
-                                    @if ($item->user_id === auth()->id())
+                            @auth
+                                @if ($item->user_id === auth()->id())
+                                    <div class="flex justify-end">
                                         <div class="dropdown dropdown-end">
-                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm">
+                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm" 
+                                                           onclick="event.stopPropagation()">
                                                 <x-mary-icon name="o-ellipsis-vertical" class="w-4 h-4" />
                                             </x-mary-button>
                                             <ul tabindex="0"
@@ -500,10 +497,10 @@ new class extends Component {
                                                         class="text-error">Delete</a></li>
                                             </ul>
                                         </div>
-                                    @endif
-                                @endauth
-                            </div>
-                        </x-mary-card>
+                                    </div>
+                                @endif
+                            @endauth
+                        </div>
                     @endforeach
                 </div>
 
