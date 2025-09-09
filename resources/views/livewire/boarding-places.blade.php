@@ -37,7 +37,6 @@ new class extends Component {
     public $maxPrice = '';
     public $minCapacity = '';
 
-
     protected $rules = [
         'title' => 'required|string|max:255',
         'description' => 'required|string',
@@ -290,11 +289,12 @@ new class extends Component {
                     <span class="text-error text-sm">{{ $message }}</span>
                 @enderror
 
-                <x-mary-select wire:model="price_period" label="Price Period" placeholder="Select period">
-                    <option value="">Not specified</option>
-                    <option value="per month">Per Month</option>
-                    <option value="per semester">Per Semester</option>
-                    <option value="per year">Per Year</option>
+                <x-mary-select wire:model="price_period" label="Payment Method" placeholder="Select payment method"
+                    :options="[
+                        ['name' => 'Per Person', 'id' => 'per_person'],
+                        ['name' => 'Per Room', 'id' => 'per_room'],
+                        ['name' => 'Per Floor', 'id' => 'per_floor'],
+                    ]">
                 </x-mary-select>
 
                 <!-- Capacity -->
@@ -346,8 +346,7 @@ new class extends Component {
                 <x-mary-input wire:model.live.debounce.300ms="maxPrice" placeholder="Max price" type="number" />
 
                 <!-- Min Capacity -->
-                <x-mary-input wire:model.live.debounce.300ms="minCapacity" placeholder="Min capacity"
-                    type="number" />
+                <x-mary-input wire:model.live.debounce.300ms="minCapacity" placeholder="Min capacity" type="number" />
 
                 <!-- Clear Filters -->
                 <x-mary-button class="btn-ghost" wire:click="clearFilters">
@@ -363,7 +362,8 @@ new class extends Component {
             @if ($this->places->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($this->places as $place)
-                        <x-mary-card class="bg-base-100 hover:shadow-lg transition-shadow">
+                        <div class="bg-base-100 hover:shadow-lg transition-shadow rounded-lg p-4 cursor-pointer"
+                            wire:click="viewDetails({{ $place->id }})">
                             <!-- Images -->
                             @if ($place->images && count($place->images) > 0)
                                 <div class="h-48 bg-base-200 rounded-lg overflow-hidden mb-4">
@@ -422,16 +422,12 @@ new class extends Component {
                             </div>
 
                             <!-- Actions -->
-                            <div class="flex gap-2">
-                                <x-mary-button wire:click="viewDetails({{ $place->id }})"
-                                    class="btn-primary btn-sm flex-1">
-                                    View Details
-                                </x-mary-button>
-
-                                @auth
-                                    @if ($place->user_id === auth()->id())
+                            @auth
+                                @if ($place->user_id === auth()->id())
+                                    <div class="flex justify-end">
                                         <div class="dropdown dropdown-end">
-                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm">
+                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm"
+                                                onclick="event.stopPropagation()">
                                                 <x-mary-icon name="o-ellipsis-vertical" class="w-4 h-4" />
                                             </x-mary-button>
                                             <ul tabindex="0"
@@ -441,10 +437,10 @@ new class extends Component {
                                                         class="text-error">Delete</a></li>
                                             </ul>
                                         </div>
-                                    @endif
-                                @endauth
-                            </div>
-                        </x-mary-card>
+                                    </div>
+                                @endif
+                            @endauth
+                        </div>
                     @endforeach
                 </div>
 

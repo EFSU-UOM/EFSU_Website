@@ -18,7 +18,7 @@ class BoardingPlace extends Model
         'longitude',
         'distance_to_university',
         'price',
-        'price_period',
+        'payment_method',
         'capacity',
         'contact_phone',
         'contact_email',
@@ -81,9 +81,9 @@ class BoardingPlace extends Model
         if (!$this->price) {
             return 'Price not specified';
         }
-        
-        $period = $this->price_period ? " {$this->price_period}" : '';
-        return "LKR " . number_format($this->price, 2) . $period;
+
+        $paymentMethod = $this->payment_method ? " {$this->payment_method}" : '';
+        return "LKR " . number_format($this->price, 2) . $paymentMethod;
     }
 
     public function getFormattedDistanceAttribute()

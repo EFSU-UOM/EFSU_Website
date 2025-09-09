@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('longitude', 11, 8)->nullable();
             $table->decimal('distance_to_university', 8, 2)->nullable(); // Distance in km
             $table->decimal('price', 10, 2)->nullable(); // Price if available
-            $table->string('price_period')->nullable(); // per month, per semester, etc.
+            $table->string('payment_method')->nullable(); // Payment method: per_person, per_room, per_floor, etc.
             $table->integer('capacity')->nullable(); // Number of students that can be accommodated
             $table->string('contact_phone')->nullable();
             $table->string('contact_email')->nullable();

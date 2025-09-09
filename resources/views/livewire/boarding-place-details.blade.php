@@ -355,10 +355,10 @@ new class extends Component {
                             <x-mary-card>
                                 <h4>Actions</h4>
                                 <div class="flex gap-3">
-                                    <x-mary-button class="btn-secondary flex-1" wire:click="enableEdit">
+                                    {{-- <x-mary-button class="btn-secondary flex-1" wire:click="enableEdit">
                                         <x-mary-icon name="o-pencil" class="w-5 h-5" />
                                         Edit
-                                    </x-mary-button>
+                                    </x-mary-button> --}}
 
                                     <x-mary-button class="btn-error flex-1" wire:click="deletePlace"
                                         wire:confirm="Are you sure you want to delete this boarding place?">
