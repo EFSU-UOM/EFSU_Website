@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 use App\Models\ForumPost;
+use App\Models\LostAndFound;
 
 Route::get('/', function () {
     return view('home');
@@ -37,6 +38,10 @@ Route::get('/forum/{post}', function (int $post) {
 Route::get('/lost-and-found', function () {
     return view('lost-and-found');
 })->name('lost-and-found');
+
+Route::get('/lost-and-found/{item}', function (int $item) {
+    return view('lost-and-found-detail', ['item' => App\Models\LostAndFound::with('user')->findOrFail($item)]);
+})->name('lost-and-found.detail');
 
 
 Route::get('/gallery', function () {
