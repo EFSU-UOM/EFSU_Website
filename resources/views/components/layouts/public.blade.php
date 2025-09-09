@@ -64,6 +64,7 @@
                             <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('boarding.places') }}">Boarding Places</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                             <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         </x-mary-menu>
@@ -142,6 +143,7 @@
                         <x-mary-menu-item link="{{ route('resources') }}">Resources</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('forum') }}">Forum</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('lost-and-found') }}">Lost & Found</x-mary-menu-item>
+                        <x-mary-menu-item link="{{ route('boarding.places') }}">Boarding Places</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('complaints') }}">Complaints</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('store') }}">Store</x-mary-menu-item>
                         <x-mary-menu-item link="{{ route('gallery') }}">Gallery</x-mary-menu-item>

@@ -43,6 +43,14 @@ Route::get('/lost-and-found/{item}', function (int $item) {
     return view('lost-and-found-detail', ['item' => App\Models\LostAndFound::with('user')->findOrFail($item)]);
 })->name('lost-and-found.detail');
 
+Route::get('/boarding-places', function () {
+    return view('boarding-places');
+})->name('boarding.places');
+
+Route::get('/boarding-places/{id}', function ($id) {
+    return view('boarding-place-details', ['id' => $id]);
+})->name('boarding.place.details');
+
 
 Route::get('/gallery', function () {
     return view('gallery');
