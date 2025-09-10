@@ -180,7 +180,6 @@ new class extends Component {
                                     </div>
                                     <div>
                                         <div class="font-semibold">{{ $user->name }}</div>
-                                        <div class="text-sm opacity-70">ID: {{ $user->id }}</div>
                                     </div>
                                 </div>
                             </td>
