@@ -63,7 +63,7 @@ new class extends Component {
     public function availableAccessLevels()
     {
         $currentUser = auth()->user();
-        return collect(AccessLevel::cases())->filter(fn($level) => $level->value > $currentUser->access_level->value)->values();
+        return collect(AccessLevel::cases())->filter(fn($level) => $level->value >= $currentUser->access_level->value)->values();
     }
 
     public function openModal(User $user)
@@ -100,9 +100,9 @@ new class extends Component {
             return;
         }
 
-        // Validate that user can only set access levels lower than their own
-        if ($this->newAccessLevel <= $currentUser->access_level->value) {
-            $this->addError('newAccessLevel', 'You can only assign access levels lower than your own.');
+        // Validate that user can only set access levels at their level or lower
+        if ($this->newAccessLevel < $currentUser->access_level->value) {
+            $this->addError('newAccessLevel', 'You can only assign access levels at your level or lower.');
             return;
         }
 
@@ -264,7 +264,7 @@ new class extends Component {
 
                 <div class="alert alert-info mt-4">
                     <x-mary-icon name="o-information-circle" />
-                    <span>You can only assign access levels lower than your own
+                    <span>You can only assign access levels at your level or lower
                         ({{ auth()->user()->getAccessLevelLabel() }}).</span>
                 </div>
             </div>
