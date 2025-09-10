@@ -34,12 +34,13 @@ new class extends Component {
             ->orderBy($this->sortBy, $this->sortDirection);
 
         if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('category', 'like', "%{$this->search}%")
-                    ->orWhere('complaint_text', 'like', "%{$this->search}%")
-                    ->orWhereHas('user', function ($userQuery) {
-                        $userQuery->where('name', 'like', "%{$this->search}%")
-                            ->orWhere('email', 'like', "%{$this->search}%");
+            $searchTerm = '%' . $this->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('category', 'like', $searchTerm)
+                    ->orWhere('complaint_text', 'like', $searchTerm)
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                        $userQuery->where('name', 'like', $searchTerm)
+                            ->orWhere('email', 'like', $searchTerm);
                     });
             });
         }
