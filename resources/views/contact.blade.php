@@ -159,7 +159,7 @@
                             'position' => 'President',
                             'email' => 'president@efsu-uom.lk',
                             'phone' => '+94 71 711 4853',
-                            'icon' => '👨‍💼',
+                            'image' => '/people/charuka.avif',
                             'bg' => 'bg-primary'
                         ],
                         [
@@ -167,7 +167,7 @@
                             'position' => 'Secretary',
                             'email' => 'secretary@efsu-uom.lk',
                             'phone' => '+94 78 531 3027',
-                            'icon' => '📋',
+                            'image' => '/people/meegalle.avif',
                             'bg' => 'bg-secondary'
                         ],
                         [
@@ -175,7 +175,7 @@
                             'position' => 'Vice President',
                             'email' => 'vicepresident@efsu-uom.lk',
                             'phone' => '+94 70 449 8462',
-                            'icon' => '👨‍💼',
+                            'image' => '/people/maleesha.avif',
                             'bg' => 'bg-accent'
                         ],
                         [
@@ -183,7 +183,7 @@
                             'position' => 'Vice Secretary',
                             'email' => 'vicesecretary@efsu-uom.lk',
                             'phone' => '+94 76 699 0124',
-                            'icon' => '📝',
+                            'image' => '/people/sahan.avif',
                             'bg' => 'bg-info'
                         ],
                         [
@@ -191,7 +191,7 @@
                             'position' => 'Treasurer',
                             'email' => 'treasurer@efsu-uom.lk',
                             'phone' => '+94 71 787 5495',
-                            'icon' => '💰',
+                            'image' => '/people/pivithuru.avif',
                             'bg' => 'bg-success'
                         ],
                         [
@@ -199,7 +199,7 @@
                             'position' => 'Editor',
                             'email' => 'editor@efsu-uom.lk',
                             'phone' => '+94 78 584 9870',
-                            'icon' => '✏️',
+                            'image' => '/people/lasindu.avif',
                             'bg' => 'bg-warning'
                         ],
                     ];
@@ -210,7 +210,7 @@
                             'position' => 'Committee Member',
                             'email' => 'kaveeshag@efsu-uom.lk',
                             'phone' => '+94 70 207 5700',
-                            'icon' => '👥',
+                            'image' => '/people/gimhana.avif',
                             'bg' => 'bg-orange-400'
                         ],
                         [
@@ -218,7 +218,7 @@
                             'position' => 'Committee Member',
                             'email' => 'shamitha@efsu-uom.lk',
                             'phone' => '+94 71 791 0819',
-                            'icon' => '👥',
+                            'image' => '/people/shamitha.avif',
                             'bg' => 'bg-purple-500'
                         ],
                         [
@@ -226,7 +226,7 @@
                             'position' => 'Committee Member',
                             'email' => 'chanuka@efsu-uom.lk',
                             'phone' => '+94 77 568 1545',
-                            'icon' => '👥',
+                            'image' => '/people/chanuka.avif',
                             'bg' => 'bg-teal-500'
                         ],
                         [
@@ -234,7 +234,7 @@
                             'position' => 'Committee Member',
                             'email' => 'shivamayinthan@efsu-uom.lk',
                             'phone' => '+94 76 637 0873',
-                            'icon' => '👥',
+                            'image' => '/people/shiva.avif',
                             'bg' => 'bg-indigo-500'
                         ],
                         [
@@ -242,7 +242,7 @@
                             'position' => 'Committee Member',
                             'email' => 'kaveesha@efsu-uom.lk',
                             'phone' => '+94 77 690 7920',
-                            'icon' => '👥',
+                            'image' => '/people/kaveesha.avif',
                             'bg' => 'bg-pink-500'
                         ],
                         [
@@ -250,7 +250,7 @@
                             'position' => 'Committee Member',
                             'email' => 'gishan@efsu-uom.lk',
                             'phone' => '+94 76 351 0388',
-                            'icon' => '👥',
+                            'image' => '/people/gishan.avif',
                             'bg' => 'bg-emerald-500'
                         ],
                         [
@@ -258,7 +258,7 @@
                             'position' => 'Committee Member',
                             'email' => 'sithum@efsu-uom.lk',
                             'phone' => '+94 70 163 2029',
-                            'icon' => '👥',
+                            'image' => '/people/sithum.avif',
                             'bg' => 'bg-red-500'
                         ]
                     ];
@@ -269,9 +269,7 @@
                     @php $president = $leaders[0]; @endphp
                     <x-mary-card class="w-full md:w-2/3 mx-auto p-6 text-center" shadow>
                         <div class="flex justify-center">
-                            <x-mary-avatar class="!w-20 !h-20 {{ $president['bg'] }}">
-                                <span class="text-white text-4xl">{{ $president['icon'] }}</span>
-                            </x-mary-avatar>
+                            <x-mary-avatar class="!w-20 !h-20" :image="$president['image']" />
                         </div>
                         <h2 class="mt-4 text-2xl font-bold">{{ $president['name'] }}</h2>
                         <p class="text-lg text-base-content/70">{{ $president['position'] }}</p>
@@ -297,9 +295,7 @@
                     @foreach(array_slice($leaders, 1) as $leader)
                         <x-mary-card class="p-4" shadow>
                             <div class="flex items-center gap-3 mb-4">
-                                <x-mary-avatar class="!w-14 !h-14 {{ $leader['bg'] }}">
-                                    <span class="text-white text-2xl">{{ $leader['icon'] }}</span>
-                                </x-mary-avatar>
+                                <x-mary-avatar class="!w-14 !h-14" :image="$leader['image']" />
                                 <div>
                                     <h3 class="font-semibold text-lg">{{ $leader['name'] }}</h3>
                                     <p class="text-sm text-base-content/70">{{ $leader['position'] }}</p>
@@ -329,9 +325,7 @@
                     @foreach($committeeMembers as $member)
                         <x-mary-card class="w-full" shadow>
                             <div class="flex items-center gap-3 mb-4">
-                                <x-mary-avatar class="!w-12 !h-12 {{ $member['bg'] }}">
-                                    <span class="text-white text-xl">{{ $member['icon'] }}</span>
-                                </x-mary-avatar>
+                                <x-mary-avatar class="!w-12 !h-12" :image="$member['image']" />
                                 <div>
                                     <h3 class="font-semibold text-base-content">{{ $member['name'] }}</h3>
                                     <p class="text-sm text-base-content/70">{{ $member['position'] }}</p>
