@@ -50,6 +50,22 @@ class BoardingPlace extends Model
         return $this->hasMany(BoardingPlaceComment::class)->whereNull('parent_id')->orderBy('score', 'desc');
     }
 
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(BoardingRating::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        $average = $this->ratings()->where('rating', '>', 0)->avg('rating');
+        return $average ? round($average, 1) : 0;
+    }
+
+    public function getRatingCountAttribute()
+    {
+        return $this->ratings()->where('rating', '>', 0)->count();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
