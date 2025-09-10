@@ -14,6 +14,14 @@ return new class extends Migration
         Schema::table('complaints', function (Blueprint $table) {
             $table->boolean('is_anonymous')->default(false);
             $table->json('images')->nullable();
+        });
+        
+        // For PostgreSQL compatibility, drop and recreate the status column
+        Schema::table('complaints', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
+        
+        Schema::table('complaints', function (Blueprint $table) {
             $table->enum('status', [
                 'delivered', 
                 'viewed', 
@@ -21,7 +29,7 @@ return new class extends Migration
                 'action_taken', 
                 'rejected', 
                 'incomplete'
-            ])->default('delivered')->change();
+            ])->default('delivered');
         });
     }
 
@@ -32,12 +40,20 @@ return new class extends Migration
     {
         Schema::table('complaints', function (Blueprint $table) {
             $table->dropColumn(['is_anonymous', 'images']);
+        });
+        
+        // For PostgreSQL compatibility, drop and recreate the status column
+        Schema::table('complaints', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
+        
+        Schema::table('complaints', function (Blueprint $table) {
             $table->enum('status', [
                 'pending',
                 'in_progress', 
                 'resolved',
                 'closed'
-            ])->default('pending')->change();
+            ])->default('pending');
         });
     }
 };
