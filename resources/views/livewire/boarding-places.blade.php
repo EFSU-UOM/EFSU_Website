@@ -65,7 +65,7 @@ new class extends Component {
 
     public function getPlacesProperty()
     {
-        $query = BoardingPlace::with('user')->withCount('comments')->active();
+        $query = BoardingPlace::with(['user', 'ratings'])->withCount('comments')->active();
 
         if (!empty($this->search)) {
             $query->where(function ($q) {
@@ -417,6 +417,20 @@ new class extends Component {
                                     </div>
                                 @endif
                             </div>
+
+                            <!-- Rating Display -->
+                            @if ($place->average_rating > 0)
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="rating rating-sm">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <div class="mask mask-star-2 opacity-100 {{ $i <= $place->average_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
+                                        @endfor
+                                    </div>
+                                    <span class="text-sm text-base-content/70">
+                                        {{ $place->average_rating }} ({{ $place->rating_count }})
+                                    </span>
+                                </div>
+                            @endif
 
                             <div class="flex items-center justify-between text-base-content/60 text-sm mb-4">
                                 <div class="flex items-center">

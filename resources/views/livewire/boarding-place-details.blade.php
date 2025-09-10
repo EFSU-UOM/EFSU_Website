@@ -12,6 +12,8 @@ new class extends Component {
 
     public $boardingPlace;
     public $editMode = false;
+    public $rating = 0;
+    public $userRating = null;
 
     // Form fields for editing
     public $title = '';
@@ -47,9 +49,16 @@ new class extends Component {
 
     public function mount($id)
     {
-        $this->boardingPlace = BoardingPlace::with('user', 'topLevelComments.user', 'topLevelComments.replies.user')->findOrFail($id);
+        $this->boardingPlace = BoardingPlace::with(['user', 'topLevelComments.user', 'topLevelComments.replies.user', 'ratings'])->findOrFail($id);
         $this->boardingPlace->incrementViews();
         $this->library = $this->boardingPlace->images ?: new Collection();
+        
+        if (auth()->check()) {
+            $this->userRating = $this->boardingPlace->ratings()
+                ->where('user_id', auth()->id())
+                ->first();
+            $this->rating = $this->userRating ? $this->userRating->rating : 0;
+        }
     }
 
     public function enableEdit()
@@ -149,6 +158,41 @@ new class extends Component {
     public function goBack()
     {
         return redirect()->route('boarding.places');
+    }
+
+    public function submitRating()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        if ($this->rating < 0 || $this->rating > 5) {
+            return;
+        }
+
+        $existingRating = $this->boardingPlace->ratings()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($existingRating) {
+            if ($this->rating == 0) {
+                $existingRating->delete();
+            } else {
+                $existingRating->update(['rating' => $this->rating]);
+            }
+        } else if ($this->rating > 0) {
+            $this->boardingPlace->ratings()->create([
+                'user_id' => auth()->id(),
+                'rating' => $this->rating,
+            ]);
+        }
+
+        $this->boardingPlace->refresh();
+        $this->userRating = $this->boardingPlace->ratings()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        session()->flash('success', $this->rating == 0 ? 'Rating removed successfully!' : 'Rating submitted successfully!');
     }
 }; ?>
 
@@ -274,6 +318,50 @@ new class extends Component {
                                 <span class="text-base-content/80">{{ $boardingPlace->views_count }} views</span>
                             </div>
                         </div>
+                    </x-mary-card>
+
+                    <!-- Rating Section -->
+                    <x-mary-card>
+                        <h4>Rating</h4>
+                        
+                        <!-- Overall Rating Display -->
+                        @if ($boardingPlace->average_rating > 0)
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="rating rating-md">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <div class="mask mask-star-2 opacity-100 {{ $i <= $boardingPlace->average_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
+                                    @endfor
+                                </div>
+                                <div>
+                                    <div class="text-lg font-bold">{{ $boardingPlace->average_rating }}</div>
+                                    <div class="text-sm text-base-content/60">{{ $boardingPlace->rating_count }} {{ Str::plural('rating', $boardingPlace->rating_count) }}</div>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-base-content/60 mb-4">No ratings yet. Be the first to rate!</p>
+                        @endif
+
+                        <!-- User Rating Input -->
+                        @auth
+                            <div class="space-y-3">
+                                <p class="text-sm font-medium">Your Rating:</p>
+                                <div class="flex items-center gap-3">
+                                    <x-mary-rating wire:model.live="rating" class="bg-warning" />
+                                    <x-mary-button wire:click="submitRating" class="btn-primary btn-sm">
+                                        {{ $userRating ? 'Update' : 'Submit' }}
+                                    </x-mary-button>
+                                    @if ($userRating)
+                                        <x-mary-button wire:click="$set('rating', 0); submitRating()" class="btn-ghost btn-sm">
+                                            Remove
+                                        </x-mary-button>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-base-content/60">
+                                <a href="{{ route('login') }}" class="link link-primary">Sign in</a> to rate this place
+                            </p>
+                        @endauth
                     </x-mary-card>
 
                     <!-- Description -->
