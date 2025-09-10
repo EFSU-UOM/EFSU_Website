@@ -23,6 +23,10 @@ Route::get('/news', function () {
     return view('news');
 })->name('news');
 
+Route::get('/news/{article}', function (App\Models\NewsArticle $article) {
+    return view('article', ['article' => $article]);
+})->name('article');
+
 Route::get('/resources', function () {
     return view('resources');
 })->name('resources');
@@ -101,6 +105,10 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     Route::view('/dashboard/announcements', 'dashboard.announcements')->name('dashboard.announcements');
     Route::view('/dashboard/merch', 'dashboard.merch')->name('dashboard.merch');
     Route::view('/dashboard/news-articles', 'dashboard.news-articles')->name('dashboard.news-articles');
+    Route::view('/dashboard/news-articles/create', 'dashboard.create-article')->name('dashboard.news-articles.create');
+    Route::get('/dashboard/news-articles/{article}/edit', function (App\Models\NewsArticle $article) {
+        return view('dashboard.edit-article', ['article' => $article]);
+    })->name('dashboard.news-articles.edit');
     Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
     Route::view('/dashboard/users', 'dashboard.users')->name('dashboard.users');
