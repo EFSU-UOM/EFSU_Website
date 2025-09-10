@@ -1,3 +1,3 @@
 <x-layouts.public>
-        <livewire:create-complaint />
+        <livewire:complaints-dashboard />
 </x-layouts.public>

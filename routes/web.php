@@ -111,6 +111,7 @@ Route::middleware(['admin', 'auth', 'verified'])->group(function () {
     })->name('dashboard.news-articles.edit');
     Route::view('/dashboard/gallery-items', 'dashboard.gallery-items')->name('dashboard.gallery-items');
     Route::view('/dashboard/events', 'dashboard.events')->name('dashboard.events');
+    Route::view('/dashboard/complaints', 'dashboard.complaints')->name('dashboard.complaints');
     Route::view('/dashboard/users', 'dashboard.users')->name('dashboard.users');
 });
 
