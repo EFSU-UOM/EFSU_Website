@@ -173,3 +173,21 @@ select:focus[data-flux-control] {
     @apply cursor-pointer
 }
 
+@layer components {
+  #mainarticle {
+    @apply text-base leading-relaxed max-w-none;
+    color: var(--base-content);
+  }
+  #mainarticle p { @apply mb-4; }
+  #mainarticle h1 { @apply text-2xl font-semibold mt-6 mb-2; }
+  #mainarticle h2 { @apply text-xl font-semibold mt-5 mb-2; }
+  #mainarticle h3 { @apply text-lg font-semibold mt-4 mb-2; }
+  #mainarticle a { @apply underline; color: var(--primary); }
+  #mainarticle code { @apply bg-gray-100 px-1 py-0.5 rounded font-mono text-sm; }
+  #mainarticle pre { @apply p-4 rounded overflow-auto font-mono text-sm; background: #0f172a; color: #e6eef8; }
+  #mainarticle img { @apply max-w-full h-auto block my-2 rounded-md; }
+  #mainarticle ul, #mainarticle ol { @apply mb-4 ml-5; }
+  #mainarticle blockquote { @apply p-3 mb-4 border-l-4 border-l-[rgba(0,0,0,0.08)]; background: rgba(0,0,0,0.02); }
+  #mainarticle table { @apply w-full border-collapse mb-4; }
+  #mainarticle th, #mainarticle td { @apply border px-3 py-2 text-left; border-color: rgba(0,0,0,0.08); }
+}

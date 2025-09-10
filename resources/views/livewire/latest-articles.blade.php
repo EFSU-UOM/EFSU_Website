@@ -63,7 +63,7 @@ $getBadgeColor = function($category) {
                         </div>
                         <h3 class="text-lg font-semibold text-base-content mb-2">{{ $article->title }}</h3>
                         <p class="text-base-content/70 mb-4">{!! $article->excerpt !!}</p>
-                        <x-mary-button link="#" label="Read More" color="{{ $this->getBadgeColor($article->category) }}" variant="link" size="sm" right-icon="o-arrow-right" />
+                        <x-mary-button link="{{ route('article', $article) }}" label="Read More" color="{{ $this->getBadgeColor($article->category) }}" variant="link" size="sm" right-icon="o-arrow-right" />
                 </x-mary-card>
             @endforeach
         </div>
