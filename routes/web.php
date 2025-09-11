@@ -51,6 +51,10 @@ Route::get('/boarding-places', function () {
     return view('boarding-places');
 })->name('boarding.places');
 
+Route::get('/boarding-places/create', function () {
+    return view('boarding-place-create');
+})->middleware(['auth', 'verified'])->name('boarding.place.create');
+
 Route::get('/boarding-places/{id}', function ($id) {
     return view('boarding-place-details', ['id' => $id]);
 })->name('boarding.place.details');

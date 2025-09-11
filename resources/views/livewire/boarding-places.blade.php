@@ -2,33 +2,11 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Collection;
 use App\Models\BoardingPlace;
 use Illuminate\Support\Facades\Storage;
-use Mary\Traits\WithMediaSync;
 
 new class extends Component {
-    use WithPagination, WithFileUploads, WithMediaSync;
-
-    public $showCreateForm = false;
-
-    // Form fields
-    public $title = '';
-    public $description = '';
-    public $location = '';
-    public $latitude = '';
-    public $longitude = '';
-    public $distance_to_university = '';
-    public $price = '';
-    public $payment_method = '';
-    public $capacity = '';
-    public $contact_phone = '';
-    public $contact_email = '';
-
-    public Collection $library;
-    #[Rule(['files.*' => 'image|max:1024'])]
-    public array $files = [];
+    use WithPagination;
 
     // Filters
     public $search = '';
@@ -37,22 +15,6 @@ new class extends Component {
     public $maxPrice = '';
     public $minCapacity = '';
 
-    protected $rules = [
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'location' => 'required|string|max:255',
-        'latitude' => 'nullable|numeric|between:-90,90',
-        'longitude' => 'nullable|numeric|between:-180,180',
-        'distance_to_university' => 'nullable|numeric|min:0',
-        'price' => 'nullable|numeric|min:0',
-        'payment_method' => 'nullable|string|max:255',
-        'capacity' => 'nullable|integer|min:1',
-        'contact_phone' => 'nullable|string|max:255',
-        'contact_email' => 'nullable|email|max:255',
-        'files' => 'required|array|min:1',
-        'files.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ];
-
     public function mount()
     {
         $this->search = request('search', '');
@@ -60,7 +22,6 @@ new class extends Component {
         $this->minPrice = request('minPrice', '');
         $this->maxPrice = request('maxPrice', '');
         $this->minCapacity = request('minCapacity', '');
-        $this->library = new Collection();
     }
 
     public function getPlacesProperty()
@@ -90,60 +51,6 @@ new class extends Component {
         return $query->orderBy('created_at', 'desc')->paginate(12);
     }
 
-    public function openCreateForm()
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $this->resetForm();
-        $this->showCreateForm = true;
-    }
-
-    public function closeCreateForm()
-    {
-        $this->showCreateForm = false;
-        $this->resetForm();
-        $this->resetValidation();
-    }
-
-    public function store()
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $this->validate();
-
-        $data = [
-            'user_id' => auth()->id(),
-            'title' => $this->title,
-            'description' => $this->description,
-            'location' => $this->location,
-            'latitude' => $this->latitude ?: null,
-            'longitude' => $this->longitude ?: null,
-            'distance_to_university' => $this->distance_to_university ?: null,
-            'price' => $this->price ?: null,
-            'payment_method' => $this->payment_method ?: null,
-            'capacity' => $this->capacity ?: null,
-            'contact_phone' => $this->contact_phone ?: null,
-            'contact_email' => $this->contact_email ?: null,
-        ];
-
-        if (!empty($this->files)) {
-            $imagePaths = [];
-            foreach ($this->files as $file) {
-                $imagePaths[] = $file->store('boarding-places', 'public');
-            }
-            $data['images'] = $imagePaths;
-        }
-
-        BoardingPlace::create($data);
-
-        $this->closeCreateForm();
-        session()->flash('success', 'Boarding place posted successfully!');
-        $this->resetPage();
-    }
 
     public function delete($id)
     {
@@ -171,11 +78,6 @@ new class extends Component {
         return redirect()->route('boarding.place.details', $placeId);
     }
 
-    private function resetForm()
-    {
-        $this->reset(['title', 'description', 'location', 'latitude', 'longitude', 'distance_to_university', 'price', 'payment_method', 'capacity', 'contact_phone', 'contact_email', 'files']);
-        $this->library = new Collection();
-    }
 
     public function updatingSearch()
     {
@@ -203,6 +105,7 @@ new class extends Component {
     }
 }; ?>
 
+<div>
 <section>
     <!-- Page Header -->
     <section class="bg-base-100 py-16">
@@ -213,10 +116,10 @@ new class extends Component {
                     Find the perfect boarding place near the university. Share places you know to help fellow students.
                 </p>
                 @auth
-                    <x-mary-button class="btn-primary" @click="$wire.openCreateForm()">
+                    <a href="{{ route('boarding.place.create') }}" class="btn btn-primary">
                         <x-mary-icon name="o-plus" class="w-5 h-5" />
                         Post Boarding Place
-                    </x-mary-button>
+                    </a>
                 @else
                     <p class="text-base-content/60">
                         <a href="{{ route('login') }}" class="link link-primary">Sign in</a> to post boarding places
@@ -235,103 +138,6 @@ new class extends Component {
         </div>
     @endif
 
-    <!-- Create Form Modal -->
-    <x-mary-modal wire:model="showCreateForm" title="Post Boarding Place" class="backdrop-blur" box-class="max-w-4xl">
-        <div class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Title -->
-                <div class="md:col-span-2">
-                    <x-mary-input wire:model="title" label="Title" placeholder="e.g., Comfortable boarding near EFSU"
-                        required />
-                    @error('title')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Description -->
-                <div class="md:col-span-2">
-                    <x-mary-textarea wire:model="description" label="Description"
-                        placeholder="Describe the boarding place, amenities, rules, etc." rows="4" required />
-                    @error('description')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Location -->
-                <x-mary-input wire:model="location" label="Location" placeholder="Street address or area name"
-                    required />
-                @error('location')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <!-- Distance to University -->
-                <x-mary-input wire:model="distance_to_university" label="Distance to University (m)" type="number"
-                    step="0.1" />
-                @error('distance_to_university')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <!-- Coordinates -->
-                <x-mary-input wire:model="latitude" label="Latitude (Optional)" type="number" step="any"
-                    placeholder="e.g., 6.9271" />
-                @error('latitude')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <x-mary-input wire:model="longitude" label="Longitude (Optional)" type="number" step="any"
-                    placeholder="e.g., 79.8612" />
-                @error('longitude')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <!-- Price -->
-                <x-mary-input wire:model="price" label="Price (Optional)" type="number" step="0.01" />
-                @error('price')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <x-mary-select wire:model="payment_method" label="Payment Method" placeholder="Select payment method"
-                    :options="[
-                        ['name' => 'Per Person', 'id' => 'per_person'],
-                        ['name' => 'Per Room', 'id' => 'per_room'],
-                        ['name' => 'Per Floor', 'id' => 'per_floor'],
-                    ]">
-                </x-mary-select>
-
-                <!-- Capacity -->
-                <x-mary-input wire:model="capacity" label="Capacity (Optional)" type="number"
-                    placeholder="Number of students" />
-                @error('capacity')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <!-- Contact Information -->
-                <x-mary-input wire:model="contact_phone" label="Contact Phone (Optional)" />
-                @error('contact_phone')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <x-mary-input wire:model="contact_email" label="Contact Email (Optional)" type="email" />
-                @error('contact_email')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
-
-                <!-- Image Upload -->
-                <div class="md:col-span-2">
-                    <x-mary-image-library wire:model="files" wire:library="library" :preview="$library"
-                        label="Boarding images" required/>
-                    @error('files')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
-        </div>
-
-        <x-slot:actions>
-            <x-mary-button label="Cancel" wire:click="closeCreateForm" />
-            <x-mary-button label="Post Place" wire:click="store" class="btn-primary" />
-        </x-slot:actions>
-    </x-mary-modal>
 
     <!-- Filters -->
     <section class="py-8 bg-base-200">
@@ -480,10 +286,10 @@ new class extends Component {
                         No boarding places match your search criteria. Try adjusting your filters.
                     </p>
                     @auth
-                        <x-mary-button class="btn-primary" @click="$wire.openCreateForm()">
+                        <a href="{{ route('boarding.place.create') }}" class="btn btn-primary">
                             <x-mary-icon name="o-plus" class="w-5 h-5" />
                             Post First Place
-                        </x-mary-button>
+                        </a>
                     @endauth
                 </div>
             @endif
@@ -491,3 +297,5 @@ new class extends Component {
     </section>
 
 </section>
+
+</div>
