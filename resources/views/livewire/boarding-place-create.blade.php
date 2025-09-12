@@ -341,5 +341,5 @@ new class extends Component {
     </script>
 
     <!-- Load Google Maps API -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAg6DlD9Eb8wrhBcbv3fmjljFa_8Yb6sRU&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('google_maps.api_key') }}&callback=initMap"></script>
 </div>

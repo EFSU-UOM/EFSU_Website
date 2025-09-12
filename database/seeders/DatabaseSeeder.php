@@ -15,10 +15,12 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@uom.lk',
+            'password' => bcrypt('password'), // password
+            'access_level' => 0,
+        ]);
 
         $this->call([
             GalleryItemSeeder::class,
