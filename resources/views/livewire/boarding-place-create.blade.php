@@ -141,13 +141,13 @@ new class extends Component {
                         @enderror
 
                         <!-- Coordinates -->
-                        <x-mary-input wire:model="latitude" label="Latitude (Optional)" type="number" step="any"
+                        <x-mary-input class="hidden" wire:model="latitude" type="number" step="any"
                             placeholder="e.g., 6.9271" />
                         @error('latitude')
                             <span class="text-error text-sm">{{ $message }}</span>
                         @enderror
 
-                        <x-mary-input wire:model="longitude" label="Longitude (Optional)" type="number" step="any"
+                        <x-mary-input class="hidden"  wire:model="longitude" type="number" step="any"
                             placeholder="e.g., 79.8612" />
                         @error('longitude')
                             <span class="text-error text-sm">{{ $message }}</span>
