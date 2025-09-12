@@ -139,7 +139,7 @@ new class extends Component {
 
     public function deletePlace()
     {
-        if (!auth()->check() || $this->boardingPlace->user_id !== auth()->id()) {
+        if (!auth()->check() || auth()->user()->isAdmin() || $this->boardingPlace->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -439,7 +439,7 @@ new class extends Component {
 
                     <!-- Action Buttons -->
                     @auth
-                        @if ($boardingPlace->user_id === auth()->id())
+                        @if ($boardingPlace->user_id === auth()->id() or auth()->user()->isAdmin())
                             <x-mary-card>
                                 <h4>Actions</h4>
                                 <div class="flex gap-3">
