@@ -139,7 +139,7 @@ new class extends Component {
 
     public function deletePlace()
     {
-        if (!auth()->check() || auth()->user()->isAdmin() || $this->boardingPlace->user_id !== auth()->id()) {
+        if (!auth()->check() || (!auth()->user()->isAdmin() && $this->boardingPlace->user_id !== auth()->id())) {
             abort(403);
         }
 
