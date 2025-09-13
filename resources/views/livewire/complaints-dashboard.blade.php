@@ -12,6 +12,10 @@ new class extends Component {
     public $selectedStatus = '';
     public $search = '';
     public $showCreateForm = false;
+    public $viewingComplaint = null;
+    public $replyingTo = null;
+    public $replyContent = '';
+    public $expandedReplies = [];
 
     public function mount()
     {
@@ -21,7 +25,8 @@ new class extends Component {
 
     public function getComplaintsProperty()
     {
-        $query = Complaint::where('user_id', Auth::id())
+        $query = Complaint::with(['topLevelReplies'])
+            ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc');
 
         if (!empty($this->search)) {
@@ -70,6 +75,99 @@ new class extends Component {
     public function updatingSelectedStatus()
     {
         $this->resetPage();
+    }
+
+    public function viewComplaint($complaintId)
+    {
+        $this->viewingComplaint = Complaint::with(['topLevelReplies'])->findOrFail($complaintId);
+        $this->showComplaintModal = true;
+    }
+
+    public function closeComplaintView()
+    {
+        $this->showComplaintModal = false;
+        $this->viewingComplaint = null;
+        $this->replyingTo = null;
+        $this->replyContent = '';
+        $this->expandedReplies = [];
+        $this->resetValidation();
+    }
+
+    public function postReply($parentId = null)
+    {
+        if (!auth()->check()) {
+            return;
+        }
+
+        if (empty(trim($this->replyContent))) {
+            return;
+        }
+
+        // Find the complaint ID from parent reply or use replyingTo as complaint ID
+        if ($parentId) {
+            $parentReply = \App\Models\ComplaintReply::findOrFail($parentId);
+            $complaintId = $parentReply->complaint_id;
+        } else {
+            $complaintId = $this->replyingTo;
+            $parentId = null;
+        }
+
+        \App\Models\ComplaintReply::create([
+            'complaint_id' => $complaintId,
+            'user_id' => auth()->id(),
+            'parent_id' => $parentId,
+            'content' => $this->replyContent,
+        ]);
+
+        $this->replyContent = '';
+        $this->replyingTo = null;
+        
+        // Refresh the viewing complaint
+        if ($this->viewingComplaint) {
+            $this->viewingComplaint = Complaint::with(['topLevelReplies'])->findOrFail($this->viewingComplaint->id);
+        }
+    }
+
+    public function setReplyingTo($id)
+    {
+        $this->replyingTo = $id;
+        $this->replyContent = '';
+    }
+
+    public function cancelReply()
+    {
+        $this->replyingTo = null;
+        $this->replyContent = '';
+    }
+
+    public function toggleReplies($replyId)
+    {
+        if (in_array($replyId, $this->expandedReplies)) {
+            $this->expandedReplies = array_values(array_diff($this->expandedReplies, [$replyId]));
+        } else {
+            $this->expandedReplies[] = $replyId;
+        }
+    }
+
+    public function deleteReply($replyId)
+    {
+        if (!auth()->check()) {
+            return;
+        }
+        
+        $reply = \App\Models\ComplaintReply::findOrFail($replyId);
+        
+        // Check if user is admin or reply owner
+        if (!auth()->user()->isAdmin() && $reply->user_id !== auth()->id()) {
+            return;
+        }
+        
+        $reply->delete();
+        
+        // Refresh the viewing complaint
+        if ($this->viewingComplaint) {
+            $this->viewingComplaint = Complaint::with(['topLevelReplies'])->findOrFail($this->viewingComplaint->id);
+        }
     }
 };
 ?>
@@ -179,10 +277,26 @@ new class extends Component {
                                 </div>
                             @endif
 
-                            <!-- Metadata -->
-                            <div class="flex items-center justify-between text-sm text-base-content/60 pt-2 border-t border-base-300">
-                                <span>Submitted {{ $complaint->created_at->diffForHumans() }}</span>
-                                <span>ID: #{{ $complaint->id }}</span>
+                            <!-- Actions and Metadata -->
+                            <div class="flex items-center justify-between pt-3 border-t border-base-300">
+                                <div class="flex items-center gap-4 text-sm text-base-content/60">
+                                    <span>Submitted {{ $complaint->created_at->diffForHumans() }}</span>
+                                    @if($complaint->topLevelReplies->count() > 0)
+                                        <span class="flex items-center gap-1">
+                                            <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4" />
+                                            {{ $complaint->topLevelReplies->count() }} {{ Str::plural('reply', $complaint->topLevelReplies->count()) }}
+                                        </span>
+                                    @endif
+                                    <span>ID: #{{ $complaint->id }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <x-mary-button 
+                                        wire:click="viewComplaint({{ $complaint->id }})" 
+                                        class="btn-ghost btn-sm">
+                                        <x-mary-icon name="o-eye" class="w-4 h-4" />
+                                        View Details
+                                    </x-mary-button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -221,4 +335,144 @@ new class extends Component {
             </div>
         </x-mary-card>
     @endif
+
+    <!-- Complaint Detail Modal -->
+    <x-mary-modal wire:model="showComplaintModal" title="{{ $viewingComplaint ? 'Complaint Details #' . $viewingComplaint->id : '' }}" class="backdrop-blur" box-class="max-w-4xl">
+        @if($viewingComplaint)
+            <div class="space-y-6">
+                <!-- Complaint Header -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <x-mary-badge :value="ucwords(str_replace('_', ' ', $viewingComplaint->category))" class="badge-outline" />
+                        @if($viewingComplaint->is_anonymous)
+                            <x-mary-badge value="Anonymous" class="badge-ghost" />
+                        @endif
+                    </div>
+                    <x-mary-badge 
+                        :value="$viewingComplaint->formatted_status" 
+                        class="badge-{{ $viewingComplaint->status_badge_color }}"
+                    />
+                </div>
+
+                <!-- Complaint Content -->
+                <div class="prose max-w-none">
+                    <p class="text-base-content/90 leading-relaxed">
+                        {{ $viewingComplaint->complaint_text }}
+                    </p>
+                </div>
+
+                <!-- Images -->
+                @if($viewingComplaint->images && count($viewingComplaint->images) > 0)
+                    <div>
+                        <label class="font-semibold text-sm opacity-70 block mb-2">Attachments</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            @foreach($viewingComplaint->images as $image)
+                                <div class="aspect-square rounded-lg overflow-hidden bg-base-200">
+                                    <img 
+                                        src="{{ Storage::url($image) }}" 
+                                        alt="Complaint image" 
+                                        class="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                        onclick="imageModal{{ $viewingComplaint->id }}_{{ $loop->index }}.showModal()"
+                                    >
+                                </div>
+
+                                <!-- Image Modal -->
+                                <dialog id="imageModal{{ $viewingComplaint->id }}_{{ $loop->index }}" class="modal">
+                                    <div class="modal-box max-w-4xl">
+                                        <img src="{{ Storage::url($image) }}" alt="Complaint image" class="w-full">
+                                    </div>
+                                    <form method="dialog" class="modal-backdrop">
+                                        <button>close</button>
+                                    </form>
+                                </dialog>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Metadata -->
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div>
+                        <label class="font-semibold text-sm opacity-70">Submitted</label>
+                        <div class="text-sm">{{ $viewingComplaint->created_at->format('M d, Y H:i') }}</div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-sm opacity-70">Last Updated</label>
+                        <div class="text-sm">{{ $viewingComplaint->updated_at->format('M d, Y H:i') }}</div>
+                    </div>
+                </div>
+
+                <!-- Replies Section -->
+                <div class="border-t pt-4">
+                    <!-- Success/Error Messages -->
+                    @if (session('reply-success'))
+                        <x-mary-alert icon="o-check-circle" class="alert-success mb-4">
+                            {{ session('reply-success') }}
+                        </x-mary-alert>
+                    @endif
+
+                    @if (session('error'))
+                        <x-mary-alert icon="o-x-circle" class="alert-error mb-4">
+                            {{ session('error') }}
+                        </x-mary-alert>
+                    @endif
+
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="font-semibold text-sm opacity-70">
+                            Replies ({{ $viewingComplaint->topLevelReplies->count() }})
+                        </label>
+                    </div>
+
+                    <!-- New Reply Form -->
+                    @if($replyingTo === $viewingComplaint->id)
+                        <div class="bg-base-200 p-4 rounded-lg mb-4">
+                            <form wire:submit="postReply">
+                                <x-mary-textarea 
+                                    wire:model="replyContent"
+                                    placeholder="Write your reply..."
+                                    rows="3"
+                                    class="w-full mb-3" />
+                                @error('replyContent')
+                                    <span class="text-error text-sm mb-2 block">{{ $message }}</span>
+                                @enderror
+                                <div class="flex justify-end space-x-2">
+                                    <x-mary-button wire:click="cancelReply" class="btn-outline btn-sm">
+                                        Cancel
+                                    </x-mary-button>
+                                    <x-mary-button type="submit" class="btn-primary btn-sm">
+                                        Post Reply
+                                    </x-mary-button>
+                                </div>
+                            </form>
+                        </div>
+                    @else
+                        <div class="mb-4">
+                            <x-mary-button wire:click="setReplyingTo({{ $viewingComplaint->id }})" class="btn-primary btn-sm">
+                                <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4" />
+                                Add Reply
+                            </x-mary-button>
+                        </div>
+                    @endif
+
+                    <!-- Replies List -->
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        @forelse($viewingComplaint->topLevelReplies as $reply)
+                            @include('livewire.partials.complaint-reply', ['reply' => $reply, 'depth' => 0])
+                        @empty
+                            <div class="text-center py-4 text-base-content/60">
+                                <x-mary-icon name="o-chat-bubble-left" class="w-8 h-8 mx-auto mb-2 opacity-40" />
+                                <p class="text-sm">No replies yet. Be the first to respond!</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        @endif
+
+        <x-slot:actions>
+            <x-mary-button label="Close" wire:click="closeComplaintView" />
+        </x-slot:actions>
+    </x-mary-modal>
 </div>

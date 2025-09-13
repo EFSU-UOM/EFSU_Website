@@ -21,6 +21,16 @@ class Complaint extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function replies()
+    {
+        return $this->hasMany(ComplaintReply::class)->with(['user', 'replies']);
+    }
+
+    public function topLevelReplies()
+    {
+        return $this->hasMany(ComplaintReply::class)->topLevel()->with(['user', 'replies'])->orderBy('created_at', 'asc');
+    }
+
     public function getStatusBadgeColorAttribute()
     {
         return match($this->status) {

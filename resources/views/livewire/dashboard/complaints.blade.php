@@ -13,6 +13,10 @@ new class extends Component {
     public $search = '';
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
+    public $replyingTo = null;
+    public $replyContent = '';
+    public $expandedReplies = [];
+    public $showComplaintModal = false;
 
     public function mount()
     {
@@ -30,7 +34,7 @@ new class extends Component {
 
     public function getComplaintsProperty()
     {
-        $query = Complaint::with('user')
+        $query = Complaint::with(['user', 'topLevelReplies'])
             ->orderBy($this->sortBy, $this->sortDirection);
 
         if (!empty($this->search)) {
@@ -94,6 +98,95 @@ new class extends Component {
             $this->sortDirection = 'asc';
         }
         $this->resetPage();
+    }
+
+    public function postReply($parentId = null)
+    {
+        $this->validate([
+            'replyContent' => 'required|string|max:1000',
+        ]);
+
+        if (!auth()->check()) {
+            session()->flash('error', 'Please log in to reply.');
+            return;
+        }
+
+        if (empty(trim($this->replyContent))) {
+            $this->addError('replyContent', 'Reply content is required.');
+            return;
+        }
+
+        try {
+            // Find the complaint ID from parent reply or use replyingTo as complaint ID
+            if ($parentId) {
+                $parentReply = \App\Models\ComplaintReply::findOrFail($parentId);
+                $complaintId = $parentReply->complaint_id;
+            } else {
+                $complaintId = $this->replyingTo;
+                $parentId = null;
+            }
+
+            \App\Models\ComplaintReply::create([
+                'complaint_id' => $complaintId,
+                'user_id' => auth()->id(),
+                'parent_id' => $parentId,
+                'content' => $this->replyContent,
+            ]);
+
+            $this->replyContent = '';
+            $this->replyingTo = null;
+            $this->resetValidation();
+
+            session()->flash('reply-success', 'Reply posted successfully!');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to post reply. Please try again.');
+        }
+    }
+
+    public function setReplyingTo($id)
+    {
+        $this->replyingTo = $id;
+        $this->replyContent = '';
+        $this->resetValidation();
+    }
+
+    public function cancelReply()
+    {
+        $this->replyingTo = null;
+        $this->replyContent = '';
+        $this->resetValidation();
+    }
+
+    public function toggleReplies($replyId)
+    {
+        if (in_array($replyId, $this->expandedReplies)) {
+            $this->expandedReplies = array_values(array_diff($this->expandedReplies, [$replyId]));
+        } else {
+            $this->expandedReplies[] = $replyId;
+        }
+    }
+
+    public function deleteReply($replyId)
+    {
+        if (!auth()->check()) {
+            session()->flash('error', 'Please log in to delete replies.');
+            return;
+        }
+        
+        try {
+            $reply = \App\Models\ComplaintReply::findOrFail($replyId);
+            
+            // Check if user is admin or reply owner
+            if (!auth()->user()->isAdmin() && $reply->user_id !== auth()->id()) {
+                session()->flash('error', 'You can only delete your own replies.');
+                return;
+            }
+            
+            $reply->delete();
+            session()->flash('reply-success', 'Reply deleted successfully!');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to delete reply. Please try again.');
+        }
     }
 };
 ?>
@@ -222,6 +315,12 @@ new class extends Component {
                                                 <span class="text-xs opacity-60">{{ count($complaint->images) }} image(s)</span>
                                             </div>
                                         @endif
+                                        @if($complaint->topLevelReplies->count() > 0)
+                                            <div class="flex items-center gap-1 mt-1">
+                                                <x-mary-icon name="o-chat-bubble-left" class="w-3 h-3 opacity-60" />
+                                                <span class="text-xs opacity-60">{{ $complaint->topLevelReplies->count() }} {{ Str::plural('reply', $complaint->topLevelReplies->count()) }}</span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -348,6 +447,73 @@ new class extends Component {
                                                 <div class="text-sm">{{ $complaint->updated_at->format('M d, Y H:i') }}</div>
                                             </div>
                                         </div>
+
+                                        <!-- Replies Section -->
+                                        @if(auth()->check())
+                                            <div class="border-t pt-4 mt-4">
+                                                <!-- Success/Error Messages -->
+                                                @if (session('reply-success'))
+                                                    <x-mary-alert icon="o-check-circle" class="alert-success mb-4">
+                                                        {{ session('reply-success') }}
+                                                    </x-mary-alert>
+                                                @endif
+
+                                                @if (session('error'))
+                                                    <x-mary-alert icon="o-x-circle" class="alert-error mb-4">
+                                                        {{ session('error') }}
+                                                    </x-mary-alert>
+                                                @endif
+
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <label class="font-semibold text-sm opacity-70">
+                                                        Admin Replies ({{ $complaint->topLevelReplies->count() }})
+                                                    </label>
+                                                </div>
+
+                                                <!-- New Reply Form -->
+                                                @if($replyingTo === $complaint->id)
+                                                    <div class="bg-base-200 p-4 rounded-lg mb-4">
+                                                        <form wire:submit="postReply">
+                                                            <x-mary-textarea 
+                                                                wire:model="replyContent"
+                                                                placeholder="Write your reply..."
+                                                                rows="3"
+                                                                class="w-full mb-3" />
+                                                            @error('replyContent')
+                                                                <span class="text-error text-sm mb-2 block">{{ $message }}</span>
+                                                            @enderror
+                                                            <div class="flex justify-end space-x-2">
+                                                                <x-mary-button wire:click="cancelReply" class="btn-outline btn-sm">
+                                                                    Cancel
+                                                                </x-mary-button>
+                                                                <x-mary-button type="submit" class="btn-primary btn-sm">
+                                                                    Post Reply
+                                                                </x-mary-button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                @else
+                                                    <div class="mb-4">
+                                                        <x-mary-button wire:click="setReplyingTo({{ $complaint->id }})" class="btn-primary btn-sm">
+                                                            <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4" />
+                                                            Add Reply
+                                                        </x-mary-button>
+                                                    </div>
+                                                @endif
+
+                                                <!-- Replies List -->
+                                                <div class="space-y-3 max-h-96 overflow-y-auto">
+                                                    @forelse($complaint->topLevelReplies as $reply)
+                                                        @include('livewire.partials.complaint-reply', ['reply' => $reply, 'depth' => 0])
+                                                    @empty
+                                                        <div class="text-center py-4 text-base-content/60">
+                                                            <x-mary-icon name="o-chat-bubble-left" class="w-8 h-8 mx-auto mb-2 opacity-40" />
+                                                            <p class="text-sm">No replies yet. Be the first to respond!</p>
+                                                        </div>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div class="modal-action">
