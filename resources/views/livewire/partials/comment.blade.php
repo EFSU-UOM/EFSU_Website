@@ -43,9 +43,21 @@
                             Cancel
                         </button>
                     @else
-                        <button wire:click="setReplyingTo({{ $comment->id }})" class="text-xs text-primary hover:text-primary-focus">
+                        <x-mary-button wire:click="setReplyingTo({{ $comment->id }})" class="btn-ghost btn-xs">
+                            <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4" />
                             Reply
-                        </button>
+                        </x-mary-button>
+                    @endif
+
+                    <!-- Delete Button (for comment owner or admin) -->
+                    @if ($comment->user_id === auth()->id() || auth()->user()->isAdmin())
+                        <x-mary-button 
+                            wire:click="deleteComment({{ $comment->id }})"
+                            wire:confirm="Are you sure you want to delete this comment?"
+                            class="btn-ghost btn-xs text-error">
+                            <x-mary-icon name="o-trash" class="w-4 h-4" />
+                            Delete
+                        </x-mary-button>
                     @endif
                 @endauth
             </div>

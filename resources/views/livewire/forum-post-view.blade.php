@@ -182,6 +182,50 @@ $togglePin = function () {
     }
 };
 
+$deleteComment = function ($commentId) {
+    if (!auth()->check()) {
+        $this->js('alert("Please log in to delete comments.")');
+        return;
+    }
+    
+    $comment = ForumComment::find($commentId);
+    if (!$comment) {
+        $this->js('alert("Comment not found.")');
+        return;
+    }
+    
+    // Check if user is admin or comment owner
+    if (!auth()->user()->isAdmin() && $comment->user_id !== auth()->id()) {
+        $this->js('alert("You can only delete your own comments.")');
+        return;
+    }
+    
+    $comment->delete();
+    $this->dispatch('comment-deleted');
+};
+
+$deletePost = function () {
+    if (!auth()->check()) {
+        $this->js('alert("Please log in to delete posts.")');
+        return;
+    }
+    
+    $post = ForumPost::find($this->postId);
+    if (!$post) {
+        $this->js('alert("Post not found.")');
+        return;
+    }
+    
+    // Check if user is admin or post owner
+    if (!auth()->user()->isAdmin() && $post->user_id !== auth()->id()) {
+        $this->js('alert("You can only delete your own posts.")');
+        return;
+    }
+    
+    $post->delete();
+    return redirect()->route('forum');
+};
+
 ?>
 
 <section class="bg-base-100 py-16">
@@ -221,15 +265,26 @@ $togglePin = function () {
                             class="badge-{{ $this->post->category->color() }} mb-2" />
                         <div class="flex items-center justify-between">
                             <h1 class="text-3xl font-bold text-base-content">{{ $this->post->title }}</h1>
-                            @if(auth()->check() && auth()->user()->isAdmin())
-                                <button 
-                                    wire:click="togglePin"
-                                    class="flex items-center space-x-2 px-3 py-1 rounded-md text-sm transition-colors
-                                           {{ $this->post->is_pinned ? 'bg-warning/20 text-warning hover:bg-warning/30' : 'bg-base-300 text-base-content/60 hover:bg-base-300/80' }}">
-                                    <x-mary-icon name="{{ $this->post->is_pinned ? 'o-bookmark-slash' : 'o-bookmark' }}" class="w-4 h-4" />
-                                    <span>{{ $this->post->is_pinned ? 'Unpin' : 'Pin' }}</span>
-                                </button>
-                            @endif
+                            <div class="flex items-center space-x-2">
+                                @if(auth()->check() && auth()->user()->isAdmin())
+                                    <button 
+                                        wire:click="togglePin"
+                                        class="flex items-center space-x-2 px-3 py-1 rounded-md text-sm transition-colors
+                                               {{ $this->post->is_pinned ? 'bg-warning/20 text-warning hover:bg-warning/30' : 'bg-base-300 text-base-content/60 hover:bg-base-300/80' }}">
+                                        <x-mary-icon name="{{ $this->post->is_pinned ? 'o-bookmark-slash' : 'o-bookmark' }}" class="w-4 h-4" />
+                                        <span>{{ $this->post->is_pinned ? 'Unpin' : 'Pin' }}</span>
+                                    </button>
+                                @endif
+                                @if(auth()->check() && (auth()->user()->isAdmin() || $this->post->user_id === auth()->id()))
+                                    <button 
+                                        wire:click="deletePost"
+                                        wire:confirm="Are you sure you want to delete this post? This action cannot be undone."
+                                        class="flex items-center space-x-2 px-3 py-1 rounded-md text-sm transition-colors bg-error/20 text-error hover:bg-error/30">
+                                        <x-mary-icon name="o-trash" class="w-4 h-4" />
+                                        <span>Delete</span>
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                         @if($this->post->is_pinned)
                             <x-mary-badge value="Pinned" class="badge-warning mt-2" />
