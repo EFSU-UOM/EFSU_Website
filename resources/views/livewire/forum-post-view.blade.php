@@ -5,26 +5,21 @@ use App\Models\ForumComment;
 use function Livewire\Volt\{computed, state, mount};
 
 state([
-    'postId',
+    'post',
     'newComment' => '',
     'replyingTo' => null,
     'replyContent' => '',
     'expandedComments' => [],
 ]);
 
-mount(function ($postId) {
-    $this->postId = $postId;
+mount(function (ForumPost $post) {
+    $this->post = $post->load(['user', 'votes'])->loadCount(['comments']);
 });
 
-$post = computed(function () {
-    return ForumPost::with(['user', 'votes'])
-        ->withCount(['comments'])
-        ->findOrFail($this->postId);
-});
 
 $comments = computed(function () {
     return ForumComment::with(['user', 'replies.user', 'replies.replies.user'])
-        ->where('post_id', $this->postId)
+        ->where('post_id', $this->post->id)
         ->whereNull('parent_id')
         ->orderBy('score', 'desc')
         ->orderBy('created_at', 'asc')
@@ -47,7 +42,7 @@ $postComment = function () {
 
     ForumComment::create([
         'content' => $this->newComment,
-        'post_id' => $this->postId,
+        'post_id' => $this->post->id,
         'user_id' => auth()->id(),
         'upvotes' => 0,
         'downvotes' => 0,
@@ -70,7 +65,7 @@ $postReply = function ($parentId) {
 
     ForumComment::create([
         'content' => $this->replyContent,
-        'post_id' => $this->postId,
+        'post_id' => $this->post->id,
         'parent_id' => $parentId,
         'user_id' => auth()->id(),
         'upvotes' => 0,
@@ -93,11 +88,8 @@ $upvotePost = function () {
         return;
     }
     
-    $post = ForumPost::find($this->postId);
-    if ($post) {
-        $post->upvote(auth()->user());
-        $this->dispatch('post-voted');
-    }
+    $this->post->upvote(auth()->user());
+    $this->dispatch('post-voted');
 };
 
 $downvotePost = function () {
@@ -110,11 +102,8 @@ $downvotePost = function () {
         return;
     }
     
-    $post = ForumPost::find($this->postId);
-    if ($post) {
-        $post->downvote(auth()->user());
-        $this->dispatch('post-voted');
-    }
+    $this->post->downvote(auth()->user());
+    $this->dispatch('post-voted');
 };
 
 $upvoteComment = function ($commentId) {
@@ -175,11 +164,8 @@ $togglePin = function () {
         return;
     }
     
-    $post = ForumPost::find($this->postId);
-    if ($post) {
-        $post->togglePin();
-        $this->dispatch('post-pinned');
-    }
+    $this->post->togglePin();
+    $this->dispatch('post-pinned');
 };
 
 $deleteComment = function ($commentId) {
@@ -210,19 +196,13 @@ $deletePost = function () {
         return;
     }
     
-    $post = ForumPost::find($this->postId);
-    if (!$post) {
-        $this->js('alert("Post not found.")');
-        return;
-    }
-    
     // Check if user is admin or post owner
-    if (!auth()->user()->isAdmin() && $post->user_id !== auth()->id()) {
+    if (!auth()->user()->isAdmin() && $this->post->user_id !== auth()->id()) {
         $this->js('alert("You can only delete your own posts.")');
         return;
     }
     
-    $post->delete();
+    $this->post->delete();
     return redirect()->route('forum');
 };
 

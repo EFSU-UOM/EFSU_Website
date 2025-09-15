@@ -34,8 +34,8 @@ Route::get('/forum', function () {
     return view('forum');
 })->name('forum');
 
-Route::get('/forum/{post}', function (int $post) {
-    return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
+Route::get('/forum/{post}', function (App\Models\ForumPost $post) {
+    return view('forum-post', ['post' => $post]);
 })->name('forum.post');
 
 Route::get('/lost-and-found', function () {
