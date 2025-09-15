@@ -75,29 +75,38 @@ new class extends Component {
 ?>
 
 <div class="max-w-7xl mx-auto px-4 py-8 space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+    @auth
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-base-content">Complaints</h1>
+                <p class="text-base-content/70 mt-1">Submit new complaints and track existing ones</p>
+            </div>
+            <x-mary-button wire:click="openCreateForm" class="btn-primary">
+                <x-mary-icon name="o-plus" class="w-5 h-5" />
+                Submit New Complaint
+            </x-mary-button>
+        </div>
+    @else
+        <!-- Login Prompt Header -->
+        <div class="text-center">
             <h1 class="text-3xl font-bold text-base-content">Complaints</h1>
             <p class="text-base-content/70 mt-1">Submit new complaints and track existing ones</p>
         </div>
-        <x-mary-button wire:click="openCreateForm" class="btn-primary">
-            <x-mary-icon name="o-plus" class="w-5 h-5" />
-            Submit New Complaint
-        </x-mary-button>
-    </div>
+    @endauth
 
-    <!-- Create Complaint Modal -->
-    <x-mary-modal wire:model="showCreateForm" title="Submit a Complaint" class="backdrop-blur" box-class="max-w-2xl">
-        <livewire:create-complaint-form />
-        
-        <x-slot:actions>
-            <x-mary-button label="Close" wire:click="closeCreateForm" />
-        </x-slot:actions>
-    </x-mary-modal>
+    @auth
+        <!-- Create Complaint Modal -->
+        <x-mary-modal wire:model="showCreateForm" title="Submit a Complaint" class="backdrop-blur" box-class="max-w-2xl">
+            <livewire:create-complaint-form />
+            
+            <x-slot:actions>
+                <x-mary-button label="Close" wire:click="closeCreateForm" />
+            </x-slot:actions>
+        </x-mary-modal>
 
-    <!-- Filters -->
-    <x-mary-card>
+        <!-- Filters -->
+        <x-mary-card>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <x-mary-input 
                 wire:model.live.debounce.300ms="search" 
@@ -221,4 +230,27 @@ new class extends Component {
             </div>
         </x-mary-card>
     @endif
+    @else
+        <!-- Login Prompt for Guests -->
+        <x-mary-card class="text-center py-12">
+            <div class="space-y-6">
+                <x-mary-icon name="o-lock-closed" class="w-16 h-16 text-primary mx-auto" />
+                <div>
+                    <h3 class="text-2xl font-semibold text-base-content mb-2">Login Required</h3>
+                    <p class="text-base-content/70 text-lg">
+                        You need to be logged in to submit and view complaints.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <x-mary-button link="{{ route('login') }}" class="btn-primary">
+                        <x-mary-icon name="o-arrow-right-on-rectangle" class="w-5 h-5" />
+                        Login to Continue
+                    </x-mary-button>
+                    <x-mary-button link="{{ route('register') }}" class="btn-outline">
+                        Don't have an account? Register
+                    </x-mary-button>
+                </div>
+            </div>
+        </x-mary-card>
+    @endauth
 </div>
