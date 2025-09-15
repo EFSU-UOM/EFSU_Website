@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 use App\Models\ForumPost;
-use App\Models\LostAndFound;
 
 Route::get('/', function () {
     return view('home');
@@ -35,8 +34,8 @@ Route::get('/forum', function () {
     return view('forum');
 })->name('forum');
 
-Route::get('/forum/{post}', function (int $post) {
-    return view('forum-post', ['post' => ForumPost::findOrFail($post)]);
+Route::get('/forum/{post}', function (App\Models\ForumPost $post) {
+    return view('forum-post', ['post' => $post]);
 })->name('forum.post');
 
 Route::get('/lost-and-found', function () {
@@ -76,6 +75,10 @@ Route::get('/store', function () {
     return view('store');
 })->name('store');
 
+Route::get('/complaints', function () {
+    return view('complaints');
+})->name('complaints');
+
 Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'notify'])->name('payment.notify');
 
 Route::get('/payment/success', function () {
@@ -98,10 +101,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/payment/{orderId}', function ($orderId) {
         return view('payment', ['orderId' => $orderId]);
     })->name('payment');
-
-    Route::get('/complaints', function () {
-        return view('complaints');
-    })->name('complaints');
 });
 
 Route::middleware(['admin', 'auth', 'verified'])->group(function () {

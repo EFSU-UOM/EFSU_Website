@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NewsArticle extends Model
 {
@@ -23,4 +22,20 @@ class NewsArticle extends Model
         'is_featured' => 'boolean',
         'published_at' => 'datetime'
     ];
+
+    public function getTimeAgo()
+    {
+        $now = now();
+        $diffInMinutes = round($now->diffInMinutes($this->created_at,true));
+        $diffInHours = round($now->diffInHours($this->created_at,true));
+        $diffInDays = round($now->diffInDays($this->created_at,true));
+
+        if ($diffInMinutes < 60) {
+            return $diffInMinutes < 1 ? 'Just now' : $diffInMinutes . ' minutes ago';
+        } elseif ($diffInHours < 24) {
+            return $diffInHours . ' hours ago';
+        } else {
+            return $diffInDays . ' days ago';
+        }
+    }
 }

@@ -181,6 +181,28 @@ $downvote = function ($postId) {
         $this->dispatch('post-voted');
     }
 };
+
+$deletePost = function ($postId) {
+    if (!auth()->check()) {
+        $this->js('alert("Please log in to delete posts.")');
+        return;
+    }
+    
+    $post = ForumPost::find($postId);
+    if (!$post) {
+        $this->js('alert("Post not found.")');
+        return;
+    }
+    
+    // Check if user is admin or post owner
+    if (!auth()->user()->isAdmin() && $post->user_id !== auth()->id()) {
+        $this->js('alert("You can only delete your own posts.")');
+        return;
+    }
+    
+    $post->delete();
+    $this->dispatch('post-deleted');
+};
 ?>
 
 <section class="bg-base-100 py-16">
@@ -257,18 +279,29 @@ $downvote = function ($postId) {
                             </div>
                             
                             <div class="flex-1">
-                                <div class="flex items-center mb-2">
-                                    @if($post->is_pinned)
-                                        <x-mary-badge value="Pinned" class="badge-warning mr-2" />
-                                    @endif
-                                    <x-mary-badge 
-                                        value="{{ $post->category->label() }}" 
-                                        class="badge-{{ $post->category->color() }} mr-2" />
-                                    <a href="{{ route('forum.post', $post) }}" class="text-lg font-semibold text-base-content hover:text-primary cursor-pointer">
-                                        {{ $post->title }}
-                                    </a>
-                                    @if($post->is_pinned)
-                                        <x-mary-icon name="o-bookmark" class="w-4 h-4 text-warning ml-2" />
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        @if($post->is_pinned)
+                                            <x-mary-badge value="Pinned" class="badge-warning mr-2" />
+                                        @endif
+                                        <x-mary-badge 
+                                            value="{{ $post->category->label() }}" 
+                                            class="badge-{{ $post->category->color() }} mr-2" />
+                                        <a href="{{ route('forum.post', $post) }}" class="text-lg font-semibold text-base-content hover:text-primary cursor-pointer">
+                                            {{ $post->title }}
+                                        </a>
+                                        @if($post->is_pinned)
+                                            <x-mary-icon name="o-bookmark" class="w-4 h-4 text-warning ml-2" />
+                                        @endif
+                                    </div>
+                                    @if(auth()->check() && (auth()->user()->isAdmin() || $post->user_id === auth()->id()))
+                                        <button 
+                                            wire:click="deletePost({{ $post->id }})"
+                                            wire:confirm="Are you sure you want to delete this post? This action cannot be undone."
+                                            class="flex items-center space-x-1 px-2 py-1 rounded-md text-xs transition-colors bg-error/20 text-error hover:bg-error/30">
+                                            <x-mary-icon name="o-trash" class="w-3 h-3" />
+                                            <span>Delete</span>
+                                        </button>
                                     @endif
                                 </div>
                                 <p class="text-base-content/70 mb-3">{{ Str::limit($post->content, 1000) }}</p>
