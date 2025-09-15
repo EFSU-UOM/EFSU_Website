@@ -31,6 +31,9 @@
     <!-- Quick Access Section -->
     <livewire:quick-access />
 
+    <!-- Latest News Section -->
+    <livewire:latest-news />
+
     <!-- Latest Announcements Section -->
     <livewire:latest-announcements />
 </x-layouts.public>
