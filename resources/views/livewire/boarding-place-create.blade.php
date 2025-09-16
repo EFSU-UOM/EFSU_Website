@@ -54,6 +54,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot create boarding places.');
+            return redirect()->route('boarding.places');
+        }
+
         $this->validate();
 
         $data = [

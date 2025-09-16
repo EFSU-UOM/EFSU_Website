@@ -69,6 +69,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->access_level->value <= AccessLevel::ADMIN->value;
     }
 
+    public function isModerator()
+    {
+        return $this->access_level->value <= AccessLevel::MODERATOR->value;
+    }
+
+    public function isBanned()
+    {
+        return $this->access_level === AccessLevel::BANNED;
+    }
+
     public function hasAccessLevel(AccessLevel $requiredLevel): bool
     {
         return $this->access_level->canAccess($requiredLevel);

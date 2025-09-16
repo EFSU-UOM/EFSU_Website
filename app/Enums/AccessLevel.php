@@ -8,6 +8,7 @@ enum AccessLevel: int
     case ADMIN = 1;
     case MODERATOR = 10;
     case USER = 100;
+    case BANNED = 1000;
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum AccessLevel: int
             AccessLevel::ADMIN => 'Admin',
             AccessLevel::MODERATOR => 'Moderator',
             AccessLevel::USER => 'Member',
+            AccessLevel::BANNED => 'Banned',
         };
     }
 

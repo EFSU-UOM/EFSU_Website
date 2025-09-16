@@ -78,6 +78,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post lost and found items.');
+            return;
+        }
+
         $this->resetForm();
         $this->showCreateForm = true;
     }
@@ -93,6 +98,11 @@ new class extends Component {
     {
         if (!auth()->check()) {
             return redirect()->route('login');
+        }
+
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post lost and found items.');
+            return;
         }
 
         $this->validate();
