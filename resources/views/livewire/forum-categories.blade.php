@@ -35,6 +35,10 @@ $openNewPostModal = function () {
         $this->js('alert("Please verify your email address to create posts.")');
         return;
     }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot create forum posts.")');
+        return;
+    }
 
     $this->showNewPostModal = true;
     $this->newPostTitle = '';
@@ -56,6 +60,10 @@ $createPost = function () {
     }
     if (!auth()->user()->hasVerifiedEmail()) {
         $this->js('alert("Please verify your email address to create posts.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot create forum posts.")');
         return;
     }
 

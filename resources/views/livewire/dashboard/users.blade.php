@@ -187,7 +187,7 @@ new class extends Component {
                             <td>{{ $user->contact ?? 'N/A' }}</td>
                             <td>
                                 <x-mary-badge :value="$user->getAccessLevelLabel()"
-                                    class="{{ $user->access_level->value <= 1 ? 'badge-error' : ($user->access_level->value <= 10 ? 'badge-warning' : 'badge-success') }}" />
+                                    class="{{ $user->access_level->value === 1000 ? 'badge-neutral' : ($user->access_level->value <= 1 ? 'badge-error' : ($user->access_level->value <= 10 ? 'badge-warning' : 'badge-success')) }}" />
                             </td>
                             <td>
                                 @if($user->id === auth()->id())
