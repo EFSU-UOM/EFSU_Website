@@ -12,6 +12,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $name = '';
     public string $email = '';
     public string $contact = '';
+    public string $batch = '';
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -24,6 +25,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class, 'ends_with:@uom.lk'],
             'contact' => ['required', 'string', 'regex:/^[1-9][0-9]{8}$/', 'size:9'],
+            'batch' => ['required', 'integer', 'min:0', 'max:99'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -65,6 +67,18 @@ new #[Layout('components.layouts.auth')] class extends Component {
             required
             autocomplete="email"
             placeholder="name.batch@uom.lk"
+            x-on:input="extractBatchFromEmail($event.target.value)"
+            hint="Please use your University of Moratuwa email address (not your personal email)"
+        />
+
+        <x-mary-input
+            wire:model="batch"
+            label="Batch"
+            type="number"
+            required
+            placeholder="23"
+            min="0"
+            max="99"
         />
 
         <x-mary-input
@@ -107,3 +121,18 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </a>
     </div>
 </div>
+
+<script>
+function extractBatchFromEmail(email) {
+    // Check if email follows the pattern: name.batch@uom.lk
+    const emailPattern = /^[^.]+\.(\d{2})@uom\.lk$/;
+    const match = email.match(emailPattern);
+    
+    if (match && match[1]) {
+        // Extract the batch number (2 digits)
+        const batch = match[1];
+        // Update the batch field using Livewire
+        @this.set('batch', batch);
+    }
+}
+</script>

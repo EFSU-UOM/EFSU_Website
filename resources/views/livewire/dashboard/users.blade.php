@@ -165,6 +165,7 @@ new class extends Component {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Contact</th>
+                        <th>Batch</th>
                         <th>Access Level</th>
                         <th>Actions</th>
                     </tr>
@@ -185,6 +186,7 @@ new class extends Component {
                             </td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->contact ?? 'N/A' }}</td>
+                            <td>{{ $user->batch ?? 'N/A' }}</td>
                             <td>
                                 <x-mary-badge :value="$user->getAccessLevelLabel()"
                                     class="{{ $user->access_level->value === 1000 ? 'badge-neutral' : ($user->access_level->value <= 1 ? 'badge-error' : ($user->access_level->value <= 10 ? 'badge-warning' : 'badge-success')) }}" />
@@ -200,7 +202,7 @@ new class extends Component {
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-8 text-muted-foreground">
+                            <td colspan="6" class="text-center py-8 text-muted-foreground">
                                 No users found matching your criteria.
                             </td>
                         </tr>
@@ -243,6 +245,7 @@ new class extends Component {
                         <h3 class="font-semibold text-lg">{{ $selectedUser->name }}</h3>
                         <p class="text-sm opacity-70">{{ $selectedUser->email }}</p>
                         <p class="text-sm opacity-70">Contact: {{ $selectedUser->contact ?? 'N/A' }}</p>
+                        <p class="text-sm opacity-70">Batch: {{ $selectedUser->batch ?? 'N/A' }}</p>
                         <p class="text-sm opacity-70">Current Access: {{ $selectedUser->getAccessLevelLabel() }}</p>
                     </div>
                 </div>

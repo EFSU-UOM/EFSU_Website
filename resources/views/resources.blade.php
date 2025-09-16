@@ -9,7 +9,7 @@
         </div>
     </section>
 
-    <!-- Resource Categories -->
+    {{-- <!-- Resource Categories -->
     <section class="bg-base-200 py-16">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -41,7 +41,7 @@
                 <x-mary-input placeholder="Search resources..." icon="o-magnifying-glass" />
             </div>
         </div>
-    </section>
+    </section> --}}
 
 
     <!-- Student Services Section -->
