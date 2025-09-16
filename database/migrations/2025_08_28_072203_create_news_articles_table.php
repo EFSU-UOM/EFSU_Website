@@ -22,6 +22,13 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
+            
+            $table->index('category');
+            $table->index('is_published');
+            $table->index('is_featured');
+            $table->index('published_at');
+            $table->index(['is_published', 'category']);
+            $table->index(['is_published', 'published_at']);
         });
     }
 

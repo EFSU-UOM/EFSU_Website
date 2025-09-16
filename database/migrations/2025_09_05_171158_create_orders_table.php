@@ -35,6 +35,11 @@ return new class extends Migration
             $table->timestamp('paid_at')->nullable();
             
             $table->timestamps();
+            
+            $table->index('user_id');
+            $table->index('status');
+            $table->index('created_at');
+            $table->index(['user_id', 'status']);
         });
     }
 

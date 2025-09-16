@@ -33,6 +33,8 @@ return new class extends Migration
             $table->index(['status', 'created_at']);
             $table->index('distance_to_university');
             $table->index('price');
+            $table->index('capacity');
+            $table->index('title');
         });
     }
 

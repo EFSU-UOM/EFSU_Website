@@ -16,8 +16,22 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // link to users table
             $table->string('category'); // canteen, sports, other
             $table->text('complaint_text'); // the complaint content
-            $table->enum('status', ['pending', 'reviewed', 'resolved'])->default('pending');
+            $table->boolean('is_anonymous')->default(false);
+            $table->json('images')->nullable();
+            $table->enum('status', [
+                'delivered', 
+                'viewed', 
+                'in_progress', 
+                'action_taken', 
+                'rejected', 
+                'incomplete'
+            ])->default('delivered');
             $table->timestamps();
+            
+            $table->index('user_id');
+            $table->index('category');
+            $table->index('status');
+            $table->index(['status', 'category']);
         });
     }
 

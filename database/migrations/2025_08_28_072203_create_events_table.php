@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('facebook_page_url')->nullable();
             $table->json('facebook_album_urls')->nullable();
             $table->timestamps();
+            
+            $table->index('type');
         });
     }
 
