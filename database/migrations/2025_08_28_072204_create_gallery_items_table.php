@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('category')->default('events'); // events, seminars, trips, activities
             $table->string('link')->nullable();
             $table->timestamps();
+            
+            $table->index('category');
         });
     }
 

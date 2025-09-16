@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('image_url')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
+            
+            $table->index('is_active');
+            $table->index('expires_at');
         });
     }
 

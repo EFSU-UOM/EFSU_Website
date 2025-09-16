@@ -23,6 +23,13 @@ return new class extends Migration
             $table->enum('status', ['active', 'owner_found', 'lost_item_obtained'])->default('active');
             $table->timestamp('item_date')->nullable(); // Date when item was lost/found
             $table->timestamps();
+            
+            $table->index('type');
+            $table->index('status');
+            $table->index('item_date');
+            $table->index(['type', 'status']);
+            $table->index('location');
+            $table->index('title');
         });
     }
 
