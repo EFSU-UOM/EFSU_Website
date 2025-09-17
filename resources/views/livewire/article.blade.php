@@ -98,9 +98,9 @@ new class extends Component {
 
         <!-- Featured Image -->
         @if ($article->image_url)
-            <div class="mb-8">
+            <div class="mb-8 max-w-md mx-auto md:max-w-lg">
                 <img src="{{ Storage::url($article->image_url) }}" alt="{{ $article->title }}"
-                    class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg">
+                    class="w-full aspect-square object-contain rounded-lg shadow-lg">
             </div>
         @endif
     </div>
@@ -120,12 +120,9 @@ new class extends Component {
             <div class="flex items-center gap-4">
                 <span class="text-base-content/70 font-medium">Share this article:</span>
                 <div class="flex gap-2">
-                    {{-- <x-mary-button
-                        onclick="navigator.share ? navigator.share({title: '{{ addslashes($article->title) }}', url: window.location.href}) : window.open('https://twitter.com/intent/tweet?text={{ urlencode($article->title) }}&url=' + encodeURIComponent(window.location.href), '_blank')"
-                        class="btn-ghost btn-sm" icon="o-share" />
-                    <x-mary-button href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($article->url) }}"
-                        class="btn-ghost btn-sm">
-                    </x-mary-button> --}}
+                    <x-mary-button
+                        onclick="navigator.share ? navigator.share({title: '{{ addslashes($article->title) }}', url: window.location.href}) : window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank')"
+                        class="btn-ghost btn-sm" icon="o-share" /> 
                 </div>
             </div>
 

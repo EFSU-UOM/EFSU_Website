@@ -55,7 +55,7 @@ $getBadgeColor = function($category) {
                 <x-mary-card class="bg-base-100 border border-base-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                     <x-slot:figure>
                         <img src="{{ Storage::url($article->image_url) }}"
-                             alt="{{ $article->title }}" class="w-full h-48 object-cover">
+                             alt="{{ $article->title }}" class="w-full aspect-square object-cover">
                     </x-slot:figure>
                         <div class="flex items-center mb-3">
                             <x-mary-badge value="{{ ucfirst($article->category) }}" color="{{ $this->getBadgeColor($article->category) }}" class="mr-3" />

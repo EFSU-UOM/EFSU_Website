@@ -41,7 +41,7 @@ $getBadgeColor = function($category) {
                 <x-mary-card class="{{ $article->is_featured ? 'border border-secondary/20 bg-secondary/5' : '' }}">
                     @if($article->image_url)
                         <div class="aspect-square w-full mb-4 overflow-hidden rounded-lg bg-base-200">
-                            <img src="{{ $article->image_url }}" alt="{{ $article->title }}" 
+                            <img src="{{ Storage::url($article->image_url) }}" alt="{{ $article->title }}" 
                                  class="w-full h-full object-cover">
                         </div>
                     @endif

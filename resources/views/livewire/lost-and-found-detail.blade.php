@@ -355,7 +355,7 @@ new class extends Component {
                             @if ($item->image)
                                 <div class="aspect-square bg-base-200 rounded-lg overflow-hidden">
                                     <img src="{{ Storage::url($item->image) }}" alt="{{ $item->title }}"
-                                        class="w-full h-full object-cover">
+                                        class="w-full h-full object-contain">
                                 </div>
                             @else
                                 <div class="aspect-square bg-base-200 rounded-lg flex items-center justify-center">
