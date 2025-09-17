@@ -100,7 +100,7 @@ new class extends Component {
         @if ($article->image_url)
             <div class="mb-8 max-w-md mx-auto md:max-w-lg">
                 <img src="{{ Storage::url($article->image_url) }}" alt="{{ $article->title }}"
-                    class="w-full aspect-square object-cover rounded-lg shadow-lg">
+                    class="w-full aspect-square object-contain rounded-lg shadow-lg">
             </div>
         @endif
     </div>
