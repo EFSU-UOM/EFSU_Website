@@ -96,11 +96,12 @@ new #[Layout('components.layouts.auth')] class extends Component {
             wire:click="sendVerification" 
             class="btn-primary w-full" 
             :disabled="!$canResend"
+            id="resend-button"
         >
             @if(!$canResend && $timeRemaining > 0)
-                {{ __('Resend in') }} {{ gmdate('i:s', $timeRemaining) }}
+                <span id="button-text">{{ __('Resend in') }} <span id="timer-display">{{ gmdate('i:s', $timeRemaining) }}</span></span>
             @else
-                {{ __('Resend verification email') }}
+                <span id="button-text">{{ __('Resend verification email') }}</span>
             @endif
         </x-mary-button>
 
@@ -117,13 +118,28 @@ new #[Layout('components.layouts.auth')] class extends Component {
         function startTimer() {
             if (timer) clearInterval(timer);
             
+            let startTime = Date.now();
+            let initialTimeRemaining = @this.timeRemaining;
+            
             timer = setInterval(function() {
-                if (@this.timeRemaining > 0) {
-                    @this.timeRemaining--;
-                    @this.$refresh();
+                let elapsed = Math.floor((Date.now() - startTime) / 1000);
+                let currentTimeRemaining = Math.max(0, initialTimeRemaining - elapsed);
+                
+                if (currentTimeRemaining > 0) {
+                    // Update only the DOM, no server requests
+                    let minutes = Math.floor(currentTimeRemaining / 60);
+                    let seconds = currentTimeRemaining % 60;
+                    let timeString = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                    
+                    let timerDisplay = document.getElementById('timer-display');
+                    if (timerDisplay) {
+                        timerDisplay.textContent = timeString;
+                    }
                 } else {
-                    @this.canResend = true;
+                    // Timer finished, update server state once
                     clearInterval(timer);
+                    @this.timeRemaining = 0;
+                    @this.canResend = true;
                     @this.$refresh();
                 }
             }, 1000);
