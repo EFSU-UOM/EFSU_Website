@@ -43,7 +43,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         if ($this->isPasswordPwned($this->password)) {
             // Flash a warning message after successful login
-            session()->flash('password_breach_warning', '⚠️ Your password has appeared in a data breach. For your safety, please change it soon.');
+            session()->flash('password_breach_warning', ' Your password has appeared in a data breach. For your safety, please change it soon.');
         }
 
         $this->redirectIntended(default: route('home', absolute: false), navigate: true);
@@ -81,26 +81,31 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
 
 
-    protected function isPasswordPwned(string $password): bool
-    {
-        $sha1 = strtoupper(sha1($password));
-        $prefix = substr($sha1, 0, 5);
-        $suffix = substr($sha1, 5);
+  protected function isPasswordPwned(string $password): bool
+{
+    $sha1 = strtoupper(sha1($password));
+    $prefix = substr($sha1, 0, 5);
+    $suffix = substr($sha1, 5);
 
-        $response = Http::get("https://api.pwnedpasswords.com/range/{$prefix}");
-        if ($response->failed()) {
-            return false; // fail-safe
-        }
-
-        foreach (explode("\n", $response->body()) as $line) {
-            [$hashSuffix, $count] = explode(':', $line);
-            if ($suffix === trim($hashSuffix)) {
-                return true;
-            }
-        }
-
-        return false;
+    $response = Http::get("https://api.pwnedpasswords.com/range/{$prefix}");
+    if ($response->failed()) {
+        return false; // fail-safe
     }
+
+    foreach (explode("\n", $response->body()) as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, ':') === false) {
+            continue; // skip empty or malformed lines
+        }
+
+        [$hashSuffix, $count] = explode(':', $line, 2); // limit to 2 parts
+        if ($suffix === $hashSuffix) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 
@@ -119,7 +124,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     </div>
 
   @if (session('status'))
-    <x-mary-alert color="warning" class="text-center">
+    <x-mary-alert color="info" class="text-center">
         {{ session('status') }}
     </x-mary-alert>
 @endif
