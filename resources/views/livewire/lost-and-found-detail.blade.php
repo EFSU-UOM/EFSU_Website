@@ -24,26 +24,44 @@ new class extends Component {
     public $image = null;
     public $editingStatus = '';
 
+    public $currentImageUrl = null;
+
     // Comment functionality
     public $newComment = '';
     public $replyingTo = null;
     public $replyContent = '';
 
-    protected $rules = [
-        'type' => 'required|in:lost,found',
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'location' => 'nullable|string|max:255',
-        'contact_info' => 'nullable|string|max:255',
-        'item_date' => 'nullable|date',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'newComment' => 'required|string|max:1000',
-        'replyContent' => 'required|string|max:1000',
-    ];
+    protected function getPostValidationRules()
+    {
+        return [
+            'type' => 'required|in:lost,found',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
+            'contact_info' => 'nullable|string|max:255',
+            'item_date' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ];
+    }
+
+    protected function getCommentValidationRules()
+    {
+        return [
+            'newComment' => 'required|string|max:1000',
+        ];
+    }
+
+    protected function getReplyValidationRules()
+    {
+        return [
+            'replyContent' => 'required|string|max:1000',
+        ];
+    }
 
     public function mount(LostAndFound $item)
     {
         $this->item = $item;
+        $this->currentImageUrl = $item->image;
         
         // Set social meta data for this item
         $this->setSocialMeta();
@@ -105,7 +123,7 @@ new class extends Component {
             abort(403);
         }
 
-        $this->validate();
+        $this->validate($this->getPostValidationRules());
 
         $data = [
             'type' => $this->type,
@@ -176,7 +194,7 @@ new class extends Component {
             return redirect()->route('login');
         }
 
-        $this->validate(['newComment' => 'required|string|max:1000']);
+        $this->validate($this->getCommentValidationRules());
 
         LostAndFoundComment::create([
             'user_id' => auth()->id(),
@@ -194,7 +212,7 @@ new class extends Component {
             return redirect()->route('login');
         }
 
-        $this->validate(['replyContent' => 'required|string|max:1000']);
+        $this->validate($this->getReplyValidationRules());
 
         LostAndFoundComment::create([
             'user_id' => auth()->id(),
@@ -360,12 +378,9 @@ new class extends Component {
 
                             <!-- Image Upload -->
                             <div>
-                                <x-mary-file wire:model="image" label="Item Photo (Optional)" accept="image/*"
-                                    crop-after-change>
-                                    @if (!empty($item->image))
-                                        <img src="{{ Storage::url($item->image) }}"
-                                            class="h-32 w-32 object-cover rounded-lg">
-                                    @endif
+                                <x-mary-file wire:model="image" label="Upload New Image (optional)" accept="image/*" crop-after-change>
+                                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}" 
+                                        alt="Preview" class="w-full h-48 object-cover rounded-lg" />
                                 </x-mary-file>
                             </div>
                         </form>
