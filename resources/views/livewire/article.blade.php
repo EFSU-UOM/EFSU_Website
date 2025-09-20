@@ -9,6 +9,75 @@ new class extends Component {
     public function mount(NewsArticle $article)
     {
         $this->article = $article;
+        
+        // Set social meta data for this article
+        $this->setSocialMeta();
+    }
+    
+    private function setSocialMeta()
+    {
+        $socialMeta = [
+            'title' => $this->article->title . ' | ' . config('app.name'),
+            'description' => $this->article->excerpt ?: Str::limit(strip_tags($this->article->content), 160),
+            'type' => 'article',
+            'author' => config('app.name'),
+            'published_time' => $this->article->published_at->toISOString(),
+            'section' => $this->article->category,
+            'tags' => [$this->article->category],
+        ];
+        
+        if ($this->article->image_url) {
+            $socialMeta['image'] = Storage::url($this->article->image_url);
+            $socialMeta['image_alt'] = $this->article->title;
+            $socialMeta['image_width'] = '1200';
+            $socialMeta['image_height'] = '630';
+        }
+        
+        if ($this->article->updated_at != $this->article->created_at) {
+            $socialMeta['modified_time'] = $this->article->updated_at->toISOString();
+        }
+        
+        if ($this->article->is_featured) {
+            $socialMeta['tags'][] = 'Featured';
+        }
+        
+        // Add structured data
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'NewsArticle',
+            'headline' => $this->article->title,
+            'description' => $socialMeta['description'],
+            'datePublished' => $this->article->published_at->toISOString(),
+            'author' => [
+                '@type' => 'Organization',
+                'name' => config('app.name')
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => config('app.name'),
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('android-chrome-192x192.png')
+                ]
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => request()->url()
+            ]
+        ];
+        
+        if ($this->article->image_url) {
+            $structuredData['image'] = Storage::url($this->article->image_url);
+        }
+        
+        if ($this->article->updated_at != $this->article->created_at) {
+            $structuredData['dateModified'] = $this->article->updated_at->toISOString();
+        }
+        
+        $socialMeta['structured_data'] = $structuredData;
+        
+        // Make it available to the view
+        view()->share('socialMeta', $socialMeta);
     }
 
     public function getBadgeColor($category)
