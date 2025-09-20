@@ -87,7 +87,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
     $prefix = substr($sha1, 0, 5);
     $suffix = substr($sha1, 5);
 
-    $response = Http::get("https://api.pwnedpasswords.com/range/{$prefix}");
+   try {
+        $response = Http::timeout(2)->get("https://api.pwnedpasswords.com/range/{$prefix}");
+    } catch (\Exception $e) {
+        return false; // fail-safe on timeout or connection error
+    }
     if ($response->failed()) {
         return false; // fail-safe
     }
