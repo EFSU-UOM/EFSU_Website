@@ -62,6 +62,36 @@ new class extends Component {
     {
         $this->item = $item;
         $this->currentImageUrl = $item->image;
+        
+        // Set social meta data for this item
+        $this->setSocialMeta();
+    }
+    
+    private function setSocialMeta()
+    {
+        $socialMeta = [
+            'title' => $this->item->title . ' - Lost & Found | ' . config('app.name'),
+            'description' => Str::limit($this->item->description, 160),
+            'type' => 'article',
+            'author' => $this->item->user->name,
+            'published_time' => $this->item->created_at->toISOString(),
+            'section' => 'Lost & Found',
+            'tags' => [$this->item->type_label],
+        ];
+        
+        if ($this->item->image) {
+            $socialMeta['image'] = Storage::url($this->item->image);
+            $socialMeta['image_alt'] = $this->item->title;
+            $socialMeta['image_width'] = '1200';
+            $socialMeta['image_height'] = '630';
+        }
+        
+        if ($this->item->updated_at != $this->item->created_at) {
+            $socialMeta['modified_time'] = $this->item->updated_at->toISOString();
+        }
+        
+        // Make it available to the view
+        view()->share('socialMeta', $socialMeta);
     }
 
     public function enableEdit()
