@@ -170,6 +170,74 @@
         </div>
     </header>
 
+
+        <!-- Password Breach Warning Alert -->
+<!-- Password Breach Warning Alert -->
+@if ( session('password_breach_warning'))
+<!-- Inline alert for desktop -->
+<div class="hidden sm:block">
+    <x-mary-alert 
+        title="Warning {{ session('password_breach_warning') }}" 
+        icon="o-exclamation-triangle" 
+        dismissible 
+        class="alert-warning px-42 text-lg"
+        x-data="{ show: true }"
+        x-show="show"
+    >
+        <x-slot:actions>
+            <a href="{{ route('settings.password') }}" @click="show = false">
+                <x-mary-button label="Change password" class="btn-warning btn-soft"/>
+            </a>
+        </x-slot:actions>
+    </x-mary-alert>
+</div>
+
+<!-- Mobile popup alert -->
+<div class="sm:hidden" x-data="{ open: true }" x-show="open">
+    <!-- Full-screen dark overlay -->
+    <div 
+        class="fixed inset-0 bg-black/70 z-40" 
+        @click="open = false"
+    ></div>
+
+    <!-- Modal -->
+    <div class="fixed inset-0 flex items-center justify-center z-50 px-4">
+<div class="bg-base-100 rounded-lg w-full max-w-sm p-6 relative shadow-lg">
+
+            <!-- Close button -->
+         <!-- Close button -->
+<button 
+    @click="open = false" 
+    class="absolute top-3 right-3 text-gray-800 hover:text-gray-900 text-3xl font-bold"
+    aria-label="Close"
+>
+    &times;
+</button>
+
+
+            <!-- Warning message -->
+            <div class="mb-6 flex flex-col items-center text-center gap-2">
+                <x-mary-icon name="o-exclamation-triangle" class="h-8 w-8 "/>
+                <span class="font-medium content">
+                    Warning: {{ session('password_breach_warning') }}
+                </span>
+            </div>
+
+            <!-- Change password button -->
+            <a href="{{ route('settings.password') }}" @click="open = false">
+                <x-mary-button label="Change password" class="btn-warning btn-soft w-full"/>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+@endif
+
+
+
+
+
     <!-- Main Content -->
     <main class="min-h-screen">
         {{ $slot }}
