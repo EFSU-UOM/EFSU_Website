@@ -2,6 +2,7 @@
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -40,6 +41,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
+        if ($this->isPasswordPwned($this->password)) {
+            // Flash a warning message after successful login
+            session()->flash('password_breach_warning', '⚠️ Your password has appeared in a data breach. For your safety, please change it soon.');
+        }
+
         $this->redirectIntended(default: route('home', absolute: false), navigate: true);
     }
 
@@ -71,6 +77,39 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
     }
+
+
+
+
+    protected function isPasswordPwned(string $password): bool
+    {
+        $sha1 = strtoupper(sha1($password));
+        $prefix = substr($sha1, 0, 5);
+        $suffix = substr($sha1, 5);
+
+        $response = Http::get("https://api.pwnedpasswords.com/range/{$prefix}");
+        if ($response->failed()) {
+            return false; // fail-safe
+        }
+
+        foreach (explode("\n", $response->body()) as $line) {
+            [$hashSuffix, $count] = explode(':', $line);
+            if ($suffix === trim($hashSuffix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+
+
+
+
+
+
+
 }; ?>
 
 <div class="flex flex-col gap-6">
@@ -79,11 +118,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <p class="mt-1 text-sm text-base-content/70">{{ __('Enter your email and password below to log in') }}</p>
     </div>
 
-    @if (session('status'))
-        <x-mary-alert color="info" class="text-center">
-            {{ session('status') }}
-        </x-mary-alert>
-    @endif
+  @if (session('status'))
+    <x-mary-alert color="warning" class="text-center">
+        {{ session('status') }}
+    </x-mary-alert>
+@endif
+
+    
 
     <form method="POST" wire:submit="login" class="flex flex-col gap-6">
         <x-mary-input

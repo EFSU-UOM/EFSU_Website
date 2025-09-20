@@ -170,6 +170,31 @@
         </div>
     </header>
 
+    <!-- Password Breach Warning Alert -->
+<div
+    x-data="{ show: true }"
+    x-show="show"
+    x-init="setTimeout(() => show = false, 20000)"
+    class="bg-warning/20 border-l-4 border-warning text-warning-content dark:text-warning-content-light rounded shadow-md mb-4 transition-all duration-500"
+    role="alert"
+>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center">
+            <x-mary-icon name="o-exclamation-triangle" class="h-5 w-5 mr-3 text-warning" />
+            <span class="text-sm font-medium text-black dark:text-warning-content">
+                {{ session('password_breach_warning') }}
+            </span>
+        </div>
+        <button
+            @click="show = false"
+            class="text-warning hover:text-warning-focus font-bold focus:outline-none"
+        >
+            ✖
+        </button>
+    </div>
+</div>
+
+
     <!-- Main Content -->
     <main class="min-h-screen">
         {{ $slot }}
