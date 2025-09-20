@@ -76,7 +76,7 @@ new class extends Component {
             'tags' => [],
         ];
         
-        if ($this->boardingPlace->images && count($this->boardingPlace->images) > 0) {
+        if (!empty($this->boardingPlace->images)) {
             $socialMeta['image'] = Storage::url($this->boardingPlace->images[0]);
             $socialMeta['image_alt'] = $this->boardingPlace->title;
             $socialMeta['image_width'] = '1200';

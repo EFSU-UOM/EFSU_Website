@@ -83,7 +83,7 @@
 
 @if(isset($social['structured_data']))
     <script type="application/ld+json">
-    {!! json_encode($social['structured_data'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+    {{{ json_encode($social['structured_data'], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) }}}
     </script>
 @endif
 

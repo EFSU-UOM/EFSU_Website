@@ -18,7 +18,7 @@ new class extends Component {
     {
         $socialMeta = [
             'title' => $this->article->title . ' | ' . config('app.name'),
-            'description' => $this->article->excerpt ?: Str::limit(strip_tags($this->article->content), 160),
+            'description' => $this->article->excerpt ?: Str::limit(strip_tags($this->article->content ?? ''), 160),
             'type' => 'article',
             'author' => config('app.name'),
             'published_time' => $this->article->published_at->toISOString(),
