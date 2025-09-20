@@ -59,6 +59,40 @@ new class extends Component {
                 ->first();
             $this->rating = $this->userRating ? $this->userRating->rating : 0;
         }
+        
+        // Set social meta data for this boarding place
+        $this->setSocialMeta();
+    }
+    
+    private function setSocialMeta()
+    {
+        $socialMeta = [
+            'title' => $this->boardingPlace->title . ' - Boarding Places | ' . config('app.name'),
+            'description' => Str::limit($this->boardingPlace->description, 160),
+            'type' => 'article',
+            'author' => $this->boardingPlace->user->name,
+            'published_time' => $this->boardingPlace->created_at->toISOString(),
+            'section' => 'Boarding Places',
+            'tags' => [],
+        ];
+        
+        if (!empty($this->boardingPlace->images)) {
+            $socialMeta['image'] = Storage::url($this->boardingPlace->images[0]);
+            $socialMeta['image_alt'] = $this->boardingPlace->title;
+            $socialMeta['image_width'] = '1200';
+            $socialMeta['image_height'] = '630';
+        }
+        
+        if ($this->boardingPlace->updated_at != $this->boardingPlace->created_at) {
+            $socialMeta['modified_time'] = $this->boardingPlace->updated_at->toISOString();
+        }
+        
+        if ($this->boardingPlace->location) {
+            $socialMeta['tags'][] = $this->boardingPlace->location;
+        }
+        
+        // Make it available to the view
+        view()->share('socialMeta', $socialMeta);
     }
 
     public function enableEdit()
