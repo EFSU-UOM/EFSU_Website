@@ -24,7 +24,6 @@ new class extends Component {
     public $contact_email = '';
 
     public Collection $library;
-    #[Rule(['files.*' => 'image|max:1024'])]
     public array $files = [];
 
     protected $rules = [

@@ -47,15 +47,15 @@ new class extends Component {
 
         $term = trim($this->search);
         if ($term !== '') {
-            $like = '%' . addcslashes($term, '%_\\') . '%';
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
             $query->where(function ($q) use ($like) {
-                $q->where('category', 'like', $like)
-                    ->orWhere('complaint_text', 'like', $like)
+                $q->whereRaw("category LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("complaint_text LIKE ? ESCAPE '!'", [$like])
                     ->orWhere(function ($anon) use ($like) {
                         $anon->where('is_anonymous', false)
                             ->whereHas('user', function ($userQuery) use ($like) {
-                                $userQuery->where('name', 'like', $like)
-                                    ->orWhere('email', 'like', $like);
+                                $userQuery->whereRaw("name LIKE ? ESCAPE '!'", [$like])
+                                    ->orWhereRaw("email LIKE ? ESCAPE '!'", [$like]);
                             });
                     });
             });

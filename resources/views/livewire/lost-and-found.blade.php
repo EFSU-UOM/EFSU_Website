@@ -3,6 +3,7 @@
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Url;
 use App\Models\LostAndFound;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,9 +22,13 @@ new class extends Component {
     public $image = null;
 
     // Filters
+    #[Url(history: true)]
     public $search = '';
+    #[Url(as: 'type', history: true)]
     public $typeFilter = '';
+    #[Url(as: 'status', history: true)]
     public $statusFilter = '';
+    #[Url(as: 'location', history: true)]
     public $locationFilter = '';
 
 
@@ -37,14 +42,6 @@ new class extends Component {
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->typeFilter = request('type', '');
-        $this->statusFilter = request('status', '');
-        $this->locationFilter = request('location', '');
-    }
-
     public function getItemsProperty()
     {
         $query = LostAndFound::with('user');
@@ -57,19 +54,27 @@ new class extends Component {
             $query->where('status', $this->statusFilter);
         }
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%")
-                    ->orWhere('location', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("description LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("location LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
-        if (!empty($this->locationFilter)) {
-            $query->where('location', 'like', "%{$this->locationFilter}%");
+        $location = trim($this->locationFilter);
+
+        if ($location !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $location) . '%';
+
+            $query->whereRaw("location LIKE ? ESCAPE '!'", [$like]);
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(12);
+        return $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate(12);
     }
 
     public function openCreateForm()
@@ -130,9 +135,13 @@ new class extends Component {
 
     public function delete($id)
     {
+        if (auth()->user()?->isBanned()) {
+            return;
+        }
+
         $item = LostAndFound::find($id);
 
-        if ($item && $item->user_id === auth()->id()) {
+        if ($item && ($item->user_id === auth()->id() || auth()->user()?->isModerator())) {
             if ($item->image) {
                 Storage::disk('public')->delete($item->image);
             }
@@ -143,7 +152,15 @@ new class extends Component {
 
     public function updateStatus($id, $status)
     {
+        if (auth()->user()?->isBanned()) {
+            return;
+        }
+
         $item = LostAndFound::find($id);
+
+        if (!in_array($status, ['active', 'owner_found', 'lost_item_obtained'], true)) {
+            return;
+        }
 
         if ($item && $item->user_id === auth()->id()) {
             $item->update(['status' => $status]);

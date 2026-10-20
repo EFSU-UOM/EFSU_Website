@@ -3,13 +3,16 @@
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
 
+    #[Url(history: true)]
     public $selectedStatus = '';
+    #[Url(history: true)]
     public $search = '';
     public $showCreateForm = false;
     public $showComplaintModal = false;
@@ -18,22 +21,19 @@ new class extends Component {
     public $replyContent = '';
     public $expandedReplies = [];
 
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->selectedStatus = request('status', '');
-    }
-
     public function getComplaintsProperty()
     {
         $query = Complaint::with(['topLevelReplies'])
             ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('category', 'like', "%{$this->search}%")
-                    ->orWhere('complaint_text', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("category LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("complaint_text LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
@@ -80,7 +80,13 @@ new class extends Component {
 
     public function viewComplaint($complaintId)
     {
-        $this->viewingComplaint = Complaint::with(['topLevelReplies'])->findOrFail($complaintId);
+        if (!auth()->check()) {
+            return;
+        }
+
+        $this->viewingComplaint = Complaint::with(['topLevelReplies'])
+            ->where('user_id', auth()->id())
+            ->findOrFail($complaintId);
         $this->showComplaintModal = true;
     }
 
@@ -100,21 +106,27 @@ new class extends Component {
             return;
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post replies.');
+            return;
+        }
+
         if (empty(trim($this->replyContent))) {
             return;
         }
 
-        // Find the complaint ID from parent reply or use replyingTo as complaint ID
+        $this->validate(['replyContent' => 'required|string|max:2000']);
+
+        $complaint = auth()->user()->isModerator()
+            ? Complaint::findOrFail($this->replyingTo)
+            : Complaint::where('user_id', auth()->id())->findOrFail($this->replyingTo);
+
         if ($parentId) {
-            $parentReply = \App\Models\ComplaintReply::findOrFail($parentId);
-            $complaintId = $parentReply->complaint_id;
-        } else {
-            $complaintId = $this->replyingTo;
-            $parentId = null;
+            $complaint->replies()->findOrFail($parentId);
         }
 
         \App\Models\ComplaintReply::create([
-            'complaint_id' => $complaintId,
+            'complaint_id' => $complaint->id,
             'user_id' => auth()->id(),
             'parent_id' => $parentId,
             'content' => $this->replyContent,

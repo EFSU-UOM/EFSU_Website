@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Locked;
 use App\Models\LostAndFound;
 use App\Models\LostAndFoundComment;
 use Illuminate\Support\Facades\Storage;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 new class extends Component {
     use WithFileUploads;
 
+    #[Locked]
     public LostAndFound $item;
 
     // Edit mode
@@ -28,6 +30,7 @@ new class extends Component {
 
     // Comment functionality
     public $newComment = '';
+    #[Locked]
     public $replyingTo = null;
     public $replyContent = '';
 
@@ -41,6 +44,7 @@ new class extends Component {
             'contact_info' => 'nullable|string|max:255',
             'item_date' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'editingStatus' => 'required|in:active,owner_found,lost_item_obtained',
         ];
     }
 
@@ -100,6 +104,11 @@ new class extends Component {
             abort(403);
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot edit items.');
+            return;
+        }
+
         $this->editMode = true;
         $this->type = $this->item->type;
         $this->title = $this->item->title;
@@ -121,6 +130,11 @@ new class extends Component {
     {
         if (!auth()->check() || $this->item->user_id !== auth()->id()) {
             abort(403);
+        }
+
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot edit items.');
+            return;
         }
 
         $this->validate($this->getPostValidationRules());
@@ -156,6 +170,15 @@ new class extends Component {
             abort(403);
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot edit items.');
+            return;
+        }
+
+        if (!in_array($status, ['active', 'owner_found', 'lost_item_obtained'], true)) {
+            return;
+        }
+
         $this->item->update(['status' => $status]);
         $this->item->refresh();
 
@@ -164,8 +187,13 @@ new class extends Component {
 
     public function deleteItem()
     {
-        if (!auth()->check() || $this->item->user_id !== auth()->id()) {
+        if (!auth()->check() || ($this->item->user_id !== auth()->id() && !auth()->user()->isModerator())) {
             abort(403);
+        }
+
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot delete items.');
+            return;
         }
 
         if ($this->item->image) {
@@ -194,6 +222,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post comments.');
+            return;
+        }
+
         $this->validate($this->getCommentValidationRules());
 
         LostAndFoundComment::create([
@@ -212,12 +245,19 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post replies.');
+            return;
+        }
+
         $this->validate($this->getReplyValidationRules());
+
+        $parent = LostAndFoundComment::where('lost_and_found_id', $this->item->id)->findOrFail($this->replyingTo);
 
         LostAndFoundComment::create([
             'user_id' => auth()->id(),
             'lost_and_found_id' => $this->item->id,
-            'parent_id' => $this->replyingTo,
+            'parent_id' => $parent->id,
             'content' => $this->replyContent,
         ]);
 
@@ -247,6 +287,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot vote.');
+            return;
+        }
+
         $comment = LostAndFoundComment::findOrFail($commentId);
         $comment->upvote(auth()->user());
     }
@@ -257,6 +302,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot vote.');
+            return;
+        }
+
         $comment = LostAndFoundComment::findOrFail($commentId);
         $comment->downvote(auth()->user());
     }
@@ -264,8 +314,8 @@ new class extends Component {
     public function deleteComment($commentId)
     {
         $comment = LostAndFoundComment::findOrFail($commentId);
-        
-        if ($comment->user_id === auth()->id()) {
+
+        if ($comment->user_id === auth()->id() || auth()->user()?->isModerator()) {
             $comment->delete();
             session()->flash('comment-success', 'Comment deleted successfully!');
         }
@@ -293,6 +343,15 @@ new class extends Component {
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
             <x-mary-alert icon="o-check-circle" class="alert-success">
                 {{ session('success') }}
+            </x-mary-alert>
+        </div>
+    @endif
+
+    <!-- Error Messages -->
+    @if (session('error'))
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
+            <x-mary-alert icon="o-x-circle" class="alert-error">
+                {{ session('error') }}
             </x-mary-alert>
         </div>
     @endif
@@ -465,15 +524,17 @@ new class extends Component {
                                     </div>
                                 @endif
 
-                                @if ($item->contact_info)
-                                    <div class="flex items-start">
-                                        <x-mary-icon name="o-phone" class="w-5 h-5 text-base-content/60 mr-3 mt-0.5" />
-                                        <div>
-                                            <p class="text-sm font-medium text-base-content/60">Contact Info</p>
-                                            <p class="text-base-content">{{ $item->contact_info }}</p>
+                                @auth
+                                    @if ($item->contact_info)
+                                        <div class="flex items-start">
+                                            <x-mary-icon name="o-phone" class="w-5 h-5 text-base-content/60 mr-3 mt-0.5" />
+                                            <div>
+                                                <p class="text-sm font-medium text-base-content/60">Contact Info</p>
+                                                <p class="text-base-content">{{ $item->contact_info }}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endif
+                                @endauth
                             </div>
 
                             <!-- Action Buttons -->
@@ -534,6 +595,14 @@ new class extends Component {
                                             <p class="text-xs text-base-content/50 mt-2">
                                                 Contact functionality will be available soon
                                             </p>
+                                            @if (auth()->user()->isModerator())
+                                                <x-mary-button class="btn-error w-full mt-4"
+                                                    wire:click="deleteItem"
+                                                    wire:confirm="Are you sure you want to delete this post?">
+                                                    <x-mary-icon name="o-trash" class="w-5 h-5" />
+                                                    Delete Post
+                                                </x-mary-button>
+                                            @endif
                                         </div>
                                     @endif
                                 @else
@@ -644,8 +713,8 @@ new class extends Component {
                                                 </x-mary-button>
 
                                                 <!-- Delete Button (only for comment owner) -->
-                                                @if ($comment->user_id === auth()->id())
-                                                    <x-mary-button 
+                                                @if ($comment->user_id === auth()->id() || auth()->user()->isModerator())
+                                                    <x-mary-button
                                                         wire:click="deleteComment({{ $comment->id }})"
                                                         wire:confirm="Are you sure you want to delete this comment?"
                                                         class="btn-ghost btn-xs text-error">
@@ -718,7 +787,7 @@ new class extends Component {
                                                                     </div>
 
                                                                     <!-- Delete Button for reply owner -->
-                                                                    @if ($reply->user_id === auth()->id())
+                                                                    @if ($reply->user_id === auth()->id() || auth()->user()->isModerator())
                                                                         <x-mary-button 
                                                                             wire:click="deleteComment({{ $reply->id }})"
                                                                             wire:confirm="Are you sure you want to delete this reply?"

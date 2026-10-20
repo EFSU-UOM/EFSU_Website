@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 
 class LostAndFoundComment extends Model
 {
@@ -55,50 +57,12 @@ class LostAndFoundComment extends Model
     // Vote methods (similar to ForumComment)
     public function upvote(User $user): void
     {
-        $existingVote = $this->votes()->where('user_id', $user->id)->first();
-
-        if ($existingVote) {
-            if ($existingVote->is_upvote) {
-                $existingVote->delete();
-                $this->decrement('upvotes');
-            } else {
-                $existingVote->update(['is_upvote' => true]);
-                $this->decrement('downvotes');
-                $this->increment('upvotes');
-            }
-        } else {
-            $this->votes()->create([
-                'user_id' => $user->id,
-                'is_upvote' => true,
-            ]);
-            $this->increment('upvotes');
-        }
-
-        $this->updateScore();
+        $this->castVote($user, true);
     }
 
     public function downvote(User $user): void
     {
-        $existingVote = $this->votes()->where('user_id', $user->id)->first();
-
-        if ($existingVote) {
-            if (!$existingVote->is_upvote) {
-                $existingVote->delete();
-                $this->decrement('downvotes');
-            } else {
-                $existingVote->update(['is_upvote' => false]);
-                $this->decrement('upvotes');
-                $this->increment('downvotes');
-            }
-        } else {
-            $this->votes()->create([
-                'user_id' => $user->id,
-                'is_upvote' => false,
-            ]);
-            $this->increment('downvotes');
-        }
-
-        $this->updateScore();
+        $this->castVote($user, false);
     }
 
     public function getUserVote(User $user): ?bool
@@ -107,9 +71,41 @@ class LostAndFoundComment extends Model
         return $vote ? $vote->is_upvote : null;
     }
 
+    private function castVote(User $user, bool $isUpvote): void
+    {
+        try {
+            DB::transaction(function () use ($user, $isUpvote) {
+                $existingVote = $this->votes()->where('user_id', $user->id)->first();
+
+                if (!$existingVote) {
+                    $this->votes()->create([
+                        'user_id' => $user->id,
+                        'is_upvote' => $isUpvote,
+                    ]);
+                } elseif ($existingVote->is_upvote === $isUpvote) {
+                    $existingVote->delete();
+                } else {
+                    $existingVote->update(['is_upvote' => $isUpvote]);
+                }
+
+                $this->updateScore();
+            });
+        } catch (UniqueConstraintViolationException) {
+            // A concurrent request already recorded this user's vote
+            $this->updateScore();
+        }
+    }
+
     private function updateScore(): void
     {
-        $this->update(['score' => $this->upvotes - $this->downvotes]);
+        $upvotes = $this->votes()->where('is_upvote', true)->count();
+        $downvotes = $this->votes()->where('is_upvote', false)->count();
+
+        $this->update([
+            'upvotes' => $upvotes,
+            'downvotes' => $downvotes,
+            'score' => $upvotes - $downvotes,
+        ]);
     }
 
     // Set depth when creating nested comment

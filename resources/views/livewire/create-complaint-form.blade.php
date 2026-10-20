@@ -18,10 +18,10 @@ new class extends Component {
     public array $files = [];
 
     protected array $rules = [
-        'category' => 'required|string|max:100',
-        'complaint_text' => 'required|string|min:10',
+        'category' => 'required|string|in:canteen,sports,library,hostel,transport,faculty,administration,events,safety,other',
+        'complaint_text' => 'required|string|min:10|max:5000',
         'is_anonymous' => 'boolean',
-        'files' => 'nullable|array',
+        'files' => 'nullable|array|max:5',
         'files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
@@ -32,6 +32,13 @@ new class extends Component {
 
     public function submit()
     {
+        abort_unless(auth()->check(), 403);
+
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot submit complaints.');
+            return;
+        }
+
         $this->validate();
 
         $data = [

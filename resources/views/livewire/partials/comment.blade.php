@@ -42,7 +42,7 @@
                         <button wire:click="cancelReply" class="text-xs text-base-content/60 hover:text-base-content">
                             Cancel
                         </button>
-                    @else
+                    @elseif($depth < 4)
                         <x-mary-button wire:click="setReplyingTo({{ $comment->id }})" class="btn-ghost btn-xs">
                             <x-mary-icon name="o-chat-bubble-left" class="w-4 h-4" />
                             Reply

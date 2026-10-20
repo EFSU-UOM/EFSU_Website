@@ -32,21 +32,20 @@ $addToCart = function ($merchId) {
         return redirect('/login');
     }
     
-    $existingCart = Cart::where('user_id', auth()->id())
-                       ->where('merch_id', $merchId)
-                       ->first();
-    
-    if ($existingCart) {
-        $existingCart->increment('quantity');
-        session()->flash('success', 'Quantity updated in cart!');
-    } else {
-        Cart::create([
-            'user_id' => auth()->id(),
-            'merch_id' => $merchId,
-            'quantity' => 1,
-        ]);
-        session()->flash('success', 'Item added to cart!');
+    if (auth()->user()->isBanned()) {
+        session()->flash('error', 'Your account is banned.');
+        return;
     }
+    
+    $merch = Merch::where('is_available', true)->findOrFail($merchId);
+    
+    $cart = Cart::firstOrCreate(
+        ['user_id' => auth()->id(), 'merch_id' => $merch->id],
+        ['quantity' => 0]
+    );
+    $cart->increment('quantity');
+    
+    session()->flash('success', $cart->wasRecentlyCreated ? 'Item added to cart!' : 'Quantity updated in cart!');
 };
 
 ?>

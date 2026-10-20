@@ -23,6 +23,8 @@ Route::get('/news', function () {
 })->name('news');
 
 Route::get('/news/{article}', function (App\Models\NewsArticle $article) {
+    abort_if(! $article->is_published || ! $article->published_at || $article->published_at->isFuture(), 404);
+
     return view('article', ['article' => $article]);
 })->name('article');
 

@@ -1,35 +1,44 @@
 <?php
 
 use App\Models\NewsArticle;
-use function Livewire\Volt\{state, computed};
+use Livewire\Volt\Component;
+use Livewire\WithPagination;
 
-state(['selectedCategory' => '']);
+new class extends Component {
+    use WithPagination;
 
-$articles = computed(function() {
-    $query = NewsArticle::where('is_published', true)->latest('published_at');
-    
-    if ($this->selectedCategory) {
-        $query->where('category', $this->selectedCategory);
+    public $selectedCategory = '';
+
+    public function getArticlesProperty()
+    {
+        $query = NewsArticle::where('is_published', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->latest('published_at');
+
+        if ($this->selectedCategory) {
+            $query->where('category', $this->selectedCategory);
+        }
+
+        return $query->paginate(9);
     }
-    
-    return $query->limit(6)->get();
-});
 
-$setCategory = function($category) {
-    $this->selectedCategory = $category;
-};
+    public function updatedSelectedCategory()
+    {
+        $this->resetPage();
+    }
 
-$getBadgeColor = function($category) {
-    return match($category) {
-        'academic' => 'primary',
-        'events' => 'success',
-        'achievements' => 'warning',
-        'general' => 'neutral',
-        default => 'neutral'
-    };
-};
-
-?>
+    public function getBadgeColor($category)
+    {
+        return match($category) {
+            'academic' => 'primary',
+            'events' => 'success',
+            'achievements' => 'warning',
+            'general' => 'neutral',
+            default => 'neutral'
+        };
+    }
+}; ?>
 
 <section class="bg-base-200 py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -69,14 +78,8 @@ $getBadgeColor = function($category) {
         </div>
 
         <!-- Pagination -->
-        {{-- <div class="flex justify-center mt-12">
-            <x-mary-pagination :links="[
-                ['label' => 'Previous', 'url' => '#', 'active' => false],
-                ['label' => '1', 'url' => '#', 'active' => true],
-                ['label' => '2', 'url' => '#', 'active' => false],
-                ['label' => '3', 'url' => '#', 'active' => false],
-                ['label' => 'Next', 'url' => '#', 'active' => false],
-            ]" />
-        </div> --}}
+        <div class="mt-12">
+            {{ $this->articles->links() }}
+        </div>
     </div>
 </section>

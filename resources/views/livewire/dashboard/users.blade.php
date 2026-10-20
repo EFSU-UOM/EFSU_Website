@@ -42,10 +42,10 @@ new class extends Component {
         $search = trim($this->search);
 
         if ($search !== '') {
-            $like = '%' . addcslashes($search, '%_\\') . '%';
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $search) . '%';
 
             $query->where(function ($q) use ($like) {
-                $q->where('name', 'LIKE', $like)->orWhere('email', 'LIKE', $like);
+                $q->whereRaw("name LIKE ? ESCAPE '!'", [$like])->orWhereRaw("email LIKE ? ESCAPE '!'", [$like]);
             });
         }
 

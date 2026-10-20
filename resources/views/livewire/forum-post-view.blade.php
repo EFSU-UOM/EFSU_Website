@@ -35,10 +35,16 @@ $postComment = function () {
         $this->js('alert("Please verify your email address to post comments.")');
         return;
     }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot post comments.")');
+        return;
+    }
 
     if (empty(trim($this->newComment))) {
         return;
     }
+
+    $this->validate(['newComment' => 'max:5000']);
 
     ForumComment::create([
         'content' => $this->newComment,
@@ -50,6 +56,7 @@ $postComment = function () {
     ]);
 
     $this->newComment = '';
+    $this->post->loadCount('comments');
     $this->dispatch('comment-posted');
 };
 
@@ -58,15 +65,27 @@ $postReply = function ($parentId) {
         $this->js('alert("Please log in to reply.")');
         return;
     }
+    if (!auth()->user()->hasVerifiedEmail()) {
+        $this->js('alert("Please verify your email address to reply.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot reply.")');
+        return;
+    }
 
     if (empty(trim($this->replyContent))) {
         return;
     }
 
+    $this->validate(['replyContent' => 'max:5000']);
+
+    $parent = ForumComment::where('post_id', $this->post->id)->findOrFail($parentId);
+
     ForumComment::create([
         'content' => $this->replyContent,
         'post_id' => $this->post->id,
-        'parent_id' => $parentId,
+        'parent_id' => $parent->id,
         'user_id' => auth()->id(),
         'upvotes' => 0,
         'downvotes' => 0,
@@ -75,6 +94,7 @@ $postReply = function ($parentId) {
 
     $this->replyContent = '';
     $this->replyingTo = null;
+    $this->post->loadCount('comments');
     $this->dispatch('comment-posted');
 };
 
@@ -85,6 +105,10 @@ $upvotePost = function () {
     }
     if (!auth()->user()->hasVerifiedEmail()) {
         $this->js('alert("Please verify your email address to vote.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote.")');
         return;
     }
     
@@ -101,6 +125,10 @@ $downvotePost = function () {
         $this->js('alert("Please verify your email address to vote.")');
         return;
     }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote.")');
+        return;
+    }
     
     $this->post->downvote(auth()->user());
     $this->dispatch('post-voted');
@@ -113,6 +141,10 @@ $upvoteComment = function ($commentId) {
     }
     if (!auth()->user()->hasVerifiedEmail()) {
         $this->js('alert("Please verify your email address to vote.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote.")');
         return;
     }
     
@@ -130,6 +162,10 @@ $downvoteComment = function ($commentId) {
     }
     if (!auth()->user()->hasVerifiedEmail()) {
         $this->js('alert("Please verify your email address to vote.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote.")');
         return;
     }
     
@@ -187,6 +223,7 @@ $deleteComment = function ($commentId) {
     }
     
     $comment->delete();
+    $this->post->loadCount('comments');
     $this->dispatch('comment-deleted');
 };
 

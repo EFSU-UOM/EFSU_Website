@@ -23,7 +23,19 @@ class PaymentController extends Controller
         $payment_id = $request->input('payment_id');
         $method = $request->input('method');
         
-        // Find the order
+        $merchant_secret = config('payhere.merchant_secret');
+        if (!$merchant_secret || $merchant_secret === 'your_merchant_secret') {
+            Log::error('PayHere merchant secret is not configured');
+            return response('Server misconfigured', 500);
+        }
+        
+        $local_md5sig = strtoupper(md5($merchant_id . $order_id . $payhere_amount . $payhere_currency . $status_code . strtoupper(md5($merchant_secret))));
+        
+        if (!hash_equals($local_md5sig, (string) $md5sig)) {
+            Log::error('Invalid hash in PayHere notification', ['order_id' => $order_id]);
+            return response('Invalid hash', 400);
+        }
+        
         $order = Order::where('order_id', $order_id)->first();
         
         if (!$order) {
@@ -31,15 +43,15 @@ class PaymentController extends Controller
             return response('Order not found', 404);
         }
         
-        // Verify the hash
-        $merchant_secret = config('payhere.merchant_secret');
-        if ($merchant_secret && $merchant_secret !== 'your_merchant_secret') {
-            $local_md5sig = strtoupper(md5($merchant_id . $order_id . $payhere_amount . $payhere_currency . $status_code . strtoupper(md5($merchant_secret))));
-            
-            if ($local_md5sig !== $md5sig) {
-                Log::error('Invalid hash in PayHere notification', ['order_id' => $order_id, 'expected' => $local_md5sig, 'received' => $md5sig]);
-                return response('Invalid hash', 400);
-            }
+        if ($merchant_id !== (string) config('payhere.merchant_id')
+            || $payhere_currency !== $order->currency
+            || $payhere_amount !== number_format((float) $order->total_amount, 2, '.', '')) {
+            Log::error('PayHere notification does not match order', ['order_id' => $order_id]);
+            return response('Mismatch', 400);
+        }
+        
+        if ($order->status === 'completed') {
+            return response('OK', 200);
         }
         
         // Update order status based on payment status

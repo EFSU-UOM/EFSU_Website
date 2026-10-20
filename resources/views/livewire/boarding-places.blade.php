@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 use App\Models\BoardingPlace;
 use Illuminate\Support\Facades\Storage;
 
@@ -9,42 +10,44 @@ new class extends Component {
     use WithPagination;
 
     // Filters
+    #[Url(history: true)]
     public $search = '';
+    #[Url(history: true)]
     public $maxDistance = '';
+    #[Url(history: true)]
     public $minPrice = '';
+    #[Url(history: true)]
     public $maxPrice = '';
+    #[Url(history: true)]
     public $minCapacity = '';
-
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->maxDistance = request('maxDistance', '');
-        $this->minPrice = request('minPrice', '');
-        $this->maxPrice = request('maxPrice', '');
-        $this->minCapacity = request('minCapacity', '');
-    }
 
     public function getPlacesProperty()
     {
-        $query = BoardingPlace::with(['user', 'ratings'])->withCount('comments')->active();
+        $query = BoardingPlace::with(['user'])
+            ->withAvg(['ratings' => fn ($q) => $q->where('rating', '>', 0)], 'rating')
+            ->withCount(['ratings' => fn ($q) => $q->where('rating', '>', 0)])
+            ->withCount('comments')
+            ->active();
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%")
-                    ->orWhere('location', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("description LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("location LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
-        if (!empty($this->maxDistance)) {
+        if ($this->maxDistance !== null && $this->maxDistance !== '') {
             $query->withinDistance($this->maxDistance);
         }
 
-        if (!empty($this->minPrice) || !empty($this->maxPrice)) {
+        if (($this->minPrice !== null && $this->minPrice !== '') || ($this->maxPrice !== null && $this->maxPrice !== '')) {
             $query->withinPriceRange($this->minPrice, $this->maxPrice);
         }
 
-        if (!empty($this->minCapacity)) {
+        if ($this->minCapacity !== null && $this->minCapacity !== '') {
             $query->where('capacity', '>=', $this->minCapacity);
         }
 
@@ -56,7 +59,7 @@ new class extends Component {
     {
         $place = BoardingPlace::find($id);
 
-        if ($place && $place->user_id === auth()->id()) {
+        if ($place && auth()->check() && !auth()->user()->isBanned() && $place->user_id === auth()->id()) {
             if ($place->images) {
                 foreach ($place->images as $image) {
                     Storage::disk('public')->delete($image);
@@ -225,15 +228,15 @@ new class extends Component {
                             </div>
 
                             <!-- Rating Display -->
-                            @if ($place->average_rating > 0)
+                            @if ($place->ratings_avg_rating > 0)
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="rating rating-sm">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            <div class="mask mask-star-2 opacity-100 {{ $i <= $place->average_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
+                                            <div class="mask mask-star-2 opacity-100 {{ $i <= $place->ratings_avg_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
                                         @endfor
                                     </div>
                                     <span class="text-sm text-base-content/70">
-                                        {{ $place->average_rating }} ({{ $place->rating_count }})
+                                        {{ round($place->ratings_avg_rating, 1) }} ({{ $place->ratings_count }})
                                     </span>
                                 </div>
                             @endif

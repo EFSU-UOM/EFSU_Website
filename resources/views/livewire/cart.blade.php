@@ -15,27 +15,37 @@ $cartItems = computed(function () {
     
     return Cart::with('merch')
                ->where('user_id', auth()->id())
-               ->get();
+               ->get()
+               ->filter(fn ($item) => $item->merch)
+               ->values();
 });
 
 $updateQuantity = function ($cartId, $quantity) {
-    $cartItem = Cart::find($cartId);
+    $cartItem = Cart::where('user_id', auth()->id())->find($cartId);
     if (!$cartItem) {
         session()->flash('error', 'Cart item not found!');
         return;
     }
     
+    if (filter_var($quantity, FILTER_VALIDATE_INT) === false) {
+        session()->flash('error', 'Invalid quantity!');
+        return;
+    }
+    
+    $quantity = (int) $quantity;
+    
     if ($quantity <= 0) {
         $cartItem->delete();
         session()->flash('success', 'Item removed from cart!');
     } else {
-        $cartItem->update(['quantity' => $quantity]);
+        $max = $cartItem->merch?->stock_quantity ?? 10;
+        $cartItem->update(['quantity' => min($quantity, $max)]);
         session()->flash('success', 'Quantity updated!');
     }
 };
 
 $removeItem = function ($cartId) {
-    $cartItem = Cart::find($cartId);
+    $cartItem = Cart::where('user_id', auth()->id())->find($cartId);
     if (!$cartItem) {
         session()->flash('error', 'Cart item not found!');
         return;

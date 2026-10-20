@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ForumPost;
+use App\Models\ForumVote;
 use App\ForumCategory;
 use function Livewire\Volt\{computed, state};
 
@@ -9,37 +10,52 @@ state([
     'timeFilter' => 'all',
     'sortBy' => 'new',
     'search' => '',
+])->url(history: true);
+
+state([
     'advancedSearch' => false,
     'showSearch' => false,
     'perPage' => 20,
     'loadedCount' => 20,
 ]);
 
+$filters = computed(function () {
+    return [
+        'category' => in_array($this->selectedCategory, array_column(ForumCategory::cases(), 'value'), true) ? $this->selectedCategory : 'all',
+        'time' => in_array($this->timeFilter, ['all', 'today', 'week', 'month'], true) ? $this->timeFilter : 'all',
+        'sort' => in_array($this->sortBy, ['new', 'score'], true) ? $this->sortBy : 'new',
+    ];
+});
+
 $posts = computed(function () {
-    $query = ForumPost::with(['user', 'comments'])
+    $filters = $this->filters;
+    $term = trim($this->search);
+
+    $query = ForumPost::with(['user'])
         ->withCount('comments');
     
     // Apply category filter
-    if ($this->selectedCategory !== 'all') {
-        $query->where('category', $this->selectedCategory);
+    if ($filters['category'] !== 'all') {
+        $query->where('category', $filters['category']);
     }
     
     // Apply search filter
-    if (!empty($this->search)) {
+    if ($term !== '') {
+        $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
         if ($this->advancedSearch) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('content', 'like', '%' . $this->search . '%');
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                  ->orWhereRaw("content LIKE ? ESCAPE '!'", [$like]);
             });
         } else {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $query->whereRaw("title LIKE ? ESCAPE '!'", [$like]);
         }
     }
     
     // Apply time filter
-    if ($this->timeFilter !== 'all') {
+    if ($filters['time'] !== 'all') {
         $now = now();
-        switch ($this->timeFilter) {
+        switch ($filters['time']) {
             case 'today':
                 $query->whereDate('created_at', $now->toDateString());
                 break;
@@ -54,39 +70,56 @@ $posts = computed(function () {
     
     // Apply sorting (pinned posts always come first)
     $query->orderBy('is_pinned', 'desc');
-    if ($this->sortBy === 'new') {
+    if ($filters['sort'] === 'new') {
         $query->orderBy('created_at', 'desc');
-    } else if ($this->sortBy === 'score') {
+    } else if ($filters['sort'] === 'score') {
         $query->orderBy('score', 'desc')->orderBy('created_at', 'desc');
     }
+    $query->orderBy('id', 'desc');
     
     return $query->take($this->loadedCount)->get();
 });
 
+$userVotes = computed(function () {
+    if (!auth()->check()) {
+        return collect();
+    }
+
+    return ForumVote::where('user_id', auth()->id())
+        ->where('votable_type', ForumPost::class)
+        ->whereIn('votable_id', $this->posts->pluck('id'))
+        ->get()
+        ->pluck('is_upvote', 'votable_id');
+});
+
 $totalPosts = computed(function () {
+    $filters = $this->filters;
+    $term = trim($this->search);
+
     $query = ForumPost::query();
     
     // Apply category filter
-    if ($this->selectedCategory !== 'all') {
-        $query->where('category', $this->selectedCategory);
+    if ($filters['category'] !== 'all') {
+        $query->where('category', $filters['category']);
     }
     
     // Apply search filter
-    if (!empty($this->search)) {
+    if ($term !== '') {
+        $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
         if ($this->advancedSearch) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('content', 'like', '%' . $this->search . '%');
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                  ->orWhereRaw("content LIKE ? ESCAPE '!'", [$like]);
             });
         } else {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $query->whereRaw("title LIKE ? ESCAPE '!'", [$like]);
         }
     }
     
     // Apply time filter
-    if ($this->timeFilter !== 'all') {
+    if ($filters['time'] !== 'all') {
         $now = now();
-        switch ($this->timeFilter) {
+        switch ($filters['time']) {
             case 'today':
                 $query->whereDate('created_at', $now->toDateString());
                 break;
@@ -157,6 +190,10 @@ $upvote = function ($postId) {
         $this->js('alert("Please verify your email address to vote on posts.")');
         return;
     }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote on posts.")');
+        return;
+    }
     
     $post = ForumPost::find($postId);
     if ($post) {
@@ -172,6 +209,10 @@ $downvote = function ($postId) {
     }
     if (!auth()->user()->hasVerifiedEmail()) {
         $this->js('alert("Please verify your email address to vote on posts.")');
+        return;
+    }
+    if (auth()->user()->isBanned()) {
+        $this->js('alert("You are banned and cannot vote on posts.")');
         return;
     }
     
@@ -266,14 +307,14 @@ $deletePost = function ($postId) {
                                 <button 
                                     wire:click="upvote({{ $post->id }})"
                                     class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-success/10 transition-colors
-                                           {{ auth()->check() && $post->getUserVote(auth()->user()) === true ? 'bg-success/20 text-success' : 'text-base-content/60' }}">
+                                           {{ auth()->check() && $this->userVotes->get($post->id) === true ? 'bg-success/20 text-success' : 'text-base-content/60' }}">
                                     <x-mary-icon name="o-chevron-up" class="w-5 h-5" />
                                 </button>
                                 <span class="text-sm font-semibold text-base-content">{{ $post->score }}</span>
                                 <button 
                                     wire:click="downvote({{ $post->id }})"
                                     class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-error/10 transition-colors
-                                           {{ auth()->check() && $post->getUserVote(auth()->user()) === false ? 'bg-error/20 text-error' : 'text-base-content/60' }}">
+                                           {{ auth()->check() && $this->userVotes->get($post->id) === false ? 'bg-error/20 text-error' : 'text-base-content/60' }}">
                                     <x-mary-icon name="o-chevron-down" class="w-5 h-5" />
                                 </button>
                             </div>

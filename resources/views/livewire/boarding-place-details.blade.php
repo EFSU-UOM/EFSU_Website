@@ -49,7 +49,11 @@ new class extends Component {
 
     public function mount($id)
     {
-        $this->boardingPlace = BoardingPlace::with(['user', 'topLevelComments.user', 'topLevelComments.replies.user', 'ratings'])->findOrFail($id);
+        $this->boardingPlace = BoardingPlace::with(['user', 'topLevelComments.user', 'topLevelComments.replies.user', 'ratings'])
+            ->where(function ($query) {
+                $query->active()->orWhere('user_id', auth()->id());
+            })
+            ->findOrFail($id);
         $this->boardingPlace->incrementViews();
         $this->library = $this->boardingPlace->images ?: new Collection();
         
@@ -128,7 +132,7 @@ new class extends Component {
 
     public function updatePlace()
     {
-        if (!auth()->check() || $this->boardingPlace->user_id !== auth()->id()) {
+        if (!auth()->check() || auth()->user()->isBanned() || $this->boardingPlace->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -173,7 +177,7 @@ new class extends Component {
 
     public function deletePlace()
     {
-        if (!auth()->check() || (!auth()->user()->isAdmin() && $this->boardingPlace->user_id !== auth()->id())) {
+        if (!auth()->check() || auth()->user()->isBanned() || (!auth()->user()->isAdmin() && $this->boardingPlace->user_id !== auth()->id())) {
             abort(403);
         }
 
@@ -200,9 +204,11 @@ new class extends Component {
             return redirect()->route('login');
         }
 
-        if ($this->rating < 0 || $this->rating > 5) {
-            return;
+        if (auth()->user()->isBanned()) {
+            abort(403);
         }
+
+        $this->validate(['rating' => 'required|integer|between:0,5']);
 
         $existingRating = $this->boardingPlace->ratings()
             ->where('user_id', auth()->id())

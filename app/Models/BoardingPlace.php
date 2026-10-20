@@ -78,10 +78,10 @@ class BoardingPlace extends Model
 
     public function scopeWithinPriceRange($query, $minPrice = null, $maxPrice = null)
     {
-        if ($minPrice) {
+        if ($minPrice !== null && $minPrice !== '') {
             $query->where('price', '>=', $minPrice);
         }
-        if ($maxPrice) {
+        if ($maxPrice !== null && $maxPrice !== '') {
             $query->where('price', '<=', $maxPrice);
         }
         return $query;

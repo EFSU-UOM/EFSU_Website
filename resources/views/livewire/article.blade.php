@@ -21,7 +21,7 @@ new class extends Component {
             'description' => $this->article->excerpt ?: Str::limit(strip_tags($this->article->content ?? ''), 160),
             'type' => 'article',
             'author' => config('app.name'),
-            'published_time' => $this->article->published_at->toISOString(),
+            'published_time' => $this->article->published_at?->toISOString(),
             'section' => $this->article->category,
             'tags' => [$this->article->category],
         ];
@@ -47,7 +47,7 @@ new class extends Component {
             '@type' => 'NewsArticle',
             'headline' => $this->article->title,
             'description' => $socialMeta['description'],
-            'datePublished' => $this->article->published_at->toISOString(),
+            'datePublished' => $this->article->published_at?->toISOString(),
             'author' => [
                 '@type' => 'Organization',
                 'name' => config('app.name')
@@ -203,6 +203,8 @@ new class extends Component {
     <!-- Related Articles -->
     @php
         $relatedArticles = NewsArticle::where('is_published', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->where('id', '!=', $article->id)
             ->where(function ($query) use ($article) {
                 $query->where('category', $article->category)->orWhere('is_featured', true);

@@ -70,7 +70,7 @@ $createPost = function () {
     $this->validate(
         [
             'newPostTitle' => 'required|min:3|max:255',
-            'newPostContent' => 'required|min:10',
+            'newPostContent' => 'required|min:10|max:5000',
             'newPostCategory' => 'required|in:' . implode(',', array_column(ForumCategory::cases(), 'value')),
         ],
         [
@@ -79,6 +79,7 @@ $createPost = function () {
             'newPostTitle.max' => 'Title must not exceed 255 characters',
             'newPostContent.required' => 'Content is required',
             'newPostContent.min' => 'Content must be at least 10 characters',
+            'newPostContent.max' => 'Content must not exceed 5000 characters',
             'newPostCategory.required' => 'Category is required',
             'newPostCategory.in' => 'Invalid category selected',
         ],
