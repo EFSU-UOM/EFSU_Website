@@ -60,7 +60,7 @@ new class extends Component {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($this->articles as $article)
+            @forelse($this->articles as $article)
                 <x-mary-card class="bg-base-100 border border-base-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                     <x-slot:figure>
                         <img src="{{ Storage::url($article->image_url) }}"
@@ -72,9 +72,13 @@ new class extends Component {
                         </div>
                         <h3 class="text-lg font-semibold text-base-content mb-2">{{ $article->title }}</h3>
                         <p class="text-base-content/70 mb-4">{!! $article->excerpt !!}</p>
-                        <x-mary-button link="{{ route('article', $article) }}" label="Read More" color="{{ $this->getBadgeColor($article->category) }}" variant="link" size="sm" right-icon="o-arrow-right" />
+                        <x-mary-button link="{{ route('article', $article) }}" label="Read More" class="btn-link btn-sm" right-icon="o-arrow-right" />
                 </x-mary-card>
-            @endforeach
+            @empty
+                <div class="col-span-full text-center py-8">
+                    <p class="text-base-content/60">No articles found.</p>
+                </div>
+            @endforelse
         </div>
 
         <!-- Pagination -->

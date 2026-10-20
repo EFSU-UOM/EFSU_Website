@@ -28,15 +28,14 @@ $comments = computed(function () {
 
 $postComment = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to post a comment.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to post comments.")');
+        session()->flash('error', 'Please verify your email address to post comments.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot post comments.")');
+        session()->flash('error', 'You are banned and cannot post comments.');
         return;
     }
 
@@ -62,15 +61,14 @@ $postComment = function () {
 
 $postReply = function ($parentId) {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to reply.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to reply.")');
+        session()->flash('error', 'Please verify your email address to reply.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot reply.")');
+        session()->flash('error', 'You are banned and cannot reply.');
         return;
     }
 
@@ -92,6 +90,9 @@ $postReply = function ($parentId) {
         'score' => 0,
     ]);
 
+    if (!in_array($parentId, $this->expandedComments)) {
+        $this->expandedComments[] = $parentId;
+    }
     $this->replyContent = '';
     $this->replyingTo = null;
     $this->post->loadCount('comments');
@@ -100,15 +101,14 @@ $postReply = function ($parentId) {
 
 $upvotePost = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to vote.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to vote.")');
+        session()->flash('error', 'Please verify your email address to vote.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot vote.")');
+        session()->flash('error', 'You are banned and cannot vote.');
         return;
     }
     
@@ -118,15 +118,14 @@ $upvotePost = function () {
 
 $downvotePost = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to vote.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to vote.")');
+        session()->flash('error', 'Please verify your email address to vote.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot vote.")');
+        session()->flash('error', 'You are banned and cannot vote.');
         return;
     }
     
@@ -136,15 +135,14 @@ $downvotePost = function () {
 
 $upvoteComment = function ($commentId) {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to vote.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to vote.")');
+        session()->flash('error', 'Please verify your email address to vote.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot vote.")');
+        session()->flash('error', 'You are banned and cannot vote.');
         return;
     }
     
@@ -157,15 +155,14 @@ $upvoteComment = function ($commentId) {
 
 $downvoteComment = function ($commentId) {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to vote.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to vote.")');
+        session()->flash('error', 'Please verify your email address to vote.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot vote.")');
+        session()->flash('error', 'You are banned and cannot vote.');
         return;
     }
     
@@ -196,7 +193,7 @@ $toggleReplies = function ($commentId) {
 
 $togglePin = function () {
     if (!auth()->check() || !auth()->user()->isAdmin()) {
-        $this->js('alert("Only admins can pin posts.")');
+        session()->flash('error', 'Only admins can pin posts.');
         return;
     }
     
@@ -206,19 +203,18 @@ $togglePin = function () {
 
 $deleteComment = function ($commentId) {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to delete comments.")');
-        return;
+        return $this->redirect(route('login'));
     }
-    
+
     $comment = ForumComment::find($commentId);
     if (!$comment) {
-        $this->js('alert("Comment not found.")');
+        session()->flash('error', 'Comment not found.');
         return;
     }
-    
+
     // Check if user is admin or comment owner
     if (!auth()->user()->isAdmin() && $comment->user_id !== auth()->id()) {
-        $this->js('alert("You can only delete your own comments.")');
+        session()->flash('error', 'You can only delete your own comments.');
         return;
     }
     
@@ -229,13 +225,12 @@ $deleteComment = function ($commentId) {
 
 $deletePost = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to delete posts.")');
-        return;
+        return $this->redirect(route('login'));
     }
-    
+
     // Check if user is admin or post owner
     if (!auth()->user()->isAdmin() && $this->post->user_id !== auth()->id()) {
-        $this->js('alert("You can only delete your own posts.")');
+        session()->flash('error', 'You can only delete your own posts.');
         return;
     }
     
@@ -247,6 +242,10 @@ $deletePost = function () {
 
 <section class="bg-base-100 py-16">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        @if (session('error'))
+            <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
+        @endif
+
         <!-- Back to Forum -->
         <div class="mb-6">
             <a href="{{ route('forum') }}" class="inline-flex items-center text-primary hover:text-primary-focus">
@@ -260,15 +259,17 @@ $deletePost = function () {
             <div class="flex items-start space-x-4">
                 <!-- Vote buttons -->
                 <div class="flex flex-col items-center space-y-1">
-                    <button 
+                    <button
                         wire:click="upvotePost"
+                        aria-label="Upvote post"
                         class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-success/10 transition-colors
                                {{ auth()->check() && $this->post->getUserVote(auth()->user()) === true ? 'bg-success/20 text-success' : 'text-base-content/60' }}">
                         <x-mary-icon name="o-chevron-up" class="w-6 h-6" />
                     </button>
                     <span class="text-lg font-bold text-base-content">{{ $this->post->score }}</span>
-                    <button 
+                    <button
                         wire:click="downvotePost"
+                        aria-label="Downvote post"
                         class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-error/10 transition-colors
                                {{ auth()->check() && $this->post->getUserVote(auth()->user()) === false ? 'bg-error/20 text-error' : 'text-base-content/60' }}">
                         <x-mary-icon name="o-chevron-down" class="w-6 h-6" />
@@ -339,7 +340,7 @@ $deletePost = function () {
                             rows="4"
                             class="w-full mb-4" />
                         <div class="flex justify-end">
-                            <x-mary-button type="submit" class="btn-primary">
+                            <x-mary-button type="submit" class="btn-primary" spinner="postComment" wire:loading.attr="disabled" wire:target="postComment">
                                 Post Comment
                             </x-mary-button>
                         </div>

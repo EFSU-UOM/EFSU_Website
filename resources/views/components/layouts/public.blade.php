@@ -70,6 +70,7 @@
                         </x-mary-menu>
                     </x-mary-dropdown>
                     @auth
+                        <x-mary-menu-item link="{{ route('cart') }}">Cart</x-mary-menu-item>
                         <x-mary-dropdown align="end">
                             <x-slot:trigger>
                                 <div
@@ -107,7 +108,7 @@
                                 @endif
                                 <x-mary-menu-item link="{{ route('settings.profile') }}" class="py-3">
                                     <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
-                                    <span class="font-medium">My Profile</span>
+                                    <span class="font-medium">Profile</span>
                                 </x-mary-menu-item>
                                 <x-mary-menu-item class="py-3 text-error hover:bg-error/10">
                                     <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -150,17 +151,17 @@
                         <x-mary-menu-item link="{{ route('contact') }}">Contact</x-mary-menu-item>
 
                         @auth
-                            @if (auth()->user() && auth()->user()->isAdmin())
+                            @if (auth()->user()->isAdmin())
                                 <x-mary-menu-item link="{{ route('dashboard') }}">Dashboard</x-mary-menu-item>
-                            @else
-                                <x-mary-menu-item link="{{ route('settings.profile') }}">Profile</x-mary-menu-item>
-                                <x-mary-menu-item>
-                                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                                        @csrf
-                                        <button type="submit" class="w-full text-left">Logout</button>
-                                    </form>
-                                </x-mary-menu-item>
                             @endif
+                            <x-mary-menu-item link="{{ route('cart') }}">Cart</x-mary-menu-item>
+                            <x-mary-menu-item link="{{ route('settings.profile') }}">Profile</x-mary-menu-item>
+                            <x-mary-menu-item>
+                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left">Logout</button>
+                                </form>
+                            </x-mary-menu-item>
                         @else
                             <x-mary-menu-item link="{{ route('login') }}">Login</x-mary-menu-item>
                         @endauth
@@ -177,7 +178,7 @@
 <!-- Inline alert for desktop -->
 <div class="hidden sm:block">
     <x-mary-alert 
-        title="Warning {{ session('password_breach_warning') }}" 
+        title="Warning: {{ session('password_breach_warning') }}" 
         icon="o-exclamation-triangle" 
         dismissible 
         class="alert-warning px-42 text-lg"
@@ -202,7 +203,7 @@
 
     <!-- Modal -->
     <div class="fixed inset-0 flex items-center justify-center z-50 px-4">
-<div class="bg-base-100 rounded-lg w-full max-w-sm p-6 relative shadow-lg">
+<div class="bg-base-100 rounded-lg w-full max-w-sm p-6 relative shadow-lg" role="dialog" aria-modal="true">
 
             <!-- Close button -->
          <!-- Close button -->
@@ -261,11 +262,11 @@
                             social engagement, and professional development.
                         </p>
                         <div class="flex space-x-2">
-                            <a class="btn-ghost btn-square" href="https://www.facebook.com/efsuuom" aria-label="Facebook">
-                                <x-mary-icon name="o-hand-thumb-up" class="h-5 w-5" />
+                            <a class="btn btn-ghost btn-square" href="https://www.facebook.com/efsuuom" aria-label="Facebook">
+                                <x-mary-icon name="o-globe-alt" class="h-5 w-5" />
                                 <span class="sr-only">Facebook</span>
                             </a>
-                            <a class="btn-ghost btn-square" href="https://github.com/EFSU-UOM/EFSU_Website" aria-label="GitHub">
+                            <a class="btn btn-ghost btn-square" href="https://github.com/EFSU-UOM/EFSU_Website" aria-label="GitHub">
                                 <x-mary-icon name="s-code-bracket" class="h-5 w-5" />
                                 <span class="sr-only">GitHub</span>
                             </a>

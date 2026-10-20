@@ -110,6 +110,7 @@ new class extends Component {
             wire:model="complaint_text"
             rows="5"
             placeholder="Type your complaint here..."
+            hint="10 to 5000 characters"
             required
         />
         @error('complaint_text')
@@ -128,7 +129,7 @@ new class extends Component {
                 wire:library="library" 
                 :preview="$library"
                 label="Upload images (optional)"
-                hint="You can upload multiple images to support your complaint"
+                hint="Up to 5 images, 2 MB each (JPG, PNG or GIF)"
             />
             @error('files')
                 <x-mary-alert type="error" flat class="py-1 text-sm">{{ $message }}</x-mary-alert>
@@ -139,7 +140,7 @@ new class extends Component {
         </div>
 
         <div>
-            <x-mary-button type="submit" color="primary" class="w-full">
+            <x-mary-button type="submit" color="primary" class="w-full" spinner="submit">
                 Submit Complaint
             </x-mary-button>
         </div>

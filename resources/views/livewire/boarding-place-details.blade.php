@@ -298,9 +298,9 @@ new class extends Component {
                             <x-mary-input wire:model="price" label="Price" type="number" step="0.01" />
                             <x-mary-select wire:model="payment_method" label="Price Period">
                                 <option value="">Not specified</option>
-                                <option value="per month">Per Month</option>
-                                <option value="per semester">Per Semester</option>
-                                <option value="per year">Per Year</option>
+                                <option value="per_person">Per Person</option>
+                                <option value="per_room">Per Room</option>
+                                <option value="per_floor">Per Floor</option>
                             </x-mary-select>
 
                             <!-- Capacity -->
@@ -391,7 +391,7 @@ new class extends Component {
                                         {{ $userRating ? 'Update' : 'Submit' }}
                                     </x-mary-button>
                                     @if ($userRating)
-                                        <x-mary-button wire:click="$set('rating', 0); submitRating()" class="btn-ghost btn-sm">
+                                        <x-mary-button wire:click="$set('rating', 0); submitRating()" wire:confirm="Remove your rating?" class="btn-ghost btn-sm">
                                             Remove
                                         </x-mary-button>
                                     @endif
@@ -435,7 +435,7 @@ new class extends Component {
 
                             @if ($boardingPlace->price)
                                 <div class="flex items-start">
-                                    <x-mary-icon name="o-currency-dollar"
+                                    <x-mary-icon name="o-banknotes"
                                         class="w-5 h-5 text-base-content/60 mr-3 mt-0.5" />
                                     <div>
                                         <p class="text-sm font-medium text-base-content/60">Price</p>
@@ -464,13 +464,13 @@ new class extends Component {
                                 @if ($boardingPlace->contact_phone)
                                     <div class="flex items-center">
                                         <x-mary-icon name="o-phone" class="w-4 h-4 mr-2 text-base-content/60" />
-                                        <span class="text-base-content">{{ $boardingPlace->contact_phone }}</span>
+                                        <a href="tel:{{ $boardingPlace->contact_phone }}" class="link link-hover text-base-content">{{ $boardingPlace->contact_phone }}</a>
                                     </div>
                                 @endif
                                 @if ($boardingPlace->contact_email)
                                     <div class="flex items-center">
                                         <x-mary-icon name="o-envelope" class="w-4 h-4 mr-2 text-base-content/60" />
-                                        <span class="text-base-content">{{ $boardingPlace->contact_email }}</span>
+                                        <a href="mailto:{{ $boardingPlace->contact_email }}" class="link link-hover text-base-content">{{ $boardingPlace->contact_email }}</a>
                                     </div>
                                 @endif
                             </div>
@@ -483,10 +483,12 @@ new class extends Component {
                             <x-mary-card>
                                 <h4>Actions</h4>
                                 <div class="flex gap-3">
-                                    {{-- <x-mary-button class="btn-secondary flex-1" wire:click="enableEdit">
-                                        <x-mary-icon name="o-pencil" class="w-5 h-5" />
-                                        Edit
-                                    </x-mary-button> --}}
+                                    @if ($boardingPlace->user_id === auth()->id())
+                                        <x-mary-button class="btn-secondary flex-1" wire:click="enableEdit">
+                                            <x-mary-icon name="o-pencil" class="w-5 h-5" />
+                                            Edit
+                                        </x-mary-button>
+                                    @endif
 
                                     <x-mary-button class="btn-error flex-1" wire:click="deletePlace"
                                         wire:confirm="Are you sure you want to delete this boarding place?">
@@ -508,7 +510,7 @@ new class extends Component {
                         <div class="aspect-video bg-base-200 rounded-lg overflow-hidden">
                             <iframe
                                 src="https://maps.google.com/maps?q={{ $boardingPlace->latitude }},{{ $boardingPlace->longitude }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                                class="w-full h-full border-0"></iframe>
+                                title="Location map" class="w-full h-full border-0"></iframe>
                         </div>
                     </x-mary-card>
                 </div>

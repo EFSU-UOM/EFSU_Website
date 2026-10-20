@@ -1,9 +1,13 @@
-<x-mary-card class="ml-{{ $depth * 8 }}">
+@php
+    $indent = ['', 'ml-4 sm:ml-8', 'ml-8 sm:ml-16', 'ml-12 sm:ml-24', 'ml-16 sm:ml-32'][$depth] ?? 'ml-16 sm:ml-32';
+@endphp
+<x-mary-card class="{{ $indent }}">
     <div class="flex items-start space-x-3">
         <!-- Vote buttons -->
         <div class="flex flex-col items-center space-y-1">
-            <button 
+            <button
                 wire:click="upvoteComment({{ $comment->id }})"
+                aria-label="Upvote comment"
                 class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-success/10 transition-colors
                        {{ auth()->check() && $comment->getUserVote(auth()->user()) === true ? 'bg-success/20 text-success' : 'text-base-content/60' }}">
                 <x-mary-icon name="o-chevron-up" class="w-4 h-4" />
@@ -11,6 +15,7 @@
             <span class="text-xs font-semibold text-base-content">{{ $comment->score }}</span>
             <button 
                 wire:click="downvoteComment({{ $comment->id }})"
+                aria-label="Downvote comment"
                 class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-error/10 transition-colors
                        {{ auth()->check() && $comment->getUserVote(auth()->user()) === false ? 'bg-error/20 text-error' : 'text-base-content/60' }}">
                 <x-mary-icon name="o-chevron-down" class="w-4 h-4" />
@@ -75,7 +80,7 @@
                             <x-mary-button wire:click="cancelReply" class="btn-outline btn-sm">
                                 Cancel
                             </x-mary-button>
-                            <x-mary-button type="submit" class="btn-primary btn-sm">
+                            <x-mary-button type="submit" class="btn-primary btn-sm" spinner="postReply" wire:loading.attr="disabled" wire:target="postReply">
                                 Post Reply
                             </x-mary-button>
                         </div>

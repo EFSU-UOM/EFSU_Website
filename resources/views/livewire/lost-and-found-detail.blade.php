@@ -209,7 +209,12 @@ new class extends Component {
     // Comment functionality
     public function getCommentsProperty()
     {
-        return LostAndFoundComment::with(['user', 'replies.user'])
+        return LostAndFoundComment::with([
+                'user',
+                'votes' => fn ($q) => $q->where('user_id', auth()->id()),
+                'replies.user',
+                'replies.votes' => fn ($q) => $q->where('user_id', auth()->id()),
+            ])
             ->where('lost_and_found_id', $this->item->id)
             ->topLevel()
             ->orderedByScore()
@@ -380,43 +385,28 @@ new class extends Component {
                             <!-- Title -->
                             <x-mary-input wire:model="title" label="Item Title"
                                 placeholder="e.g., Black iPhone 14 Pro, Blue Backpack, etc." />
-                            @error('title')
-                                <span class="text-error text-sm">{{ $message }}</span>
-                            @enderror
 
                             <!-- Description -->
                             <x-mary-textarea wire:model="description" label="Description"
                                 placeholder="Provide detailed description including color, brand, distinctive features, etc."
                                 rows="4" />
-                            @error('description')
-                                <span class="text-error text-sm">{{ $message }}</span>
-                            @enderror
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Location -->
                                 <div>
                                     <x-mary-input wire:model="location" label="Location"
                                         placeholder="Library, Cafeteria, etc." />
-                                    @error('location')
-                                        <span class="text-error text-sm">{{ $message }}</span>
-                                    @enderror
                                 </div>
 
                                 <!-- Date -->
                                 <div>
                                     <x-mary-input wire:model="item_date" label="Date" type="date" />
-                                    @error('item_date')
-                                        <span class="text-error text-sm">{{ $message }}</span>
-                                    @enderror
                                 </div>
                             </div>
 
                             <!-- Contact Info -->
                             <x-mary-input wire:model="contact_info" label="Contact Information (Optional)"
                                 placeholder="Email, phone, or preferred contact method" />
-                            @error('contact_info')
-                                <span class="text-error text-sm">{{ $message }}</span>
-                            @enderror
 
                             <!-- Status -->
                             <x-mary-select
@@ -426,27 +416,25 @@ new class extends Component {
                                     ['name' => 'Active', 'id' => 'active'],
                                     $type === 'lost'
                                         ? ['name' => 'Owner Found', 'id' => 'owner_found']
-                                        : ['name' => 'Item Obtained', 'id' => 'lost_item_obtained'],
+                                        : ['name' => 'Item Claimed', 'id' => 'lost_item_obtained'],
                                 ]"
                                 option-label="name"
                                 option-value="id"
                             />
-                            @error('editingStatus')
-                                <span class="text-error text-sm">{{ $message }}</span>
-                            @enderror
 
                             <!-- Image Upload -->
                             <div>
-                                <x-mary-file wire:model="image" label="Upload New Image (optional)" accept="image/*" crop-after-change>
-                                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}" 
+                                <x-mary-file wire:model="image" label="Upload New Image (optional)" accept="image/*" crop-after-change
+                                    hint="JPG, PNG or GIF, max 2 MB">
+                                    <img src="{{ $image ? $image->temporaryUrl() : ($currentImageUrl ? Storage::url($currentImageUrl) : '/placeholder.avif') }}"
                                         alt="Preview" class="w-full h-48 object-cover rounded-lg" />
                                 </x-mary-file>
                             </div>
                         </form>
-                        
+
                         <div class="flex gap-3 pt-6">
                             <x-mary-button label="Cancel" wire:click="cancelEdit" />
-                            <x-mary-button label="Update Item" wire:click="updateItem" class="btn-primary" />
+                            <x-mary-button label="Update Item" wire:click="updateItem" class="btn-primary" spinner="updateItem" />
                         </div>
                     </div>
                 </x-mary-card>
@@ -565,13 +553,13 @@ new class extends Component {
                                                             <x-mary-button class="btn-success w-full"
                                                                 wire:click="updateItemStatus('owner_found')">
                                                                 <x-mary-icon name="o-check-circle" class="w-5 h-5" />
-                                                                Mark as Found - Owner Located
+                                                                Mark as Owner Found
                                                             </x-mary-button>
                                                         @else
                                                             <x-mary-button class="btn-success w-full"
                                                                 wire:click="updateItemStatus('lost_item_obtained')">
                                                                 <x-mary-icon name="o-check-circle" class="w-5 h-5" />
-                                                                Mark as Returned - Item Claimed
+                                                                Mark as Item Claimed
                                                             </x-mary-button>
                                                         @endif
                                                     </div>
@@ -587,13 +575,6 @@ new class extends Component {
                                                 @else
                                                     Is this your item? Contact the finder to claim it.
                                                 @endif
-                                            </p>
-                                            <x-mary-button class="btn-primary">
-                                                <x-mary-icon name="o-envelope" class="w-5 h-5" />
-                                                Contact {{ $item->user->name }}
-                                            </x-mary-button>
-                                            <p class="text-xs text-base-content/50 mt-2">
-                                                Contact functionality will be available soon
                                             </p>
                                             @if (auth()->user()->isModerator())
                                                 <x-mary-button class="btn-error w-full mt-4"
@@ -656,11 +637,8 @@ new class extends Component {
                                         placeholder="Add a comment about this lost/found item..." 
                                         rows="3" 
                                         class="w-full" />
-                                    @error('newComment')
-                                        <span class="text-error text-sm">{{ $message }}</span>
-                                    @enderror
                                     <div class="flex justify-end mt-2">
-                                        <x-mary-button wire:click="postComment" class="btn-primary btn-sm">
+                                        <x-mary-button wire:click="postComment" class="btn-primary btn-sm" spinner="postComment">
                                             Post Comment
                                         </x-mary-button>
                                     </div>
@@ -691,17 +669,19 @@ new class extends Component {
                                             <span class="font-medium text-base-content">{{ $comment->user->name }}</span>
                                             <span class="text-xs text-base-content/60">{{ $comment->created_at->diffForHumans() }}</span>
                                         </div>
-                                        <p class="text-base-content/80 mb-3">{{ $comment->content }}</p>
-                                        
+                                        <p class="text-base-content/80 mb-3">{!! nl2br(e($comment->content)) !!}</p>
+
                                         <div class="flex items-center space-x-4">
                                             @auth
                                                 <!-- Voting -->
                                                 <div class="flex items-center space-x-1">
-                                                    <x-mary-button wire:click="upvoteComment({{ $comment->id }})" class="btn-ghost btn-xs">
+                                                    <x-mary-button wire:click="upvoteComment({{ $comment->id }})" class="btn-ghost btn-xs {{ $comment->votes->first()?->is_upvote === true ? 'text-primary' : '' }}"
+                                                        aria-label="Upvote comment">
                                                         <x-mary-icon name="o-chevron-up" class="w-4 h-4" />
                                                     </x-mary-button>
                                                     <span class="text-sm font-medium text-base-content/70">{{ $comment->score }}</span>
-                                                    <x-mary-button wire:click="downvoteComment({{ $comment->id }})" class="btn-ghost btn-xs">
+                                                    <x-mary-button wire:click="downvoteComment({{ $comment->id }})" class="btn-ghost btn-xs {{ $comment->votes->first()?->is_upvote === false ? 'text-error' : '' }}"
+                                                        aria-label="Downvote comment">
                                                         <x-mary-icon name="o-chevron-down" class="w-4 h-4" />
                                                     </x-mary-button>
                                                 </div>
@@ -740,14 +720,11 @@ new class extends Component {
                                                             placeholder="Write your reply..." 
                                                             rows="2" 
                                                             class="w-full" />
-                                                        @error('replyContent')
-                                                            <span class="text-error text-sm">{{ $message }}</span>
-                                                        @enderror
                                                         <div class="flex justify-end gap-2 mt-2">
                                                             <x-mary-button wire:click="cancelReply" class="btn-ghost btn-sm">
                                                                 Cancel
                                                             </x-mary-button>
-                                                            <x-mary-button wire:click="postReply" class="btn-primary btn-sm">
+                                                            <x-mary-button wire:click="postReply" class="btn-primary btn-sm" spinner="postReply">
                                                                 Post Reply
                                                             </x-mary-button>
                                                         </div>
@@ -771,17 +748,19 @@ new class extends Component {
                                                                 <span class="text-sm font-medium text-base-content">{{ $reply->user->name }}</span>
                                                                 <span class="text-xs text-base-content/60">{{ $reply->created_at->diffForHumans() }}</span>
                                                             </div>
-                                                            <p class="text-sm text-base-content/80 mb-2">{{ $reply->content }}</p>
-                                                            
+                                                            <p class="text-sm text-base-content/80 mb-2">{!! nl2br(e($reply->content)) !!}</p>
+
                                                             @auth
                                                                 <div class="flex items-center space-x-2">
                                                                     <!-- Voting for replies -->
                                                                     <div class="flex items-center space-x-1">
-                                                                        <x-mary-button wire:click="upvoteComment({{ $reply->id }})" class="btn-ghost btn-xs">
+                                                                        <x-mary-button wire:click="upvoteComment({{ $reply->id }})" class="btn-ghost btn-xs {{ $reply->votes->first()?->is_upvote === true ? 'text-primary' : '' }}"
+                                                                            aria-label="Upvote reply">
                                                                             <x-mary-icon name="o-chevron-up" class="w-3 h-3" />
                                                                         </x-mary-button>
                                                                         <span class="text-xs font-medium text-base-content/70">{{ $reply->score }}</span>
-                                                                        <x-mary-button wire:click="downvoteComment({{ $reply->id }})" class="btn-ghost btn-xs">
+                                                                        <x-mary-button wire:click="downvoteComment({{ $reply->id }})" class="btn-ghost btn-xs {{ $reply->votes->first()?->is_upvote === false ? 'text-error' : '' }}"
+                                                                            aria-label="Downvote reply">
                                                                             <x-mary-icon name="o-chevron-down" class="w-3 h-3" />
                                                                         </x-mary-button>
                                                                     </div>

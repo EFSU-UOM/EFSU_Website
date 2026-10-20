@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
     <head>
         @include('partials.head')
     </head>
@@ -40,7 +40,7 @@
                                 </div>
                                 <x-mary-menu-item link="{{ route('settings.profile') }}" wire:navigate>
                                     <x-mary-icon name="o-cog-6-tooth" class="w-5 h-5" />
-                                    Settings
+                                    Profile
                                 </x-mary-menu-item>
                                 <x-mary-menu-separator />
                                 <x-mary-menu-item>
@@ -134,7 +134,7 @@
                             <x-mary-menu class="menu menu-md">
                                 <x-mary-menu-item link="{{ route('settings.profile') }}">
                                     <x-mary-icon name="o-user-circle" class="me-3 w-5 h-5" />
-                                    <span class="font-medium">My Profile</span>
+                                    <span class="font-medium">Profile</span>
                                 </x-mary-menu-item>
                                 <x-mary-menu-item class="text-error hover:bg-error/10">
                                     <form method="POST" action="{{ route('logout') }}" class="w-full">

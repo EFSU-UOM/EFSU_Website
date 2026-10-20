@@ -68,7 +68,7 @@ new class extends Component {
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <x-mary-button type="submit" class="btn btn-primary w-full">
+                    <x-mary-button type="submit" class="btn-primary" spinner="updatePassword">
                         {{ __('Save') }}
                     </x-mary-button>
                 </div>

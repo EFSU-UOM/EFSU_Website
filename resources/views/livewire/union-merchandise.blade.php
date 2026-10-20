@@ -60,6 +60,7 @@ $addToCart = function ($merchId) {
                 </x-mary-button>
             @endauth
             <x-mary-select
+                        label="Category"
                         wire:model.live="selectedCategory"
                         class="w-48"
                         :options="collect([['name' => 'All Categories', 'id' => '']])->merge(
@@ -71,6 +72,14 @@ $addToCart = function ($merchId) {
                     />
         </x-slot:actions>
     </x-mary-header>
+
+        <!-- Flash Messages -->
+        @if (session('success'))
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success mb-6" />
+        @endif
+        @if (session('error'))
+            <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
+        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($this->filteredMerch as $item)
@@ -118,7 +127,7 @@ $addToCart = function ($merchId) {
                 <div class="col-span-full text-center py-8">
                     <p class="text-base-content/60">
                         @if($selectedCategory)
-                            No {{ $selectedCategory }} available at the moment.
+                            No {{ MerchType::from($selectedCategory)->label() }} available at the moment.
                         @else
                             No merchandise available at the moment.
                         @endif

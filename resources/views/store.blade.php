@@ -20,15 +20,11 @@
         <div class="text-center bg-base-100 rounded-lg p-8">
             <h3 class="text-xl font-semibold text-base-content mb-4">How to Order</h3>
             <p class="text-base-content/70 mb-6">
-                Contact us through WhatsApp or visit our office to place your order. 
+                Contact us or visit our office to place your order.
                 Payment options include cash, bank transfer, or mobile payments.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <x-mary-button class="btn-primary">
-                    <x-mary-icon name="o-phone" class="w-4 h-4 mr-2" />
-                    WhatsApp Order
-                </x-mary-button>
-                <x-mary-button class="btn-outline">
+                <x-mary-button class="btn-outline" link="{{ route('contact') }}">
                     <x-mary-icon name="o-map-pin" class="w-4 h-4 mr-2" />
                     Visit Office
                 </x-mary-button>

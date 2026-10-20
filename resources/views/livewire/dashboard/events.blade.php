@@ -404,7 +404,7 @@ new class extends Component {
         <p>Are you sure you want to delete this event? This action cannot be undone.</p>
         <x-slot:actions>
             <x-mary-button label="Cancel" wire:click="$set('showDeleteModal', false)" />
-            <x-mary-button label="Delete" wire:click="delete" class="btn-error" />
+            <x-mary-button label="Delete" wire:click="delete" class="btn-error" spinner="delete" />
         </x-slot:actions>
     </x-mary-modal>
 </div>

@@ -132,6 +132,9 @@ $proceedToPayment = function () {
         </x-mary-header>
 
         <!-- Flash Messages -->
+        @if (session('success'))
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success mb-6" />
+        @endif
         @if (session('error'))
             <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
         @endif
@@ -155,7 +158,7 @@ $proceedToPayment = function () {
                             <x-mary-input wire:model="first_name" label="First Name" required />
                             <x-mary-input wire:model="last_name" label="Last Name" required />
                             <x-mary-input wire:model="email" label="Email" type="email" required />
-                            <x-mary-input wire:model="phone" label="Phone" required />
+                            <x-mary-input wire:model="phone" label="Phone" placeholder="07XXXXXXXX" required />
                             <div class="md:col-span-2">
                                 <x-mary-textarea wire:model="address" label="Address" rows="3" required />
                             </div>
@@ -178,7 +181,7 @@ $proceedToPayment = function () {
                                 <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
                                     <div class="avatar">
                                         <div class="w-12 h-12 rounded">
-                                            <img src="{{ $item->merch->image_url ?: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}" 
+                                            <img src="{{ $item->merch->image_url ? Storage::url($item->merch->image_url) : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}"
                                                  alt="{{ $item->merch->name }}" />
                                         </div>
                                     </div>
@@ -216,11 +219,11 @@ $proceedToPayment = function () {
                         </div>
                         
                         <x-mary-button 
-                            label="Proceed to Payment" 
-                            class="btn-primary w-full" 
+                            label="Proceed to Payment"
+                            class="btn-primary w-full"
                             wire:click="proceedToPayment"
                             wire:loading.attr="disabled"
-                            wire:target="proceedToPayment"
+                            spinner="proceedToPayment"
                         />
                     </div>
                 </div>

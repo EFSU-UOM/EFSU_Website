@@ -108,7 +108,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         />
 
         <div class="flex items-center justify-end">
-            <x-mary-button type="submit" color="primary" class="w-full" icon="o-arrow-right">
+            <x-mary-button type="submit" class="btn-primary w-full" icon="o-arrow-right" spinner="resetPassword">
                 {{ __('Reset password') }}
             </x-mary-button>
         </div>

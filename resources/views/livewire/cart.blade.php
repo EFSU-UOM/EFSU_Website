@@ -40,7 +40,11 @@ $updateQuantity = function ($cartId, $quantity) {
     } else {
         $max = $cartItem->merch?->stock_quantity ?? 10;
         $cartItem->update(['quantity' => min($quantity, $max)]);
-        session()->flash('success', 'Quantity updated!');
+        if ($quantity > $max) {
+            session()->flash('error', "Only {$max} in stock");
+        } else {
+            session()->flash('success', 'Quantity updated!');
+        }
     }
 };
 
@@ -81,7 +85,7 @@ $getTotalPrice = function () {
         <x-mary-header title="Shopping Cart" subtitle="Review your selected merchandise">
             <x-slot:actions>
                 @if(!$this->cartItems->isEmpty())
-                    <x-mary-button label="Clear Cart" class="btn-outline btn-error" wire:click="clearCart" />
+                    <x-mary-button label="Clear Cart" class="btn-outline btn-error" wire:click="clearCart" wire:confirm="Clear all items from your cart?" />
                 @endif
                 <x-mary-button label="Continue Shopping" class="btn-outline" link="{{ route('store') }}" />
             </x-slot:actions>
@@ -117,7 +121,7 @@ $getTotalPrice = function () {
                                         <div class="flex items-center gap-4 p-4 border border-base-300 rounded-lg">
                                             <div class="avatar">
                                                 <div class="w-16 h-16 rounded">
-                                                    <img src="{{ $item->merch->image_url ?: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' }}" 
+                                                    <img src="{{ $item->merch->image_url ? Storage::url($item->merch->image_url) : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' }}"
                                                          alt="{{ $item->merch->name }}" />
                                                 </div>
                                             </div>
@@ -130,14 +134,17 @@ $getTotalPrice = function () {
                                             
                                             <div class="flex items-center gap-2">
                                                 <x-mary-button 
-                                                    icon="o-minus" 
+                                                    icon="o-minus"
+                                                    aria-label="Decrease quantity"
                                                     class="btn-sm btn-outline"
                                                     wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
                                                 />
                                                 <span class="w-8 text-center font-semibold">{{ $item->quantity }}</span>
-                                                <x-mary-button 
-                                                    icon="o-plus" 
+                                                <x-mary-button
+                                                    icon="o-plus"
+                                                    aria-label="Increase quantity"
                                                     class="btn-sm btn-outline"
+                                                    :disabled="$item->quantity >= $item->merch->stock_quantity"
                                                     wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
                                                 />
                                             </div>
@@ -147,9 +154,11 @@ $getTotalPrice = function () {
                                                     LKR {{ number_format($item->merch->price * $item->quantity, 0) }}
                                                 </p>
                                                 <x-mary-button 
-                                                    icon="o-trash" 
+                                                    icon="o-trash"
+                                                    aria-label="Remove item"
                                                     class="btn-sm btn-ghost text-error mt-1"
                                                     wire:click="removeItem({{ $item->id }})"
+                                                    wire:confirm="Remove this item from your cart?"
                                                 />
                                             </div>
                                         </div>

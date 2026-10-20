@@ -14,13 +14,24 @@ state([
 $categories = computed(function () {
     return collect(ForumCategory::cases())->map(function ($category) {
         $topicsCount = ForumPost::where('category', $category)->count();
-        
+
         return [
             'category' => $category,
             'label' => $category->label(),
             'description' => $category->description(),
             'icon' => $category->icon(),
-            'color' => $category->color(),
+            'background' => match ($category->color()) {
+                'primary' => 'bg-primary/10',
+                'success' => 'bg-success/10',
+                'secondary' => 'bg-secondary/10',
+                'warning' => 'bg-warning/10',
+            },
+            'text' => match ($category->color()) {
+                'primary' => 'text-primary',
+                'success' => 'text-success',
+                'secondary' => 'text-secondary',
+                'warning' => 'text-warning',
+            },
             'posts_count' => $topicsCount,
         ];
     });
@@ -28,15 +39,14 @@ $categories = computed(function () {
 
 $openNewPostModal = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to create a new post.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to create posts.")');
+        session()->flash('error', 'Please verify your email address to create posts.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot create forum posts.")');
+        session()->flash('error', 'You are banned and cannot create forum posts.');
         return;
     }
 
@@ -55,15 +65,14 @@ $closeNewPostModal = function () {
 
 $createPost = function () {
     if (!auth()->check()) {
-        $this->js('alert("Please log in to create a new post.")');
-        return;
+        return $this->redirect(route('login'));
     }
     if (!auth()->user()->hasVerifiedEmail()) {
-        $this->js('alert("Please verify your email address to create posts.")');
+        session()->flash('error', 'Please verify your email address to create posts.');
         return;
     }
     if (auth()->user()->isBanned()) {
-        $this->js('alert("You are banned and cannot create forum posts.")');
+        session()->flash('error', 'You are banned and cannot create forum posts.');
         return;
     }
 
@@ -85,7 +94,7 @@ $createPost = function () {
         ],
     );
 
-    ForumPost::create([
+    $post = ForumPost::create([
         'title' => $this->newPostTitle,
         'content' => $this->newPostContent,
         'category' => ForumCategory::from($this->newPostCategory),
@@ -95,14 +104,17 @@ $createPost = function () {
         'score' => 0,
     ]);
 
-    $this->closeNewPostModal();
-    $this->js('alert("Post created successfully!")');
+    return redirect()->route('forum.post', $post);
 };
 
 ?>
 
 <section class="bg-base-200 py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        @if (session('error'))
+            <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
+        @endif
+
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-base-content">Forum Categories</h2>
             <x-mary-button wire:click="openNewPostModal" class="btn-primary" icon="o-plus" label="New Discussion" />
@@ -110,18 +122,20 @@ $createPost = function () {
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             @foreach ($this->categories as $categoryData)
-                <x-mary-card class="bg-base-100 hover:shadow-lg transition-shadow">
-                    <div
-                        class="w-12 h-12 bg-{{ $categoryData['color'] }}/10 rounded-lg flex items-center justify-center mb-4">
-                        <x-mary-icon name="{{ $categoryData['icon'] }}"
-                            class="w-6 h-6 text-{{ $categoryData['color'] }}" />
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">{{ $categoryData['label'] }}</h3>
-                    <p class="text-base-content/70 text-sm mb-4">{{ $categoryData['description'] }}</p>
-                    <div class="flex items-center justify-end text-sm text-base-content/60">
-                        <span>{{ $categoryData['posts_count'] }} posts</span>
-                    </div>
-                </x-mary-card>
+                <a href="{{ route('forum', ['selectedCategory' => $categoryData['category']->value]) }}" class="block">
+                    <x-mary-card class="bg-base-100 hover:shadow-lg transition-shadow h-full">
+                        <div
+                            class="w-12 h-12 {{ $categoryData['background'] }} rounded-lg flex items-center justify-center mb-4">
+                            <x-mary-icon name="{{ $categoryData['icon'] }}"
+                                class="w-6 h-6 {{ $categoryData['text'] }}" />
+                        </div>
+                        <h3 class="text-lg font-semibold text-base-content mb-2">{{ $categoryData['label'] }}</h3>
+                        <p class="text-base-content/70 text-sm mb-4">{{ $categoryData['description'] }}</p>
+                        <div class="flex items-center justify-end text-sm text-base-content/60">
+                            <span>{{ $categoryData['posts_count'] }} {{ Str::plural('post', $categoryData['posts_count']) }}</span>
+                        </div>
+                    </x-mary-card>
+                </a>
             @endforeach
         </div>
     </div>

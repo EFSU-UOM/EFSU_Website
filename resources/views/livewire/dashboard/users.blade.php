@@ -151,7 +151,7 @@ new class extends Component {
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold tracking-tight">User Management</h1>
-            <p class="text-muted-foreground">Manage user access levels and permissions</p>
+            <p class="text-base-content/70">Manage user access levels and permissions</p>
         </div>
     </div>
 
@@ -178,6 +178,20 @@ new class extends Component {
             </x-mary-button>
         </div>
     </div>
+
+    <!-- Success Message -->
+    @if (session()->has('message'))
+        <x-mary-alert icon="o-check-circle" class="alert-success">
+            {{ session('message') }}
+        </x-mary-alert>
+    @endif
+
+    <!-- Error Message -->
+    @if (session()->has('error'))
+        <x-mary-alert icon="o-exclamation-triangle" class="alert-error">
+            {{ session('error') }}
+        </x-mary-alert>
+    @endif
 
     <!-- Users Table -->
     <div class="bg-base-100 rounded-lg border">
@@ -216,16 +230,16 @@ new class extends Component {
                             </td>
                             <td>
                                 @if($user->id === auth()->id())
-                                    <x-mary-button icon="o-lock-closed" class="btn-sm btn-ghost" disabled tooltip="Cannot edit your own access level" />
+                                    <x-mary-button icon="o-lock-closed" class="btn-sm btn-ghost" disabled tooltip="Cannot edit your own access level" aria-label="Cannot edit your own access level" />
                                 @else
                                     <x-mary-button wire:click="openModal({{ $user->id }})" icon="o-pencil"
-                                        class="btn-sm btn-ghost" tooltip="Edit User" />
+                                        class="btn-sm btn-ghost" tooltip="Edit User" aria-label="Edit User" />
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-8 text-muted-foreground">
+                            <td colspan="6" class="text-center py-8 text-base-content/70">
                                 No users found matching your criteria.
                             </td>
                         </tr>
@@ -239,20 +253,6 @@ new class extends Component {
             {{ $this->users->links() }}
         </div>
     </div>
-
-    <!-- Success Message -->
-    @if (session()->has('message'))
-        <x-mary-alert icon="o-check-circle" class="alert-success">
-            {{ session('message') }}
-        </x-mary-alert>
-    @endif
-
-    <!-- Error Message -->
-    @if (session()->has('error'))
-        <x-mary-alert icon="o-exclamation-triangle" class="alert-error">
-            {{ session('error') }}
-        </x-mary-alert>
-    @endif
 
     <!-- User Edit Modal -->
     <x-mary-modal wire:model="showModal" title="Edit User" subtitle="Update user access level" class="backdrop-blur">

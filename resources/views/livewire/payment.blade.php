@@ -58,7 +58,7 @@ $getPayHereUrl = function () {
     <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         <x-mary-header title="Payment" subtitle="Complete your order with secure payment">
             <x-slot:actions>
-                <x-mary-button label="Back to Checkout" class="btn-outline" link="{{ route('checkout') }}" />
+                <x-mary-button label="Back to Cart" class="btn-outline" link="{{ route('cart') }}" />
             </x-slot:actions>
         </x-mary-header>
 
@@ -93,8 +93,14 @@ $getPayHereUrl = function () {
                 </div>
 
                 <!-- PayHere Payment Form -->
-                <div class="text-center">                    
-                    <form method="post" action="{{ $this->getPayHereUrl() }}" class="space-y-0">
+                @if($this->order->status === 'completed')
+                    <div class="alert alert-success">
+                        <x-mary-icon name="o-check-circle" class="w-5 h-5" />
+                        <span>This order has already been paid.</span>
+                    </div>
+                @else
+                <div class="text-center">
+                    <form method="post" action="{{ $this->getPayHereUrl() }}" class="space-y-0" onsubmit="this.querySelector('button[type=submit]').disabled=true">
                         <!-- PayHere Configuration -->
                         <input type="hidden" name="merchant_id" value="{{ config('payhere.merchant_id') }}">
                         <input type="hidden" name="return_url" value="{{ config('payhere.callback_urls.return') }}">
@@ -126,6 +132,7 @@ $getPayHereUrl = function () {
                         </button>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
         
@@ -138,7 +145,7 @@ $getPayHereUrl = function () {
                         <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
                             <div class="avatar">
                                 <div class="w-16 h-16 rounded">
-                                    <img src="{{ $item->merch->image_url ?: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}" 
+                                    <img src="{{ $item->merch->image_url ? Storage::url($item->merch->image_url) : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}"
                                          alt="{{ $item->merch->name }}" />
                                 </div>
                             </div>
