@@ -2,14 +2,21 @@
 
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
 
+    const STATUSES = ['delivered', 'viewed', 'in_progress', 'action_taken', 'rejected', 'incomplete'];
+    const CATEGORIES = ['canteen', 'sports', 'library', 'hostel', 'transport', 'faculty', 'administration', 'events', 'safety', 'other'];
+
+    #[Url(history: true)]
     public $selectedStatus = '';
+    #[Url(history: true)]
     public $selectedCategory = '';
+    #[Url(history: true)]
     public $search = '';
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
@@ -18,13 +25,6 @@ new class extends Component {
     public $expandedReplies = [];
     public $showComplaintModal = false;
     public $viewingComplaint = null;
-
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->selectedStatus = request('status', '');
-        $this->selectedCategory = request('category', '');
-    }
 
     public function with()
     {
@@ -35,26 +35,37 @@ new class extends Component {
 
     public function getComplaintsProperty()
     {
-        $query = Complaint::with(['user', 'topLevelReplies'])
-            ->orderBy($this->sortBy, $this->sortDirection);
+        $column = in_array($this->sortBy, ['id', 'created_at']) ? $this->sortBy : 'created_at';
+        $direction = in_array($this->sortDirection, ['asc', 'desc']) ? $this->sortDirection : 'desc';
 
-        if (!empty($this->search)) {
-            $searchTerm = '%' . $this->search . '%';
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('category', 'like', $searchTerm)
-                    ->orWhere('complaint_text', 'like', $searchTerm)
-                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                        $userQuery->where('name', 'like', $searchTerm)
-                            ->orWhere('email', 'like', $searchTerm);
+        $query = Complaint::with(['user', 'topLevelReplies'])
+            ->orderBy($column, $direction);
+
+        if ($column === 'created_at') {
+            $query->orderBy('id', $direction);
+        }
+
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("category LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("complaint_text LIKE ? ESCAPE '!'", [$like])
+                    ->orWhere(function ($anon) use ($like) {
+                        $anon->where('is_anonymous', false)
+                            ->whereHas('user', function ($userQuery) use ($like) {
+                                $userQuery->whereRaw("name LIKE ? ESCAPE '!'", [$like])
+                                    ->orWhereRaw("email LIKE ? ESCAPE '!'", [$like]);
+                            });
                     });
             });
         }
 
-        if (!empty($this->selectedStatus)) {
+        if (in_array($this->selectedStatus, self::STATUSES, true)) {
             $query->where('status', $this->selectedStatus);
         }
 
-        if (!empty($this->selectedCategory)) {
+        if (in_array($this->selectedCategory, self::CATEGORIES, true)) {
             $query->where('category', $this->selectedCategory);
         }
 
@@ -63,9 +74,15 @@ new class extends Component {
 
     public function updateStatus($complaintId, $status)
     {
+        if (!in_array($status, self::STATUSES, true)) {
+            session()->flash('error', 'Invalid status.');
+            return;
+        }
+
         $complaint = Complaint::findOrFail($complaintId);
         $complaint->update(['status' => $status]);
-        
+        $this->resetPage();
+
         $this->dispatch('complaint-status-updated');
     }
 
@@ -123,7 +140,7 @@ new class extends Component {
                 $parentReply = \App\Models\ComplaintReply::findOrFail($parentId);
                 $complaintId = $parentReply->complaint_id;
             } else {
-                $complaintId = $this->replyingTo;
+                $complaintId = Complaint::findOrFail($this->replyingTo)->id;
                 $parentId = null;
             }
 
@@ -256,11 +273,15 @@ new class extends Component {
                 wire:model.live="selectedCategory" 
                 placeholder="Filter by category"
                 :options="[
-                    ['name' => 'Academic Issues', 'id' => 'academic_issues'],
-                    ['name' => 'Infrastructure', 'id' => 'infrastructure'],
-                    ['name' => 'Food Services', 'id' => 'food_services'],
-                    ['name' => 'Transportation', 'id' => 'transportation'],
-                    ['name' => 'Events', 'id' => 'events'],
+                    ['name' => 'Canteen / Food Services', 'id' => 'canteen'],
+                    ['name' => 'Sports / Gym / Facilities', 'id' => 'sports'],
+                    ['name' => 'Library / Study Resources', 'id' => 'library'],
+                    ['name' => 'Hostel / Accommodation', 'id' => 'hostel'],
+                    ['name' => 'Transport / Parking', 'id' => 'transport'],
+                    ['name' => 'Faculty / Teaching Issues', 'id' => 'faculty'],
+                    ['name' => 'Administration / Office Services', 'id' => 'administration'],
+                    ['name' => 'Events / Campus Activities', 'id' => 'events'],
+                    ['name' => 'Safety / Security', 'id' => 'safety'],
                     ['name' => 'Other', 'id' => 'other'],
                 ]"
             />
@@ -401,14 +422,14 @@ new class extends Component {
                 <div>
                     <h3 class="text-xl font-semibold text-base-content">No complaints found</h3>
                     <p class="text-base-content/70 mt-1">
-                        @if($search || $selectedStatus || $selectedCategory)
+                        @if(trim($search) !== '' || $selectedStatus || $selectedCategory)
                             No complaints match your current filters.
                         @else
                             No complaints have been submitted yet.
                         @endif
                     </p>
                 </div>
-                @if($search || $selectedStatus || $selectedCategory)
+                @if(trim($search) !== '' || $selectedStatus || $selectedCategory)
                     <x-mary-button wire:click="clearFilters" class="btn-ghost">
                         Clear Filters
                     </x-mary-button>

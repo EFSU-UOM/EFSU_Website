@@ -1,10 +1,12 @@
 <?php
 
 use Livewire\Volt\Component;
+use Livewire\Attributes\Locked;
 use App\Models\BoardingPlaceComment;
 use App\Models\BoardingPlace;
 
 new class extends Component {
+    #[Locked]
     public $boardingPlaceId;
     public $newComment = '';
     public $replyingTo = null;
@@ -29,10 +31,19 @@ new class extends Component {
             ->get();
     }
 
+    public function getCommentsCountProperty()
+    {
+        return BoardingPlaceComment::where('boarding_place_id', $this->boardingPlaceId)->count();
+    }
+
     public function postComment()
     {
         if (!auth()->check()) {
             return redirect()->route('login');
+        }
+
+        if (auth()->user()->isBanned()) {
+            abort(403);
         }
 
         $this->validate(['newComment' => 'required|string|max:1000']);
@@ -53,12 +64,18 @@ new class extends Component {
             return redirect()->route('login');
         }
 
+        if (auth()->user()->isBanned()) {
+            abort(403);
+        }
+
         $this->validate(['replyContent' => 'required|string|max:1000']);
+
+        $parent = BoardingPlaceComment::where('boarding_place_id', $this->boardingPlaceId)->findOrFail($this->replyingTo);
 
         BoardingPlaceComment::create([
             'user_id' => auth()->id(),
             'boarding_place_id' => $this->boardingPlaceId,
-            'parent_id' => $this->replyingTo,
+            'parent_id' => $parent->id,
             'content' => $this->replyContent,
         ]);
 
@@ -117,7 +134,7 @@ new class extends Component {
     <!-- Comments Header -->
     <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-base-content">
-            Comments ({{ $this->comments->count() }})
+            Comments ({{ $this->commentsCount }})
         </h3>
     </div>
 

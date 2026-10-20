@@ -9,10 +9,6 @@
                     <x-mary-icon name="o-key" class="w-5 h-5" />
                     {{ __('Password') }}
                 </x-mary-menu-item>
-                <x-mary-menu-item link="{{ route('settings.appearance') }}" :active="request()->routeIs('settings.appearance')" wire:navigate>
-                    <x-mary-icon name="o-swatch" class="w-5 h-5" />
-                    {{ __('Appearance') }}
-                </x-mary-menu-item>
         </x-mary-menu>
     </div>
 

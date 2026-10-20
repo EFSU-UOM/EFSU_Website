@@ -16,6 +16,19 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
 
+    protected function messages(): array
+    {
+        return [
+            'email.ends_with' => 'Please use your University of Moratuwa email address ending in @uom.lk.',
+            'contact.required' => 'Please enter your WhatsApp number.',
+            'contact.regex' => 'Enter 9 digits without the leading 0, e.g. 771234567.',
+            'batch.required' => 'Please enter your batch number.',
+            'batch.integer' => 'Batch must be a whole number.',
+            'batch.min' => 'Batch must be between 0 and 99.',
+            'batch.max' => 'Batch must be between 0 and 99.',
+        ];
+    }
+
     /**
      * Handle an incoming registration request.
      */
@@ -79,6 +92,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             placeholder="23"
             min="0"
             max="99"
+            hint="Two-digit batch number, e.g. 23"
         />
 
         <x-mary-input
@@ -87,7 +101,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
             prefix="+94"
             type="text"
             required
-            placeholder="771234567" />
+            placeholder="771234567"
+            hint="9 digits without the leading 0" />
 
         <x-mary-input
             wire:model="password"
@@ -108,7 +123,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         />
 
         <div class="flex items-center justify-end">
-            <x-mary-button type="submit" class="btn-primary w-full">
+            <x-mary-button type="submit" class="btn-primary w-full" spinner="register">
                 {{ __('Create account') }}
             </x-mary-button>
         </div>

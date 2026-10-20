@@ -18,7 +18,7 @@ use function Livewire\Volt\{state};
                 </div>
                 <h3 class="text-lg font-semibold text-base-content mb-2">Discussion Forum</h3>
                 <p class="text-base-content/70 mb-4">Connect with peers and discuss academic topics.</p>
-                <x-mary-button link="{{ route('forum') }}" variant="link" color="primary" size="sm">
+                <x-mary-button link="{{ route('forum') }}" class="btn-link btn-sm">
                     Join Discussion →
                 </x-mary-button>
             </x-mary-card>
@@ -30,7 +30,7 @@ use function Livewire\Volt\{state};
                 </div>
                 <h3 class="text-lg font-semibold text-base-content mb-2">Complaints</h3>
                 <p class="text-base-content/70 mb-4">Submit and track complaints or feedback.</p>
-                <x-mary-button link="{{ route('complaints') }}" variant="link" color="warning" size="sm">
+                <x-mary-button link="{{ route('complaints') }}" class="btn-link btn-sm">
                     Submit Complaint →
                 </x-mary-button>
             </x-mary-card>
@@ -42,7 +42,7 @@ use function Livewire\Volt\{state};
                 </div>
                 <h3 class="text-lg font-semibold text-base-content mb-2">Lost & Found</h3>
                 <p class="text-base-content/70 mb-4">Report lost items or find items that have been found.</p>
-                <x-mary-button link="{{ route('lost-and-found') }}" variant="link" color="secondary" size="sm">
+                <x-mary-button link="{{ route('lost-and-found') }}" class="btn-link btn-sm">
                     Browse Items →
                 </x-mary-button>
             </x-mary-card>
@@ -54,7 +54,7 @@ use function Livewire\Volt\{state};
                 </div>
                 <h3 class="text-lg font-semibold text-base-content mb-2">Boarding Places</h3>
                 <p class="text-base-content/70 mb-4">Find accommodation and boarding options near campus.</p>
-                <x-mary-button link="{{ route('boarding.places') }}" variant="link" color="success" size="sm">
+                <x-mary-button link="{{ route('boarding.places') }}" class="btn-link btn-sm">
                     Find Accommodation →
                 </x-mary-button>
             </x-mary-card>

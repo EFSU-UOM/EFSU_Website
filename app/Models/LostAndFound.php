@@ -66,7 +66,7 @@ class LostAndFound extends Model
         return match ($this->status) {
             'active' => 'Active',
             'owner_found' => 'Owner Found',
-            'lost_item_obtained' => 'Item Obtained',
+            'lost_item_obtained' => 'Item Claimed',
             default => 'Unknown',
         };
     }

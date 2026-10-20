@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 use App\Models\BoardingPlace;
 use Illuminate\Support\Facades\Storage;
 
@@ -9,42 +10,44 @@ new class extends Component {
     use WithPagination;
 
     // Filters
+    #[Url(history: true)]
     public $search = '';
+    #[Url(history: true)]
     public $maxDistance = '';
+    #[Url(history: true)]
     public $minPrice = '';
+    #[Url(history: true)]
     public $maxPrice = '';
+    #[Url(history: true)]
     public $minCapacity = '';
-
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->maxDistance = request('maxDistance', '');
-        $this->minPrice = request('minPrice', '');
-        $this->maxPrice = request('maxPrice', '');
-        $this->minCapacity = request('minCapacity', '');
-    }
 
     public function getPlacesProperty()
     {
-        $query = BoardingPlace::with(['user', 'ratings'])->withCount('comments')->active();
+        $query = BoardingPlace::with(['user'])
+            ->withAvg(['ratings' => fn ($q) => $q->where('rating', '>', 0)], 'rating')
+            ->withCount(['ratings' => fn ($q) => $q->where('rating', '>', 0)])
+            ->withCount('comments')
+            ->active();
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%")
-                    ->orWhere('location', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("description LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("location LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
-        if (!empty($this->maxDistance)) {
+        if ($this->maxDistance !== null && $this->maxDistance !== '') {
             $query->withinDistance($this->maxDistance);
         }
 
-        if (!empty($this->minPrice) || !empty($this->maxPrice)) {
+        if (($this->minPrice !== null && $this->minPrice !== '') || ($this->maxPrice !== null && $this->maxPrice !== '')) {
             $query->withinPriceRange($this->minPrice, $this->maxPrice);
         }
 
-        if (!empty($this->minCapacity)) {
+        if ($this->minCapacity !== null && $this->minCapacity !== '') {
             $query->where('capacity', '>=', $this->minCapacity);
         }
 
@@ -56,7 +59,7 @@ new class extends Component {
     {
         $place = BoardingPlace::find($id);
 
-        if ($place && $place->user_id === auth()->id()) {
+        if ($place && auth()->check() && !auth()->user()->isBanned() && $place->user_id === auth()->id()) {
             if ($place->images) {
                 foreach ($place->images as $image) {
                     Storage::disk('public')->delete($image);
@@ -72,12 +75,6 @@ new class extends Component {
         $this->reset(['search', 'maxDistance', 'minPrice', 'maxPrice', 'minCapacity']);
         $this->resetPage();
     }
-
-    public function viewDetails($placeId)
-    {
-        return redirect()->route('boarding.place.details', $placeId);
-    }
-
 
     public function updatingSearch()
     {
@@ -144,22 +141,22 @@ new class extends Component {
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 <!-- Search -->
-                <x-mary-input wire:model.live.debounce.300ms="search" placeholder="Search places..."
+                <x-mary-input wire:model.live.debounce.300ms="search" label="Search" placeholder="Search places..."
                     icon="o-magnifying-glass" />
 
                 <!-- Max Distance -->
-                <x-mary-input wire:model.live.debounce.300ms="maxDistance" placeholder="Max distance (m)"
+                <x-mary-input wire:model.live.debounce.300ms="maxDistance" label="Max distance (m)" placeholder="Max distance (m)"
                     type="number" />
 
                 <!-- Price Range -->
-                <x-mary-input wire:model.live.debounce.300ms="minPrice" placeholder="Min price" type="number" />
-                <x-mary-input wire:model.live.debounce.300ms="maxPrice" placeholder="Max price" type="number" />
+                <x-mary-input wire:model.live.debounce.300ms="minPrice" label="Min price (LKR)" placeholder="Min price (LKR)" type="number" />
+                <x-mary-input wire:model.live.debounce.300ms="maxPrice" label="Max price (LKR)" placeholder="Max price (LKR)" type="number" />
 
                 <!-- Min Capacity -->
-                <x-mary-input wire:model.live.debounce.300ms="minCapacity" placeholder="Min capacity" type="number" />
+                <x-mary-input wire:model.live.debounce.300ms="minCapacity" label="Min capacity" placeholder="Min capacity" type="number" />
 
                 <!-- Clear Filters -->
-                <x-mary-button class="btn-ghost" wire:click="clearFilters">
+                <x-mary-button class="btn-ghost self-end" wire:click="clearFilters">
                     Clear Filters
                 </x-mary-button>
             </div>
@@ -172,8 +169,8 @@ new class extends Component {
             @if ($this->places->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($this->places as $place)
-                        <div class="bg-base-100 hover:shadow-lg transition-shadow rounded-lg p-4 cursor-pointer"
-                            wire:click="viewDetails({{ $place->id }})">
+                        <div class="bg-base-100 hover:shadow-lg transition-shadow rounded-lg p-4">
+                            <a href="{{ route('boarding.place.details', $place->id) }}" wire:navigate class="block">
                             <!-- Images -->
                             @if ($place->images && count($place->images) > 0)
                                 <div class="h-48 bg-base-200 rounded-lg overflow-hidden mb-4">
@@ -211,7 +208,7 @@ new class extends Component {
 
                                 @if ($place->price)
                                     <div class="flex items-center text-base-content/60 text-sm">
-                                        <x-mary-icon name="o-currency-dollar" class="w-4 h-4 mr-1" />
+                                        <x-mary-icon name="o-banknotes" class="w-4 h-4 mr-1" />
                                         {{ $place->formatted_price }}
                                     </div>
                                 @endif
@@ -225,15 +222,15 @@ new class extends Component {
                             </div>
 
                             <!-- Rating Display -->
-                            @if ($place->average_rating > 0)
+                            @if ($place->ratings_avg_rating > 0)
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="rating rating-sm">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            <div class="mask mask-star-2 opacity-100 {{ $i <= $place->average_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
+                                            <div class="mask mask-star-2 opacity-100 {{ $i <= $place->ratings_avg_rating ? 'bg-amber-500' : 'bg-neutral-300' }}"></div>
                                         @endfor
                                     </div>
                                     <span class="text-sm text-base-content/70">
-                                        {{ $place->average_rating }} ({{ $place->rating_count }})
+                                        {{ round($place->ratings_avg_rating, 1) }} ({{ $place->ratings_count }})
                                     </span>
                                 </div>
                             @endif
@@ -250,14 +247,14 @@ new class extends Component {
                                     {{ $place->comments_count }}
                                 </div>
                             </div>
+                            </a>
 
                             <!-- Actions -->
                             @auth
                                 @if ($place->user_id === auth()->id())
                                     <div class="flex justify-end">
                                         <div class="dropdown dropdown-end">
-                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm"
-                                                onclick="event.stopPropagation()">
+                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm">
                                                 <x-mary-icon name="o-ellipsis-vertical" class="w-4 h-4" />
                                             </x-mary-button>
                                             <ul tabindex="0"
@@ -281,15 +278,24 @@ new class extends Component {
             @else
                 <div class="text-center py-16">
                     <x-mary-icon name="o-home" class="w-16 h-16 text-base-content/40 mx-auto mb-4" />
-                    <h3 class="text-xl font-semibold text-base-content mb-2">No boarding places found</h3>
-                    <p class="text-base-content/70 mb-6">
-                        No boarding places match your search criteria. Try adjusting your filters.
-                    </p>
+                    @if (filled($search) || filled($maxDistance) || filled($minPrice) || filled($maxPrice) || filled($minCapacity))
+                        <h3 class="text-xl font-semibold text-base-content mb-2">No boarding places found</h3>
+                        <p class="text-base-content/70 mb-6">
+                            No boarding places match your search criteria. Try adjusting your filters.
+                        </p>
+                    @else
+                        <h3 class="text-xl font-semibold text-base-content mb-2">No boarding places listed yet</h3>
+                        <p class="text-base-content/70 mb-6">
+                            Be the first to share a place near the university.
+                        </p>
+                    @endif
                     @auth
                         <a href="{{ route('boarding.place.create') }}" class="btn btn-primary">
                             <x-mary-icon name="o-plus" class="w-5 h-5" />
                             Post First Place
                         </a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-primary">Sign in to post a place</a>
                     @endauth
                 </div>
             @endif

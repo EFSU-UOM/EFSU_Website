@@ -1,3 +1,7 @@
+@php
+    $retryOrderId = request('order_id') ? App\Models\Order::where('order_id', request('order_id'))->value('id') : null;
+@endphp
+
 <x-layouts.public>
     <div class="min-h-screen bg-base-200 py-8">
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
@@ -21,7 +25,7 @@
                     @endif
 
                     <div class="space-y-4">
-                        <x-mary-button label="Retry Payment" class="btn-primary" link="{{ route('checkout') }}" />
+                        <x-mary-button label="Retry Payment" class="btn-primary" link="{{ $retryOrderId ? route('payment', $retryOrderId) : route('cart') }}" />
                         <x-mary-button label="Continue Shopping" class="btn-outline" link="{{ route('store') }}" />
                     </div>
 

@@ -78,10 +78,10 @@ class BoardingPlace extends Model
 
     public function scopeWithinPriceRange($query, $minPrice = null, $maxPrice = null)
     {
-        if ($minPrice) {
+        if ($minPrice !== null && $minPrice !== '') {
             $query->where('price', '>=', $minPrice);
         }
-        if ($maxPrice) {
+        if ($maxPrice !== null && $maxPrice !== '') {
             $query->where('price', '<=', $maxPrice);
         }
         return $query;
@@ -98,8 +98,9 @@ class BoardingPlace extends Model
             return 'Price not specified';
         }
 
-        $paymentMethod = $this->payment_method ? " {$this->payment_method}" : '';
-        return "LKR " . number_format($this->price, 2) . $paymentMethod;
+        $periods = ['per_person' => 'person', 'per_room' => 'room', 'per_floor' => 'floor'];
+        $period = $this->payment_method ? ' / ' . ($periods[$this->payment_method] ?? $this->payment_method) : '';
+        return "LKR " . number_format($this->price) . $period;
     }
 
     public function getFormattedDistanceAttribute()

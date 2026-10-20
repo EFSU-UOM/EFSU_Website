@@ -67,8 +67,8 @@ new class extends Component {
             <x-mary-input wire:model="name" label="{{ __('Name') }}" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <x-mary-input wire:model="email" label="{{ __('Email') }}" type="email" readonly disabled class="bg-gray-100" />
-                <p class="mt-1 text-sm text-gray-600">{{ __('Email cannot be modified') }}</p>
+                <x-mary-input wire:model="email" label="{{ __('Email') }}" type="email" readonly disabled />
+                <p class="mt-1 text-sm text-base-content/70">{{ __('Email cannot be modified') }}</p>
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                     <x-mary-alert color="warning" class="mt-4">
@@ -97,7 +97,7 @@ new class extends Component {
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <x-mary-button color="primary" type="submit" class="w-full">{{ __('Save') }}</x-mary-button>
+                    <x-mary-button type="submit" class="btn-primary" spinner="updateProfileInformation">{{ __('Save') }}</x-mary-button>
                 </div>
 
                 <div

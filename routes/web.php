@@ -23,6 +23,8 @@ Route::get('/news', function () {
 })->name('news');
 
 Route::get('/news/{article}', function (App\Models\NewsArticle $article) {
+    abort_if(! $article->is_published || ! $article->published_at || $article->published_at->isFuture(), 404);
+
     return view('article', ['article' => $article]);
 })->name('article');
 
@@ -103,7 +105,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('payment');
 });
 
-Route::middleware(['admin', 'auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
     Route::view('/dashboard/announcements', 'dashboard.announcements')->name('dashboard.announcements');
     Route::view('/dashboard/merch', 'dashboard.merch')->name('dashboard.merch');
@@ -123,7 +125,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
 require __DIR__ . '/auth.php';

@@ -3,6 +3,7 @@
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Url;
 use App\Models\LostAndFound;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,9 +22,13 @@ new class extends Component {
     public $image = null;
 
     // Filters
+    #[Url(history: true)]
     public $search = '';
+    #[Url(as: 'type', history: true)]
     public $typeFilter = '';
+    #[Url(as: 'status', history: true)]
     public $statusFilter = '';
+    #[Url(as: 'location', history: true)]
     public $locationFilter = '';
 
 
@@ -37,14 +42,6 @@ new class extends Component {
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->typeFilter = request('type', '');
-        $this->statusFilter = request('status', '');
-        $this->locationFilter = request('location', '');
-    }
-
     public function getItemsProperty()
     {
         $query = LostAndFound::with('user');
@@ -57,19 +54,27 @@ new class extends Component {
             $query->where('status', $this->statusFilter);
         }
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%")
-                    ->orWhere('location', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("title LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("description LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("location LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
-        if (!empty($this->locationFilter)) {
-            $query->where('location', 'like', "%{$this->locationFilter}%");
+        $location = trim($this->locationFilter);
+
+        if ($location !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $location) . '%';
+
+            $query->whereRaw("location LIKE ? ESCAPE '!'", [$like]);
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(12);
+        return $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate(12);
     }
 
     public function openCreateForm()
@@ -130,9 +135,13 @@ new class extends Component {
 
     public function delete($id)
     {
+        if (auth()->user()?->isBanned()) {
+            return;
+        }
+
         $item = LostAndFound::find($id);
 
-        if ($item && $item->user_id === auth()->id()) {
+        if ($item && ($item->user_id === auth()->id() || auth()->user()?->isModerator())) {
             if ($item->image) {
                 Storage::disk('public')->delete($item->image);
             }
@@ -143,7 +152,15 @@ new class extends Component {
 
     public function updateStatus($id, $status)
     {
+        if (auth()->user()?->isBanned()) {
+            return;
+        }
+
         $item = LostAndFound::find($id);
+
+        if (!in_array($status, ['active', 'owner_found', 'lost_item_obtained'], true)) {
+            return;
+        }
 
         if ($item && $item->user_id === auth()->id()) {
             $item->update(['status' => $status]);
@@ -216,6 +233,15 @@ new class extends Component {
         </div>
     @endif
 
+    <!-- Error Messages -->
+    @if (session('error'))
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
+            <x-mary-alert icon="o-x-circle" class="alert-error">
+                {{ session('error') }}
+            </x-mary-alert>
+        </div>
+    @endif
+
     <!-- Create Form Modal -->
     <x-mary-modal wire:model="showCreateForm" title="Post Lost/Found Item" class="backdrop-blur">
         <div class="space-y-4">
@@ -235,9 +261,6 @@ new class extends Component {
                 <div class="md:col-span-2">
                     <x-mary-input wire:model="title" label="Item Title"
                         placeholder="e.g., Black iPhone 14 Pro, Blue Backpack, etc." required />
-                    @error('title')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
                 </div>
 
                 <!-- Description -->
@@ -245,35 +268,28 @@ new class extends Component {
                     <x-mary-textarea wire:model="description" label="Description"
                         placeholder="Provide detailed description including color, brand, distinctive features, etc."
                         rows="4" required />
-                    @error('description')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
                 </div>
 
                 <!-- Location -->
-                <x-mary-input wire:model="location" label="Location" placeholder="Library, Cafeteria, etc." />
-                @error('location')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
+                <div>
+                    <x-mary-input wire:model="location" label="Location" placeholder="Library, Cafeteria, etc." />
+                </div>
 
                 <!-- Date -->
-                <x-mary-input wire:model="item_date" label="Date Lost/Found" type="date" />
-                @error('item_date')
-                    <span class="text-error text-sm">{{ $message }}</span>
-                @enderror
+                <div>
+                    <x-mary-input wire:model="item_date" label="Date Lost/Found" type="date" />
+                </div>
 
                 <!-- Contact Info -->
                 <div class="md:col-span-2">
                     <x-mary-input wire:model="contact_info" label="Contact Information (Optional)"
                         placeholder="Email, phone, or preferred contact method" />
-                    @error('contact_info')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
                 </div>
 
                 <!-- Image Upload -->
                 <div class="md:col-span-2">
-                    <x-mary-file wire:model="image" label="Item Photo (Optional)" accept="image/*" crop-after-change>
+                    <x-mary-file wire:model="image" label="Item Photo (Optional)" accept="image/*" crop-after-change
+                        hint="JPG, PNG or GIF, max 2 MB">
                         <img src="{{ $image?->temporaryUrl() ?? '/placeholder.avif' }}"
                             class="h-32 w-32 object-cover rounded-lg">
                     </x-mary-file>
@@ -283,7 +299,7 @@ new class extends Component {
 
         <x-slot:actions>
             <x-mary-button label="Cancel" wire:click="closeCreateForm" />
-            <x-mary-button label="Post Item" wire:click="store" class="btn-primary" />
+            <x-mary-button label="Post Item" wire:click="store" class="btn-primary" spinner="store" />
         </x-slot:actions>
     </x-mary-modal>
 
@@ -307,7 +323,7 @@ new class extends Component {
                     <option value="">All Status</option>
                     <option value="active">Active</option>
                     <option value="owner_found">Owner Found</option>
-                    <option value="lost_item_obtained">Item Obtained</option>
+                    <option value="lost_item_obtained">Item Claimed</option>
                 </x-mary-select>
 
                 <!-- Location Filter -->
@@ -378,32 +394,35 @@ new class extends Component {
 
                             <!-- Actions dropdown positioned absolutely -->
                             @auth
-                                @if ($item->user_id === auth()->id())
+                                @if ($item->user_id === auth()->id() || auth()->user()->isModerator())
                                     <div class="absolute top-4 right-4 z-10">
                                         <div class="dropdown dropdown-end">
-                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm" onclick="event.stopPropagation();">
+                                            <x-mary-button tabindex="0" class="btn-ghost btn-sm" aria-label="Item actions"
+                                                onclick="event.stopPropagation();">
                                                 <x-mary-icon name="o-ellipsis-vertical" class="w-4 h-4" />
                                             </x-mary-button>
                                             <ul tabindex="0"
                                                 class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                                                @if ($item->status === 'active')
-                                                    @if ($item->type === 'lost')
-                                                        <li><a
-                                                                wire:click="updateStatus({{ $item->id }}, 'owner_found')">Mark
-                                                                as Found</a></li>
+                                                @if ($item->user_id === auth()->id())
+                                                    @if ($item->status === 'active')
+                                                        @if ($item->type === 'lost')
+                                                            <li><button type="button"
+                                                                    wire:click="updateStatus({{ $item->id }}, 'owner_found')">Mark
+                                                                    as Owner Found</button></li>
+                                                        @else
+                                                            <li><button type="button"
+                                                                    wire:click="updateStatus({{ $item->id }}, 'lost_item_obtained')">Mark
+                                                                    as Item Claimed</button></li>
+                                                        @endif
                                                     @else
-                                                        <li><a
-                                                                wire:click="updateStatus({{ $item->id }}, 'lost_item_obtained')">Mark
-                                                                as Returned</a></li>
+                                                        <li><button type="button" wire:click="updateStatus({{ $item->id }}, 'active')">Mark
+                                                                as
+                                                                Active</button></li>
                                                     @endif
-                                                @else
-                                                    <li><a wire:click="updateStatus({{ $item->id }}, 'active')">Mark
-                                                            as
-                                                            Active</a></li>
                                                 @endif
-                                                <li><a wire:click="delete({{ $item->id }})"
+                                                <li><button type="button" wire:click="delete({{ $item->id }})"
                                                         wire:confirm="Are you sure you want to delete this post?"
-                                                        class="text-error">Delete</a></li>
+                                                        class="text-error">Delete</button></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -420,16 +439,23 @@ new class extends Component {
             @else
                 <div class="text-center py-16">
                     <x-mary-icon name="o-magnifying-glass" class="w-16 h-16 text-base-content/40 mx-auto mb-4" />
-                    <h3 class="text-xl font-semibold text-base-content mb-2">No items found</h3>
-                    <p class="text-base-content/70 mb-6">
-                        No lost or found items match your search criteria. Try adjusting your filters.
-                    </p>
-                    @auth
-                        <x-mary-button class="btn-primary" @click="$wire.openCreateForm()">
-                            <x-mary-icon name="o-plus" class="w-5 h-5" />
-                            Post First Item
+                    @if ($search || $typeFilter || $statusFilter || $locationFilter)
+                        <h3 class="text-xl font-semibold text-base-content mb-2">No items found</h3>
+                        <p class="text-base-content/70 mb-6">
+                            No lost or found items match your search criteria. Try adjusting your filters.
+                        </p>
+                        <x-mary-button class="btn-ghost" wire:click="clearFilters">
+                            Clear Filters
                         </x-mary-button>
-                    @endauth
+                    @else
+                        <h3 class="text-xl font-semibold text-base-content mb-2">No items posted yet</h3>
+                        @auth
+                            <x-mary-button class="btn-primary mt-6" @click="$wire.openCreateForm()">
+                                <x-mary-icon name="o-plus" class="w-5 h-5" />
+                                Post First Item
+                            </x-mary-button>
+                        @endauth
+                    @endif
                 </div>
             @endif
         </div>

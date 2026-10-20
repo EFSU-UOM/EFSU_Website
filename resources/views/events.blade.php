@@ -14,25 +14,6 @@
     <!-- Upcoming Events -->
     <livewire:upcoming-events />
 
-    <!-- Calendar Integration -->
-    <section class="bg-base-100 py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-base-content mb-4">Event Calendar</h2>
-                <p class="text-base-content/70">Interactive calendar view of all upcoming events and important dates.</p>
-            </div>
-
-            <div class="max-w-3xl mx-auto">
-                <x-mary-alert icon="o-calendar" class="alert-info">
-                    <div>
-                        <p class="font-semibold">Interactive Calendar Coming Soon</p>
-                        <p class="text-base-content/70">Google Calendar integration will be available in the next update.</p>
-                    </div>
-                </x-mary-alert>
-            </div>
-        </div>
-    </section>
-
     <!-- Event Categories -->
     <livewire:event-categories />
 </x-layouts.public>

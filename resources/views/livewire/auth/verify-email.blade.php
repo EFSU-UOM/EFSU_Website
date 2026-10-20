@@ -29,8 +29,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 $this->timeRemaining = 0;
             }
         } else {
-            $this->canResend = false;
-            $this->timeRemaining = 120;
+            $this->canResend = true;
+            $this->timeRemaining = 0;
         }
     }
 
@@ -80,7 +80,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <x-mary-alert class="alert-warning text-center">
         <div class="space-y-2">
-            <p>{{ __('Please check your mailbox at') }} <a href="https://web.mail.uom.lk" target="_blank" class="font-bold text-white hover:text-white underline">web.mail.uom.lk</a></p>
+            <p>{{ __('Please check your mailbox at') }} <a href="https://web.mail.uom.lk" target="_blank" class="font-bold underline">web.mail.uom.lk</a></p>
             <p class="text-sm">{{ __('Look for the verification email in your inbox or spam folder. The email will be from the EFSU Portal system.') }}</p>
         </div>
     </x-mary-alert>

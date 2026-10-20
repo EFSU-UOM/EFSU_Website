@@ -14,11 +14,11 @@ $news = computed(function() {
 
 $getBadgeColor = function($category) {
     return match($category) {
-        'academic' => 'info',
-        'achievements' => 'success',
-        'events' => 'warning',
-        'general' => 'primary',
-        default => 'primary'
+        'academic' => 'primary',
+        'events' => 'success',
+        'achievements' => 'warning',
+        'general' => 'neutral',
+        default => 'neutral'
     };
 };
 
@@ -30,7 +30,7 @@ $getBadgeColor = function($category) {
         <x-mary-header title="Latest News" subtitle="Stay updated with the latest news from EFSU"
             separator>
             <x-slot:actions>
-                <x-mary-button link="{{ route('news') }}" variant="link" color="primary" size="sm">
+                <x-mary-button link="{{ route('news') }}" class="btn-link btn-sm">
                     View All →
                 </x-mary-button>
             </x-slot:actions>
@@ -49,7 +49,9 @@ $getBadgeColor = function($category) {
                         <x-mary-badge value="{{ ucfirst($article->category) }}" class="badge-{{ $this->getBadgeColor($article->category) }}" />
                         <span class="text-sm text-base-content/60">{{ $article->getTimeAgo() }}</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">{{ $article->title }}</h3>
+                    <h3 class="text-lg font-semibold text-base-content mb-2">
+                        <a href="{{ route('article', $article) }}" class="hover:text-primary">{{ $article->title }}</a>
+                    </h3>
                     <div class="text-base-content/70 mb-4 [&_a]:text-primary [&_a]:underline">
                         {{ $article->excerpt }}
                     </div>

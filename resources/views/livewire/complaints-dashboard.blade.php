@@ -3,13 +3,16 @@
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
 
+    #[Url(history: true)]
     public $selectedStatus = '';
+    #[Url(history: true)]
     public $search = '';
     public $showCreateForm = false;
     public $showComplaintModal = false;
@@ -18,22 +21,19 @@ new class extends Component {
     public $replyContent = '';
     public $expandedReplies = [];
 
-    public function mount()
-    {
-        $this->search = request('search', '');
-        $this->selectedStatus = request('status', '');
-    }
-
     public function getComplaintsProperty()
     {
         $query = Complaint::with(['topLevelReplies'])
             ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('category', 'like', "%{$this->search}%")
-                    ->orWhere('complaint_text', 'like', "%{$this->search}%");
+        $term = trim($this->search);
+        if ($term !== '') {
+            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("category LIKE ? ESCAPE '!'", [$like])
+                    ->orWhereRaw("complaint_text LIKE ? ESCAPE '!'", [$like]);
             });
         }
 
@@ -59,6 +59,7 @@ new class extends Component {
     public function handleComplaintSubmitted()
     {
         $this->showCreateForm = false;
+        session()->flash('success', 'Your complaint has been submitted!');
         $this->resetPage(); // Refresh the complaints list
     }
 
@@ -80,7 +81,13 @@ new class extends Component {
 
     public function viewComplaint($complaintId)
     {
-        $this->viewingComplaint = Complaint::with(['topLevelReplies'])->findOrFail($complaintId);
+        if (!auth()->check()) {
+            return;
+        }
+
+        $this->viewingComplaint = Complaint::with(['topLevelReplies'])
+            ->where('user_id', auth()->id())
+            ->findOrFail($complaintId);
         $this->showComplaintModal = true;
     }
 
@@ -100,21 +107,27 @@ new class extends Component {
             return;
         }
 
+        if (auth()->user()->isBanned()) {
+            session()->flash('error', 'You are banned and cannot post replies.');
+            return;
+        }
+
         if (empty(trim($this->replyContent))) {
             return;
         }
 
-        // Find the complaint ID from parent reply or use replyingTo as complaint ID
+        $this->validate(['replyContent' => 'required|string|max:2000']);
+
+        $complaint = auth()->user()->isModerator()
+            ? Complaint::findOrFail($this->replyingTo)
+            : Complaint::where('user_id', auth()->id())->findOrFail($this->replyingTo);
+
         if ($parentId) {
-            $parentReply = \App\Models\ComplaintReply::findOrFail($parentId);
-            $complaintId = $parentReply->complaint_id;
-        } else {
-            $complaintId = $this->replyingTo;
-            $parentId = null;
+            $complaint->replies()->findOrFail($parentId);
         }
 
         \App\Models\ComplaintReply::create([
-            'complaint_id' => $complaintId,
+            'complaint_id' => $complaint->id,
             'user_id' => auth()->id(),
             'parent_id' => $parentId,
             'content' => $this->replyContent,
@@ -173,7 +186,7 @@ new class extends Component {
 };
 ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8" wire:loading.class="opacity-75 pointer-events-none transition-opacity duration-300">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
     @auth
         <!-- Header -->
         <div class="p-6 sm:p-8">
@@ -197,6 +210,13 @@ new class extends Component {
     @endauth
 
     @auth
+        <!-- Success Message -->
+        @if (session('success'))
+            <x-mary-alert icon="o-check-circle" class="alert-success" dismissible>
+                {{ session('success') }}
+            </x-mary-alert>
+        @endif
+
         <!-- Create Complaint Modal -->
         <x-mary-modal wire:model="showCreateForm" title="Submit a Complaint" class="backdrop-blur" box-class="max-w-2xl">
             <livewire:create-complaint-form />
@@ -249,7 +269,8 @@ new class extends Component {
 
     <!-- Complaints List -->
     @if($this->complaints->count() > 0)
-        <div class="space-y-4">
+        <div class="space-y-4" wire:loading.class="opacity-75 pointer-events-none transition-opacity duration-300"
+            wire:target="search,selectedStatus,clearFilters,gotoPage">
             @foreach($this->complaints as $complaint)
                 <x-mary-card class="border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-base-100">
                     <div class="flex flex-col lg:flex-row lg:items-start gap-6 p-2">
@@ -295,18 +316,24 @@ new class extends Component {
                                 <div class="flex gap-2 flex-wrap">
                                     @foreach($complaint->images as $image)
                                         <div class="w-20 h-20 rounded-lg overflow-hidden bg-base-200">
-                                            <img 
-                                                src="{{ Storage::url($image) }}" 
-                                                alt="Complaint image" 
-                                                class="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                            <button type="button" class="w-full h-full"
                                                 onclick="document.getElementById('modal_{{ $loop->parent->index }}_{{ $loop->index }}').showModal()"
                                             >
+                                                <img
+                                                    src="{{ Storage::url($image) }}"
+                                                    alt="Complaint image {{ $loop->iteration }}"
+                                                    class="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                                >
+                                            </button>
                                         </div>
-                                        
+
                                         <!-- Image Modal -->
                                         <dialog id="modal_{{ $loop->parent->index }}_{{ $loop->index }}" class="modal">
                                             <div class="modal-box max-w-4xl">
-                                                <img src="{{ Storage::url($image) }}" alt="Complaint image" class="w-full">
+                                                <form method="dialog">
+                                                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label="Close">✕</button>
+                                                </form>
+                                                <img src="{{ Storage::url($image) }}" alt="Complaint image {{ $loop->iteration }}" class="w-full">
                                             </div>
                                             <form method="dialog" class="modal-backdrop">
                                                 <button>close</button>
@@ -465,18 +492,24 @@ new class extends Component {
                         <div class="grid grid-cols-3 gap-2">
                             @foreach($viewingComplaint->images as $image)
                                 <div class="aspect-square rounded-lg overflow-hidden bg-base-200">
-                                    <img 
-                                        src="{{ Storage::url($image) }}" 
-                                        alt="Complaint image" 
-                                        class="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                    <button type="button" class="w-full h-full"
                                         onclick="imageModal{{ $viewingComplaint->id }}_{{ $loop->index }}.showModal()"
                                     >
+                                        <img
+                                            src="{{ Storage::url($image) }}"
+                                            alt="Complaint image {{ $loop->iteration }}"
+                                            class="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                                        >
+                                    </button>
                                 </div>
 
                                 <!-- Image Modal -->
                                 <dialog id="imageModal{{ $viewingComplaint->id }}_{{ $loop->index }}" class="modal">
                                     <div class="modal-box max-w-4xl">
-                                        <img src="{{ Storage::url($image) }}" alt="Complaint image" class="w-full">
+                                        <form method="dialog">
+                                            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label="Close">✕</button>
+                                        </form>
+                                        <img src="{{ Storage::url($image) }}" alt="Complaint image {{ $loop->iteration }}" class="w-full">
                                     </div>
                                     <form method="dialog" class="modal-backdrop">
                                         <button>close</button>
@@ -494,14 +527,14 @@ new class extends Component {
                             <x-mary-icon name="o-calendar" class="w-5 h-5 text-primary" />
                             <div>
                                 <label class="font-semibold text-sm text-base-content/70">Submitted</label>
-                                <div class="text-sm font-medium">{{ $viewingComplaint->created_at->format('M d, Y H:i') }}</div>
+                                <div class="text-sm font-medium">{{ $viewingComplaint->created_at->format('M d, Y \a\t g:i A') }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <x-mary-icon name="o-clock" class="w-5 h-5 text-secondary" />
                             <div>
                                 <label class="font-semibold text-sm text-base-content/70">Last Updated</label>
-                                <div class="text-sm font-medium">{{ $viewingComplaint->updated_at->format('M d, Y H:i') }}</div>
+                                <div class="text-sm font-medium">{{ $viewingComplaint->updated_at->format('M d, Y \a\t g:i A') }}</div>
                             </div>
                         </div>
                     </div>

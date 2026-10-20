@@ -3,6 +3,7 @@
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
 use function Livewire\Volt\{state, computed, mount};
 
 state([
@@ -12,6 +13,7 @@ state([
     'phone' => '',
     'address' => '',
     'city' => '',
+    'processing' => false,
 ]);
 
 mount(function () {
@@ -34,7 +36,9 @@ $serviceChargeRate = function () {
 $cartItems = computed(function () {
     return Cart::with('merch')
                ->where('user_id', auth()->id())
-               ->get();
+               ->get()
+               ->filter(fn ($item) => $item->merch)
+               ->values();
 });
 
 $getSubtotal = function () {
@@ -61,39 +65,57 @@ $proceedToPayment = function () {
         'city' => 'required|string|max:255',
     ]);
     
+    if ($this->processing) {
+        return;
+    }
+    
+    if (auth()->user()->isBanned()) {
+        session()->flash('error', 'Your account is banned.');
+        return;
+    }
+    
     if ($this->cartItems->isEmpty()) {
         session()->flash('error', 'Your cart is empty!');
         return redirect('/cart');
     }
     
-    // Create order
-    $order = Order::create([
-        'order_id' => Order::generateOrderId(),
-        'user_id' => auth()->id(),
-        'subtotal' => $this->getSubtotal(),
-        'service_charge' => $this->getServiceCharge(),
-        'total_amount' => $this->getTotalPrice(),
-        'status' => 'pending',
-        'currency' => 'LKR',
-        'first_name' => $this->first_name,
-        'last_name' => $this->last_name,
-        'email' => $this->email,
-        'phone' => $this->phone,
-        'address' => $this->address,
-        'city' => $this->city,
-        'country' => 'Sri Lanka',
-    ]);
-    
-    // Create order items
-    foreach ($this->cartItems as $cartItem) {
-        OrderItem::create([
-            'order_id' => $order->id,
-            'merch_id' => $cartItem->merch_id,
-            'quantity' => $cartItem->quantity,
-            'unit_price' => $cartItem->merch->price,
-            'total_price' => $cartItem->merch->price * $cartItem->quantity,
-        ]);
+    if ($this->cartItems->contains(fn ($item) => !$item->merch->is_available)) {
+        session()->flash('error', 'Some items in your cart are no longer available. Please remove them.');
+        return redirect('/cart');
     }
+    
+    $this->processing = true;
+    
+    $order = DB::transaction(function () {
+        $order = Order::create([
+            'order_id' => Order::generateOrderId(),
+            'user_id' => auth()->id(),
+            'subtotal' => $this->getSubtotal(),
+            'service_charge' => $this->getServiceCharge(),
+            'total_amount' => $this->getTotalPrice(),
+            'status' => 'pending',
+            'currency' => 'LKR',
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'address' => $this->address,
+            'city' => $this->city,
+            'country' => 'Sri Lanka',
+        ]);
+        
+        foreach ($this->cartItems as $cartItem) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'merch_id' => $cartItem->merch_id,
+                'quantity' => $cartItem->quantity,
+                'unit_price' => $cartItem->merch->price,
+                'total_price' => $cartItem->merch->price * $cartItem->quantity,
+            ]);
+        }
+        
+        return $order;
+    });
     
     // Redirect to payment
     return redirect('/payment/' . $order->id);
@@ -110,6 +132,9 @@ $proceedToPayment = function () {
         </x-mary-header>
 
         <!-- Flash Messages -->
+        @if (session('success'))
+            <x-mary-alert title="Success!" description="{{ session('success') }}" icon="o-check-circle" class="alert-success mb-6" />
+        @endif
         @if (session('error'))
             <x-mary-alert title="Error!" description="{{ session('error') }}" icon="o-x-circle" class="alert-error mb-6" />
         @endif
@@ -133,7 +158,7 @@ $proceedToPayment = function () {
                             <x-mary-input wire:model="first_name" label="First Name" required />
                             <x-mary-input wire:model="last_name" label="Last Name" required />
                             <x-mary-input wire:model="email" label="Email" type="email" required />
-                            <x-mary-input wire:model="phone" label="Phone" required />
+                            <x-mary-input wire:model="phone" label="Phone" placeholder="07XXXXXXXX" required />
                             <div class="md:col-span-2">
                                 <x-mary-textarea wire:model="address" label="Address" rows="3" required />
                             </div>
@@ -156,7 +181,7 @@ $proceedToPayment = function () {
                                 <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
                                     <div class="avatar">
                                         <div class="w-12 h-12 rounded">
-                                            <img src="{{ $item->merch->image_url ?: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}" 
+                                            <img src="{{ $item->merch->image_url ? Storage::url($item->merch->image_url) : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab' }}"
                                                  alt="{{ $item->merch->name }}" />
                                         </div>
                                     </div>
@@ -194,9 +219,11 @@ $proceedToPayment = function () {
                         </div>
                         
                         <x-mary-button 
-                            label="Proceed to Payment" 
-                            class="btn-primary w-full" 
+                            label="Proceed to Payment"
+                            class="btn-primary w-full"
                             wire:click="proceedToPayment"
+                            wire:loading.attr="disabled"
+                            spinner="proceedToPayment"
                         />
                     </div>
                 </div>

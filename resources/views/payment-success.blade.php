@@ -21,8 +21,7 @@
                     @endif
 
                     <div class="space-y-4">
-                        <x-mary-button label="View Orders" class="btn-primary" link="{{ route('store') }}" />
-                        <x-mary-button label="Continue Shopping" class="btn-outline" link="{{ route('store') }}" />
+                        <x-mary-button label="Continue Shopping" class="btn-primary" link="{{ route('store') }}" />
                     </div>
 
                     <div class="mt-6 text-center">

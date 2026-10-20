@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -47,6 +48,10 @@ class Order extends Model
 
     public static function generateOrderId(): string
     {
-        return 'ORD-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        do {
+            $orderId = 'ORD-' . date('Ymd') . '-' . Str::upper(Str::random(8));
+        } while (static::where('order_id', $orderId)->exists());
+
+        return $orderId;
     }
 }

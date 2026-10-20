@@ -166,7 +166,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <x-mary-checkbox wire:model="remember" :label="__('Remember me')" />
 
         <div class="flex items-center justify-end">
-            <x-mary-button color="primary" type="submit" class="w-full">
+            <x-mary-button type="submit" class="btn-primary w-full" spinner="login">
                 {{ __('Log in') }}
             </x-mary-button>
         </div>

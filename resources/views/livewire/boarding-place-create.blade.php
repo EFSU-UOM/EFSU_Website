@@ -24,7 +24,6 @@ new class extends Component {
     public $contact_email = '';
 
     public Collection $library;
-    #[Rule(['files.*' => 'image|max:1024'])]
     public array $files = [];
 
     protected $rules = [
@@ -174,7 +173,7 @@ new class extends Component {
                             <span class="text-error text-sm">{{ $message }}</span>
                         @enderror
 
-                        <x-mary-select wire:model="payment_method" label="Payment Method" placeholder="Select payment method"
+                        <x-mary-select wire:model="payment_method" label="Price per" placeholder="Select period"
                             :options="[
                                 ['name' => 'Per Person', 'id' => 'per_person'],
                                 ['name' => 'Per Room', 'id' => 'per_room'],
@@ -204,7 +203,11 @@ new class extends Component {
                         <div class="md:col-span-2">
                             <x-mary-image-library wire:model="files" wire:library="library" :preview="$library"
                                 label="Boarding images" required/>
+                            <p class="text-sm text-base-content/60 mt-1">At least 1 image, JPG/PNG/GIF, max 2 MB each</p>
                             @error('files')
+                                <span class="text-error text-sm">{{ $message }}</span>
+                            @enderror
+                            @error('files.*')
                                 <span class="text-error text-sm">{{ $message }}</span>
                             @enderror
                         </div>
@@ -213,7 +216,7 @@ new class extends Component {
                     <!-- Action Buttons -->
                     <div class="flex justify-end gap-4 pt-6">
                         <x-mary-button label="Cancel" wire:click="cancel" class="btn-ghost" />
-                        <x-mary-button label="Post Boarding Place" wire:click="store" class="btn-primary" />
+                        <x-mary-button label="Post Boarding Place" wire:click="store" spinner="store" class="btn-primary" />
                     </div>
                 </div>
             </x-mary-card>
@@ -280,6 +283,14 @@ new class extends Component {
 
             mapInitialized = true;
             console.log('Map initialized successfully');
+
+            // Sync the default marker position into the form fields
+            @this.set('latitude', defaultLocation.lat.toFixed(8), false);
+            @this.set('longitude', defaultLocation.lng.toFixed(8), false);
+            const latInput = document.querySelector('input[wire\\:model="latitude"]');
+            const lngInput = document.querySelector('input[wire\\:model="longitude"]');
+            if (latInput) latInput.value = defaultLocation.lat.toFixed(8);
+            if (lngInput) lngInput.value = defaultLocation.lng.toFixed(8);
 
             // Handle map clicks - use wire:ignore to prevent Livewire from destroying the map
             map.addListener("click", (e) => {
