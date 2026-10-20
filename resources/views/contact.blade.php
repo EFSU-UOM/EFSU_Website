@@ -13,112 +13,137 @@
                 @php
                     $leaders = [
                         [
-                            'name' => 'Charuka Dissanayeke',
+                            'name' => 'Maleesha Kavinda',
                             'position' => 'President',
                             'email' => 'president@efsu-uom.lk',
-                            'phone' => '+94 71 711 4853',
-                            'image' => '/people/charuka.avif',
+                            'phone' => '+94 70 449 8462',
+                            'image' => '/people/maleesha.avif',
                             'bg' => 'bg-primary'
                         ],
                         [
-                            'name' => 'Pramodya Meegalle',
+                            'name' => 'Sivamynthan Nadesamoorthy',
                             'position' => 'Secretary',
                             'email' => 'secretary@efsu-uom.lk',
-                            'phone' => '+94 78 531 3027',
-                            'image' => '/people/meegalle.avif',
+                            'phone' => '+94 76 637 0873',
+                            'image' => '/people/shiva.avif',
                             'bg' => 'bg-secondary'
                         ],
                         [
-                            'name' => 'Maleesha Kavinda',
+                            'name' => 'Kaveesha Nirmal',
                             'position' => 'Vice President',
                             'email' => 'vicepresident@efsu-uom.lk',
-                            'phone' => '+94 70 449 8462',
-                            'image' => '/people/maleesha.avif',
+                            'phone' => '+94 77 690 7920',
+                            'image' => '/people/kaveesha.avif',
                             'bg' => 'bg-accent'
                         ],
                         [
-                            'name' => 'Sahan Cooray',
+                            'name' => 'Pivithuru Hasintha',
                             'position' => 'Vice Secretary',
                             'email' => 'vicesecretary@efsu-uom.lk',
-                            'phone' => '+94 76 699 0124',
-                            'image' => '/people/sahan.avif',
+                            'phone' => '+94 71 787 5495',
+                            'image' => '/people/pivithuru.avif',
                             'bg' => 'bg-info'
                         ],
                         [
-                            'name' => 'Pivithuru Hasintha',
+                            'name' => 'Gishan Chamith',
                             'position' => 'Treasurer',
                             'email' => 'treasurer@efsu-uom.lk',
-                            'phone' => '+94 71 787 5495',
-                            'image' => '/people/pivithuru.avif',
+                            'phone' => '+94 76 351 0388',
+                            'image' => '/people/gishan.avif',
                             'bg' => 'bg-success'
                         ],
                         [
-                            'name' => 'Lasindu Induwara',
+                            'name' => 'Sehandu Diyanaka',
                             'position' => 'Editor',
                             'email' => 'editor@efsu-uom.lk',
-                            'phone' => '+94 78 584 9870',
-                            'image' => '/people/lasindu.avif',
+                            'phone' => '+94 70 532 0290',
+                            'image' => '/people/sehandu.avif',
                             'bg' => 'bg-warning'
                         ],
                     ];
 
                     $committeeMembers = [
                         [
-                            'name' => 'Kaveesha Gimhana',
-                            'position' => 'Committee Member',
-                            'email' => 'kaveeshag@efsu-uom.lk',
-                            'phone' => '+94 70 207 5700',
-                            'image' => '/people/gimhana.avif',
-                            'bg' => 'bg-orange-400'
-                        ],
-                        [
-                            'name' => 'Shamitha Maduwantha',
-                            'position' => 'Committee Member',
-                            'email' => 'shamitha@efsu-uom.lk',
-                            'phone' => '+94 71 791 0819',
-                            'image' => '/people/shamitha.avif',
-                            'bg' => 'bg-purple-500'
-                        ],
-                        [
                             'name' => 'Chanuka Maneesha',
                             'position' => 'Committee Member',
                             'email' => 'chanuka@efsu-uom.lk',
-                            'phone' => '+94 77 568 1545',
+                            'phone' => '+94 70 237 3026',
                             'image' => '/people/chanuka.avif',
+                            'bg' => 'bg-orange-400'
+                        ],
+                        [
+                            'name' => 'Sahan Cooray',
+                            'position' => 'Committee Member',
+                            'email' => 'cooraymst.22@uom.lk',
+                            'phone' => '+94 76 699 0124',
+                            'image' => '/people/sahan.avif',
+                            'bg' => 'bg-purple-500'
+                        ],
+                        [
+                            'name' => 'Lasidu Induwara',
+                            'position' => 'Committee Member',
+                            'email' => 'herathhmli.23@uom.lk',
+                            'phone' => '+94 71 115 4940',
+                            'image' => '/people/lasindu.avif',
                             'bg' => 'bg-teal-500'
                         ],
                         [
-                            'name' => 'Sivamynthan Nadesamoorthy',
+                            'name' => 'Lahiru Gunasekara',
                             'position' => 'Committee Member',
-                            'email' => 'sivamynthan@efsu-uom.lk',
-                            'phone' => '+94 76 637 0873',
-                            'image' => '/people/shiva.avif',
+                            'email' => 'gunasekaraklm.24@uom.lk',
+                            'phone' => '+94 71 351 3157',
+                            'image' => '/people/lahiru.avif',
                             'bg' => 'bg-indigo-500'
                         ],
                         [
-                            'name' => 'Kaveesha Nirmal',
+                            'name' => 'Anjana Imantha',
                             'position' => 'Committee Member',
-                            'email' => 'kaveesha@efsu-uom.lk',
-                            'phone' => '+94 77 690 7920',
-                            'image' => '/people/kaveesha.avif',
+                            'email' => 'imanthabua.24@uom.lk',
+                            'phone' => '+94 74 269 9320',
+                            'image' => '/people/anjana.avif',
                             'bg' => 'bg-pink-500'
                         ],
                         [
-                            'name' => 'Gishan Chamith',
+                            'name' => 'Waruni Wasana',
                             'position' => 'Committee Member',
-                            'email' => 'gishan@efsu-uom.lk',
-                            'phone' => '+94 76 351 0388',
-                            'image' => '/people/gishan.avif',
+                            'email' => 'nethminigvww.24@uom.lk',
+                            'phone' => '+94 77 058 0943',
+                            'image' => '/people/waruni.avif',
                             'bg' => 'bg-emerald-500'
                         ],
                         [
-                            'name' => 'Sithum Ransidu',
+                            'name' => 'Nithira Pawan',
                             'position' => 'Committee Member',
-                            'email' => 'sithum@efsu-uom.lk',
-                            'phone' => '+94 70 163 2029',
-                            'image' => '/people/sithum.avif',
+                            'email' => 'hansarahdnp.24@uom.lk',
+                            'phone' => '+94 72 556 4798',
+                            'image' => '/people/nithira.avif',
                             'bg' => 'bg-red-500'
                         ]
+                    ];
+
+                    $subCommittees = [
+                        [
+                            'title' => 'E-Frames',
+                            'subtitle' => 'EFSU Media Subcommittee',
+                            'members' => [
+                                ['name' => 'Sahan Cooray', 'position' => 'Director of Media', 'image' => '/people/sahan.avif'],
+                                ['name' => 'Sehandu Diyanaka', 'position' => 'Co-Director of Media', 'image' => '/people/sehandu.avif'],
+                                ['name' => 'Senuja Wathsilu', 'position' => 'Pillar Head - Visual Media', 'image' => '/people/senuja.avif'],
+                                ['name' => 'Sithuka Abinuka', 'position' => 'Pillar Head - Creative Media', 'image' => '/people/sithuka.avif'],
+                            ],
+                        ],
+                        [
+                            'title' => 'E-Voice',
+                            'subtitle' => 'EFSU Literature and Art Subcommittee',
+                            'members' => [
+                                ['name' => 'Sithum Ransindu', 'position' => 'Director', 'image' => '/people/sithum.avif'],
+                                ['name' => 'Vidura Prasanna', 'position' => 'Director', 'image' => '/people/vidura.avif'],
+                                ['name' => 'Avishka Theshan', 'position' => 'Pillar Head - Publications', 'image' => '/people/avishka.avif'],
+                                ['name' => 'Dineth Maduhansa', 'position' => 'Pillar Head - Literary Affairs', 'image' => '/people/dineth.avif'],
+                                ['name' => 'Oska Hidmi', 'position' => 'Pillar Head - Performing Arts', 'image' => '/people/oska.avif'],
+                                ['name' => 'Themiya Rajarathna', 'position' => 'Pillar Head - Creative Arts', 'image' => '/people/themiya.avif'],
+                            ],
+                        ],
                     ];
                 @endphp
 
@@ -206,6 +231,25 @@
                         </x-mary-card>
                     @endforeach
                 </div>
+
+                {{-- Sub-committees --}}
+                @foreach($subCommittees as $subCommittee)
+                    <h3 class="text-xl font-semibold mt-12">{{ $subCommittee['title'] }}</h3>
+                    <p class="text-sm text-base-content/70 mb-6">{{ $subCommittee['subtitle'] }}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        @foreach($subCommittee['members'] as $member)
+                            <x-mary-card class="w-full" shadow>
+                                <div class="flex items-center gap-3">
+                                    <x-mary-avatar class="!w-12 !h-12" :image="$member['image']" />
+                                    <div>
+                                        <h3 class="font-semibold text-base-content">{{ $member['name'] }}</h3>
+                                        <p class="text-sm text-base-content/70">{{ $member['position'] }}</p>
+                                    </div>
+                                </div>
+                            </x-mary-card>
+                        @endforeach
+                    </div>
+                @endforeach
             </div>
         </section>
     <section class="py-10">
