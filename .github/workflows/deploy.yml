@@ -1,139 +1,222 @@
-name: Deploy Laravel to cPanel
+name: deploy
 
 on:
-  # push:
-  #   branches: [ main, production ]
-  workflow_dispatch: # Allows manual triggering
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_vendor:
+        description: Ship vendor/ even when composer.lock has not changed
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  DEPLOY_URL: https://efsu-uom.lk/deploy.php
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, dom, filter, gd, iconv, json, mbstring, pdo
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Cache Composer packages
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
-          
-    - name: Install Composer dependencies
-      run: composer install --optimize-autoloader --no-dev --no-interaction
-      
-    - name: Install npm dependencies
-      run: npm ci
-      
-    - name: Build frontend assets
-      run: npm run build
-      
-    - name: Create production .env file
-      run: |
-        # Create production .env file
-        cat > .env << EOF
-        APP_NAME="Engineering Faculty Students' Union - University of Moratuwa"
-        APP_ENV=production
-        APP_KEY=${{ secrets.APP_KEY }}
-        APP_DEBUG=false
-        APP_URL=${{ secrets.APP_URL }}
-        
-        APP_LOCALE=en
-        APP_FALLBACK_LOCALE=en
-        APP_FAKER_LOCALE=en_US
-        
-        APP_MAINTENANCE_DRIVER=file
-        
-        PHP_CLI_SERVER_WORKERS=4
-        
-        BCRYPT_ROUNDS=12
-        
-        LOG_CHANNEL=stack
-        LOG_STACK=single
-        LOG_DEPRECATIONS_CHANNEL=null
-        LOG_LEVEL=debug
-        
-        DB_CONNECTION=mysql
-        DB_HOST=${{ secrets.DB_HOST }}
-        DB_PORT=${{ secrets.DB_PORT }}
-        DB_DATABASE=${{ secrets.DB_DB }}
-        DB_USERNAME=${{ secrets.DB_USER }}
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        
-        SESSION_DRIVER=database
-        SESSION_LIFETIME=120
-        SESSION_ENCRYPT=false
-        SESSION_PATH=/
-        SESSION_DOMAIN=null
-        
-        BROADCAST_CONNECTION=log
-        FILESYSTEM_DISK=local
-        QUEUE_CONNECTION=database
-        
-        CACHE_STORE=database
-        
-        MEMCACHED_HOST=127.0.0.1
-        
-        REDIS_CLIENT=phpredis
-        REDIS_HOST=127.0.0.1
-        REDIS_PASSWORD=null
-        REDIS_PORT=6379
-        
-        MAIL_MAILER=${{ secrets.MAIL_MAILER || 'log' }}
-        MAIL_SCHEME=null
-        MAIL_HOST=${{ secrets.MAIL_HOST || '127.0.0.1' }}
-        MAIL_PORT=${{ secrets.MAIL_PORT || '2525' }}
-        MAIL_USERNAME=${{ secrets.MAIL_USERNAME || 'null' }}
-        MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD || 'null' }}
-        MAIL_FROM_ADDRESS="${{ secrets.MAIL_FROM_ADDRESS || 'hello@example.com' }}"
-        MAIL_FROM_NAME="Laravel"
-        
-        AWS_ACCESS_KEY_ID=
-        AWS_SECRET_ACCESS_KEY=
-        AWS_DEFAULT_REGION=us-east-1
-        AWS_BUCKET=
-        AWS_USE_PATH_STYLE_ENDPOINT=false
+    environment: Production
+    timeout-minutes: 30
 
-        VITE_APP_NAME="Engineering Faculty Students' Union - University of Moratuwa"
-        EOF
-      
-    - name: Deploy entire Laravel app to FTP root
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./
-        server-dir: /htdocs
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/tests/**
-          **/.github/**
-          **/.env.example
-          **/README.md
-          
-    - name: Notify deployment status
-      if: always()
-      run: |
-        if [ ${{ job.status }} == 'success' ]; then
-          echo "✅ Deployment successful!"
-          echo "Laravel app deployed to FTP root with public directory as web root"
-        else
-          echo "❌ Deployment failed!"
-        fi
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Add Flux Credentials Loaded From ENV
+        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
+
+      - name: Install PHP Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Copy Environment File
+        run: cp .env.example .env
+
+      - name: Generate Application Key
+        run: php artisan key:generate
+
+      - name: Build Assets
+        run: npm run build
+
+      - name: Run Tests
+        run: ./vendor/bin/pest
+
+      - name: Check Server State
+        id: server
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          FORCE_VENDOR: ${{ inputs.force_vendor }}
+        run: |
+          set -euo pipefail
+
+          code=$(curl -sS --max-time 60 \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" \
+            -o status.json -w '%{http_code}' \
+            "$DEPLOY_URL?status=1")
+
+          if [ "$code" != "200" ]; then
+            echo "The status endpoint returned HTTP $code"
+            cat status.json
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import hashlib, json, os, sys
+
+          status = json.load(open('status.json'))
+          print(json.dumps(status, indent=2))
+
+          unusable = [key for key in ('proc_open', 'zip_archive', 'bootstrap_cache_writable', 'storage_writable') if not status.get(key)]
+
+          if unusable:
+              sys.exit('::error::The server cannot deploy: ' + ', '.join(unusable))
+
+          local_lock = hashlib.sha256(open('composer.lock', 'rb').read()).hexdigest()
+          needs_vendor = os.environ.get('FORCE_VENDOR') == 'true' or status.get('vendor_lock_sha256') != local_lock
+
+          def to_bytes(value):
+              value = str(value).strip()
+              units = {'k': 1024, 'm': 1024 ** 2, 'g': 1024 ** 3}
+              if value[-1:].lower() in units:
+                  return int(float(value[:-1]) * units[value[-1].lower()])
+              return int(value)
+
+          # The host's .user.ini is not always honoured, so size chunks from what it reports.
+          limit = min(to_bytes(status['upload_max_filesize']), to_bytes(status['post_max_size']))
+          chunk_bytes = max(262144, min(6 * 1024 ** 2, int(limit * 0.7) // 65536 * 65536))
+
+          print('composer.lock in this build :', local_lock)
+          print('vendor/ on the server is for:', status.get('vendor_lock_sha256'))
+          print('shipping vendor/            :', needs_vendor)
+          print('upload limit / chunk size   :', limit, '/', chunk_bytes, 'bytes')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as handle:
+              handle.write('needs_vendor={}\n'.format('true' if needs_vendor else 'false'))
+              handle.write('chunk_bytes={}\n'.format(chunk_bytes))
+          PY
+
+      - name: Upload Artifacts
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          NEEDS_VENDOR: ${{ steps.server.outputs.needs_vendor }}
+          CHUNK_BYTES: ${{ steps.server.outputs.chunk_bytes }}
+        run: |
+          set -euo pipefail
+
+          upload() {
+            local name=$1 archive=$2 id sha index chunk
+            id=$(openssl rand -hex 16)
+            sha=$(sha256sum "$archive" | cut -d ' ' -f 1)
+
+            mkdir "chunks-$name"
+            split -b "$CHUNK_BYTES" -d -a 3 "$archive" "chunks-$name/part"
+
+            index=0
+            for chunk in "chunks-$name"/part*; do
+              curl -sS --fail-with-body --max-time 300 \
+                -H "Authorization: Bearer $DEPLOY_TOKEN" \
+                -F "action=chunk" -F "id=$id" -F "index=$index" -F "chunk=@$chunk" \
+                -o /dev/null "$DEPLOY_URL"
+              index=$((index + 1))
+            done
+
+            echo "$name.zip: $(du -h "$archive" | cut -f 1) in $index chunk(s), sha256 $sha"
+
+            {
+              echo "${name^^}_ID=$id"
+              echo "${name^^}_PARTS=$index"
+              echo "${name^^}_SHA256=$sha"
+            } >> "$GITHUB_ENV"
+          }
+
+          (cd public/build && zip -qr "$GITHUB_WORKSPACE/build.zip" .)
+          upload build build.zip
+
+          if [ "$NEEDS_VENDOR" = "true" ]; then
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            (cd vendor && zip -qr "$GITHUB_WORKSPACE/vendor.zip" .)
+            upload vendor vendor.zip
+          fi
+
+      - name: Deploy
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          vendor_fields=()
+          if [ -n "${VENDOR_ID:-}" ]; then
+            vendor_fields=(-F "vendor_id=$VENDOR_ID" -F "vendor_parts=$VENDOR_PARTS" -F "vendor_sha256=$VENDOR_SHA256")
+          fi
+
+          status=$(curl -sS --max-time 900 \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" \
+            -F "commit=$GITHUB_SHA" \
+            -F "build_id=$BUILD_ID" -F "build_parts=$BUILD_PARTS" -F "build_sha256=$BUILD_SHA256" \
+            "${vendor_fields[@]}" \
+            -o response.json -w '%{http_code}' \
+            "$DEPLOY_URL")
+
+          echo "deploy.php returned HTTP $status"
+
+          python3 - "$status" <<'PY'
+          import json, sys
+
+          status = sys.argv[1]
+          raw = open('response.json').read()
+
+          try:
+              body = json.loads(raw)
+          except json.JSONDecodeError:
+              print('deploy.php did not return JSON:')
+              print(raw[:4000])
+              sys.exit(1)
+
+          for step in body.get('steps', []):
+              print('{} {} [exit {}, {}ms]'.format('ok  ' if step['ok'] else 'FAIL', step['name'], step['exit_code'], step['ms']))
+              if step['output']:
+                  print(step['output'])
+              print()
+
+          for warning in body.get('warnings', []):
+              print('::warning::' + warning)
+
+          if body.get('error'):
+              print('::error::' + body['error'])
+
+          sys.exit(0 if status == '200' and body.get('ok') is True else 1)
+          PY
+
+      - name: Verify Deployment
+        run: |
+          set -euo pipefail
+
+          code=$(curl -sS -o /dev/null -w '%{http_code}' https://efsu-uom.lk/)
+          echo "homepage returned HTTP $code"
+          test "$code" = "200"
+
+          built=$(sha256sum public/build/manifest.json | cut -d ' ' -f 1)
+          live=$(curl -fsS https://efsu-uom.lk/build/manifest.json | sha256sum | cut -d ' ' -f 1)
+          echo "built manifest $built"
+          echo "live  manifest $live"
+          test "$built" = "$live"
