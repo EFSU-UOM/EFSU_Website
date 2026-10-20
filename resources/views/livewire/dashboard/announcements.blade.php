@@ -107,7 +107,7 @@ new class extends Component {
             'content' => 'required|string',
             'type' => 'required|in:general,event,urgent,maintenance',
             'image' => 'nullable|image|max:2048',
-            'expires_at' => 'nullable|date|after:now',
+            'expires_at' => 'nullable|date',
         ]);
 
         $announcement = Announcement::findOrFail($this->editId);

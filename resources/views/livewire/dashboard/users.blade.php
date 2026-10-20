@@ -39,9 +39,13 @@ new class extends Component {
         // Hide super admins from the list
         $query->where('access_level', '>', 0);
 
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'LIKE', "%{$this->search}%")->orWhere('email', 'LIKE', "%{$this->search}%");
+        $search = trim($this->search);
+
+        if ($search !== '') {
+            $like = '%' . addcslashes($search, '%_\\') . '%';
+
+            $query->where(function ($q) use ($like) {
+                $q->where('name', 'LIKE', $like)->orWhere('email', 'LIKE', $like);
             });
         }
 
@@ -74,6 +78,13 @@ new class extends Component {
             return;
         }
 
+        $currentUser = auth()->user();
+
+        if ($currentUser->access_level !== AccessLevel::SUPER_ADMIN && $user->access_level->value <= $currentUser->access_level->value) {
+            session()->flash('error', 'You cannot edit users at your level or higher.');
+            return;
+        }
+
         $this->selectedUser = $user;
         $this->newAccessLevel = $user->access_level->value;
         $this->showModal = true;
@@ -100,13 +111,25 @@ new class extends Component {
             return;
         }
 
+        if ($currentUser->access_level !== AccessLevel::SUPER_ADMIN && $this->selectedUser->access_level->value <= $currentUser->access_level->value) {
+            $this->addError('newAccessLevel', 'You cannot edit users at your level or higher.');
+            return;
+        }
+
+        $level = AccessLevel::tryFrom((int) $this->newAccessLevel);
+
+        if (!$level) {
+            $this->addError('newAccessLevel', 'Invalid access level.');
+            return;
+        }
+
         // Validate that user can only set access levels at their level or lower
-        if ($this->newAccessLevel < $currentUser->access_level->value) {
+        if ($level->value < $currentUser->access_level->value) {
             $this->addError('newAccessLevel', 'You can only assign access levels at your level or lower.');
             return;
         }
 
-        $this->selectedUser->access_level = $this->newAccessLevel;
+        $this->selectedUser->access_level = $level;
         $this->selectedUser->save();
 
         $this->closeModal();

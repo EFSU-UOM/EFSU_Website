@@ -91,6 +91,15 @@ new class extends Component {
             'facebook_album_urls' => 'nullable|string',
         ]);
 
+        $albumUrls = array_values(array_filter(array_map('trim', explode("\n", $this->facebook_album_urls))));
+
+        foreach ($albumUrls as $url) {
+            if (! filter_var($url, FILTER_VALIDATE_URL) || ! in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)) {
+                $this->addError('facebook_album_urls', 'Each album URL must be a valid http or https URL.');
+                return;
+            }
+        }
+
         $data = [
             'title' => $this->title,
             'description' => $this->description,
@@ -101,7 +110,7 @@ new class extends Component {
             'requires_registration' => $this->requires_registration,
             'max_participants' => $this->max_participants ?: null,
             'facebook_page_url' => $this->facebook_page_url,
-            'facebook_album_urls' => $this->facebook_album_urls ? array_filter(explode("\n", $this->facebook_album_urls)) : null,
+            'facebook_album_urls' => $albumUrls ?: null,
         ];
 
         if ($this->image) {
@@ -129,6 +138,15 @@ new class extends Component {
             'facebook_album_urls' => 'nullable|string',
         ]);
 
+        $albumUrls = array_values(array_filter(array_map('trim', explode("\n", $this->facebook_album_urls))));
+
+        foreach ($albumUrls as $url) {
+            if (! filter_var($url, FILTER_VALIDATE_URL) || ! in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)) {
+                $this->addError('facebook_album_urls', 'Each album URL must be a valid http or https URL.');
+                return;
+            }
+        }
+
         $event = Event::findOrFail($this->editId);
 
         $data = [
@@ -141,7 +159,7 @@ new class extends Component {
             'requires_registration' => $this->requires_registration,
             'max_participants' => $this->max_participants ?: null,
             'facebook_page_url' => $this->facebook_page_url,
-            'facebook_album_urls' => $this->facebook_album_urls ? array_filter(explode("\n", $this->facebook_album_urls)) : null,
+            'facebook_album_urls' => $albumUrls ?: null,
         ];
 
         if ($this->image && is_object($this->image)) {

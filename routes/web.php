@@ -103,7 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('payment');
 });
 
-Route::middleware(['admin', 'auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::view('dashboard', 'dashboard.home')->name('dashboard');
     Route::view('/dashboard/announcements', 'dashboard.announcements')->name('dashboard.announcements');
     Route::view('/dashboard/merch', 'dashboard.merch')->name('dashboard.merch');

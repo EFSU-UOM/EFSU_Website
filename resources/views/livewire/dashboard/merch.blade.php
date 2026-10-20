@@ -2,6 +2,7 @@
 
 use App\Enums\MerchType;
 use App\Models\Merch;
+use Illuminate\Validation\Rule;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Volt\Component;
@@ -74,7 +75,7 @@ new class extends Component {
         $this->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category' => 'required|string|max:255',
+            'category' => ['required', Rule::enum(MerchType::class)],
             'price' => 'required|numeric|min:0',
             'image' => 'required|image|max:2048',
             'stock_quantity' => 'required|integer|min:0',
@@ -104,7 +105,7 @@ new class extends Component {
         $this->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'category' => 'required|string|max:255',
+            'category' => ['required', Rule::enum(MerchType::class)],
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
             'stock_quantity' => 'required|integer|min:0',
