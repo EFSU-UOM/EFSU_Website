@@ -1,5 +1,5 @@
 <div class="flex items-start max-md:flex-col">
-    <div class="me-10 w-full pb-4 md:w-[220px]">
+    <div class="me-0 md:me-10 w-full pb-4 md:w-[220px]">
         <x-mary-menu class="menu menu-vertical w-full" title="">
                 <x-mary-menu-item link="{{ route('settings.profile') }}" :active="request()->routeIs('settings.profile')" wire:navigate>
                     <x-mary-icon name="o-user" class="w-5 h-5" />
