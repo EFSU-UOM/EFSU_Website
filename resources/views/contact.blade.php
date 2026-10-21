@@ -147,6 +147,24 @@
                     ];
                 @endphp
 
+                {{-- Senior Treasurer --}}
+                <div class="mb-10">
+                    <x-mary-card class="w-full md:w-2/3 mx-auto p-6 text-center" shadow>
+                        <div class="flex justify-center">
+                            <x-mary-avatar class="!w-20 !h-20" image="/people/luminda.avif" />
+                        </div>
+                        <h2 class="mt-4 text-2xl font-bold">Dr. Luminda Gunawardhana</h2>
+                        <p class="text-lg text-base-content/70">Senior Treasurer, EFSU</p>
+                        <p class="text-sm text-base-content/60">Senior Lecturer</p>
+                        <div class="mt-4 text-sm text-base-content/60">
+                            <div class="flex justify-center items-center gap-2">
+                                <x-mary-icon name="o-envelope" class="w-4 h-4" />
+                                <a href="mailto:lumindang@uom.lk" class="hover:text-primary">lumindang@uom.lk</a>
+                            </div>
+                        </div>
+                    </x-mary-card>
+                </div>
+
                 {{-- Top Leader (President only) --}}
                 <div class="mb-10">
                     @php $president = $leaders[0]; @endphp
