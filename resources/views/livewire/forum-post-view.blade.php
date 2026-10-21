@@ -281,7 +281,7 @@ $deletePost = function () {
                         <x-mary-badge 
                             value="{{ $this->post->category->label() }}" 
                             class="badge-{{ $this->post->category->color() }} mb-2" />
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
                             <h1 class="text-3xl font-bold text-base-content">{{ $this->post->title }}</h1>
                             <div class="flex items-center space-x-2">
                                 @if(auth()->check() && auth()->user()->isAdmin())

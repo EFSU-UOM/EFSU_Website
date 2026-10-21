@@ -331,7 +331,7 @@ new class extends Component {
     <!-- Page Header -->
     <section class="bg-base-100 py-8">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('lost-and-found') }}" class="btn btn-ghost btn-sm">
                         <x-mary-icon name="o-arrow-left" class="w-5 h-5" />
